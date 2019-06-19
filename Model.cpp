@@ -37,6 +37,11 @@ void Model::setToken(QString data)
     }
 }
 
+DEVICE_INFO Model::deviceInfo() const
+{
+    return m_deviceInfo;
+}
+
 void Model::setDeviceInfo(DEVICE_INFO data)
 {
     m_deviceInfo = data;

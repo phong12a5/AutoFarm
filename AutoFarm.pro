@@ -29,7 +29,7 @@ HEADERS += \
     Controller/ThreadController.h \
     Processing/CheckCurrSrcThread.h \
     Processing/CheckCurrActivityThread.h \
-#    Processing/MyEncrypt.h
+    Processing/QAESEncryption.h\
     Communication/WebAPI.h
 
 SOURCES += \
@@ -43,7 +43,7 @@ SOURCES += \
     Controller/ThreadController.cpp \
     Processing/CheckCurrSrcThread.cpp \
     Processing/CheckCurrActivityThread.cpp \
-#    Processing/MyEncrypt.cpp
+    Processing/QAESEncryption.cpp\
     Communication/WebAPI.cpp
 
 RESOURCES += qml.qrc

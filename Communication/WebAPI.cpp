@@ -32,27 +32,17 @@ void WebAPI::saveFile(QString fileName, QByteArray content)
 
 void WebAPI::getApk()
 {
-    QString url = API_SERVER + QString("getapk?token=%1").arg(MODEL->token());
-    LOG << "url: " << url;
+    QString url = API_SERVER + QString("config?token=%1").arg(MODEL->token());
     QUrl serviceUrl = QUrl(url);
     QNetworkRequest request(serviceUrl);
     QJsonObject json;
-    QJsonObject deviceInfo;
 
-    deviceInfo["GoogleSF"] = "31b75eb8d";
-    deviceInfo["AndroidID"] = "391f3";
-    deviceInfo["IMEI"] = "35697865";
-    deviceInfo["IMSI"] = "456789987776";
-    deviceInfo["SIMCardSerial"] = "89876656";
-    deviceInfo["WifiMacAddress"] = "24:26:38";
-    deviceInfo["android_verion"] = "7.1.1";
-    deviceInfo["model"] = "Sony Z3";
-    json.insert("action","getapk");
-    json.insert("device",deviceInfo);
+    json.insert("action", QTextCodec::codecForMib(106)->toUnicode(getEncodedAction("getapk")));
+    json.insert("device", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
 
-    QJsonDocument jsonDoc(json);
-    LOG << "jsonDoc: " << jsonDoc;
-    QByteArray jsonData= jsonDoc.toJson();
+    LOG << "json: " << json;
+
+    QByteArray jsonData = QJsonDocument(json).toJson();
     request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
     request.setHeader(QNetworkRequest::ContentLengthHeader,QByteArray::number(jsonData.size()));
     QNetworkAccessManager* networkManager = new QNetworkAccessManager(this);
@@ -74,16 +64,78 @@ void WebAPI::downloadApk(QUrl url)
     networkManager->get(QNetworkRequest(QUrl(url)));
 }
 
+QString WebAPI::getKeyByToken() const
+{
+    return MODEL->token() + "congaubeo@123";
+}
+
+QString WebAPI::getKeyByIMEI() const
+{
+    return MODEL->deviceInfo().iMEI + MODEL->deviceInfo().iMEI + MODEL->deviceInfo().iMEI + MODEL->deviceInfo().iMEI;
+}
+
+QString WebAPI::getIV() const
+{
+    return "0123456789012345";
+}
+
+QByteArray WebAPI::getEncodedDeviceInfo() const
+{
+    QJsonObject deviceInfo;
+
+    deviceInfo["GoogleSF"] =        MODEL->deviceInfo().googleSF;
+    deviceInfo["AndroidID"] =       MODEL->deviceInfo().androidID;
+    deviceInfo["IMEI"] =            MODEL->deviceInfo().iMEI;
+    deviceInfo["IMSI"] =            MODEL->deviceInfo().iMSI;
+    deviceInfo["SIMCardSerial"] =   MODEL->deviceInfo().sIMCardSerial;
+    deviceInfo["WifiMacAddress"] =  MODEL->deviceInfo().wifiMacAddress;
+    deviceInfo["android_verion"] =  MODEL->deviceInfo().android_verion;
+    deviceInfo["model"] =           MODEL->deviceInfo().model;
+
+    LOG << "deviceInfo: " << deviceInfo;
+
+    QByteArray deviceInfoData = QJsonDocument(deviceInfo).toJson();
+
+    QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
+
+    return encryption.encode(deviceInfoData, getKeyByToken().toLocal8Bit(), getIV().toLocal8Bit()).toBase64();
+}
+
+QByteArray WebAPI::getEncodedAction(QString action) const
+{
+    QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
+    LOG << encryption.encode(action.toLocal8Bit(), getKeyByToken().toLocal8Bit(), getIV().toLocal8Bit()).toBase64();
+    return encryption.encode(action.toLocal8Bit(), getKeyByToken().toLocal8Bit(), getIV().toLocal8Bit()).toBase64();
+}
+
 void WebAPI::slotReponseGettingApk(QNetworkReply* reply)
 {
     QByteArray responseData = reply->readAll();
-    QJsonDocument jdoc = QJsonDocument::fromJson(responseData);
+    LOG << "QJsonDocument::fromJson(responseData): " << QJsonDocument::fromJson(responseData);
+    QJsonObject jsonObj = QJsonDocument::fromJson(responseData).object();
 
-    foreach (QJsonValue data, jdoc.array()) {
-        if(data.isObject()){
-            QJsonObject obj = data.toObject();
-            this->downloadApk(QUrl(obj["apk"].toString()));
+    if(jsonObj.isEmpty()){
+        LOG << "jsonObj is empty!";
+        return;
+    }else{
+        // Continue
+    }
+
+    if(jsonObj["action"].toString() == QTextCodec::codecForMib(106)->toUnicode(getEncodedAction("getapk"))){
+        QString data =  jsonObj["data"].toString();
+
+        QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
+        QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
+        QJsonDocument jdoc = QJsonDocument::fromJson(encryption.removePadding(decodeText));
+
+        foreach (QJsonValue data, jdoc.array()) {
+            if(data.isObject()){
+                QJsonObject obj = data.toObject();
+                this->downloadApk(QUrl(obj["apk"].toString()));
+            }
         }
+    }else{
+        LOG << "Another action!";
     }
 }
 
