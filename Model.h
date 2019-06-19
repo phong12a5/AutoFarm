@@ -10,6 +10,7 @@
 #include <QTest>
 #include <QString>
 #include "AppDefines.h"
+#include <QThread>
 
 class Model : public QObject
 {
@@ -28,6 +29,12 @@ public:
     DEVICE_INFO deviceInfo() const;
     void setDeviceInfo(DEVICE_INFO data);
 
+    APP_CONFIG appConfig() const;
+    void setAppConfig(APP_CONFIG data);
+
+    USER_DATA userData() const;
+    void setUserData(USER_DATA data);
+
 private:
     explicit Model(QObject *parent = nullptr);
 
@@ -38,6 +45,9 @@ private:
 
     QString m_token;
     DEVICE_INFO m_deviceInfo;
+    APP_CONFIG m_appConfig;
+    USER_DATA m_userData;
+
 signals:
     void sigStartProgram();
     void tokenChanged();

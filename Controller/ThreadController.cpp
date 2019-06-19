@@ -40,5 +40,6 @@ void ThreadController::startCheckCurrentActivity()
     connect(&m_checkActivityThread, &QThread::finished, &checkActivityWorker, &QObject::deleteLater);
     connect(this, &ThreadController::sigStartCheckCurrentActivity, &checkActivityWorker, &CheckCurrActivityThread::doWork);
     m_checkActivityThread.start();
-    emit sigStartCheckCurrentActivity("Phong DT");
+    emit sigStartCheckCurrentActivity(QString("Phong DT"));
 }
+

@@ -47,5 +47,25 @@ void Model::setDeviceInfo(DEVICE_INFO data)
     m_deviceInfo = data;
 }
 
+APP_CONFIG Model::appConfig() const
+{
+    return m_appConfig;
+}
+
+void Model::setAppConfig(APP_CONFIG data)
+{
+    m_appConfig = data;
+}
+
+USER_DATA Model::userData() const
+{
+    return m_userData;
+}
+
+void Model::setUserData(USER_DATA data)
+{
+    m_userData = data;
+}
+
 
 

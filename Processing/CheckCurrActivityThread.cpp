@@ -22,7 +22,7 @@ void CheckCurrActivityThread::doWork(const QString &parameter)
     m_updateCurrActTimer->setInterval(1000);
     m_updateCurrActTimer->setSingleShot(false);
     QObject::connect(m_updateCurrActTimer, SIGNAL(timeout()), this, SLOT(onUpdateCurrentActivity()));
-    m_updateCurrActTimer->start();
+    m_updateCurrActTimer->start();    
 }
 
 void CheckCurrActivityThread::onUpdateCurrentActivity()

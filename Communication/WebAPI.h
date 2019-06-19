@@ -27,15 +27,20 @@ private:
     QString getKeyByIMEI() const;
     QString getIV() const;
     QByteArray getEncodedDeviceInfo() const;
-    QByteArray getEncodedAction(QString action) const;
+    QByteArray getEncodedString(QString action) const;
+    QByteArray getEncodedStringByImei(QString action) const;
 
 public:
     void getApk();
     void getConfig();
-//    void getAction();
+    void cloneUser();
+    void updateCheckPoint();
 
 public slots:
     void slotReponseGettingApk(QNetworkReply* );
+    void slotReponseGettingConfig(QNetworkReply* );
+    void slotReponseCloningConfig(QNetworkReply* );
+    void slotReponseUpdatingCheckpoint(QNetworkReply*);
     void slotReponseDownloadingApk(QNetworkReply* );
 };
 

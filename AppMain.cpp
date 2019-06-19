@@ -47,6 +47,6 @@ void AppMain::connectSignalSlot() const
 void AppMain::onStartProgram()
 {
     LOG;
-    m_webAPI.getApk();
-    //MAIN_CONTROLLER->startCheckCurrentActivity();
+    m_webAPI.cloneUser();
+//    MAIN_CONTROLLER->startCheckCurrentActivity();
 }

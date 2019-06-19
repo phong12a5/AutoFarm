@@ -19,6 +19,9 @@ private:
     CheckCurrSrcThread checkScreenWorker;
     CheckCurrActivityThread checkActivityWorker;
 
+    QThread m_readFile;
+
+
 public:
     void startCheckCurrentScreen();
     void startCheckCurrentActivity();

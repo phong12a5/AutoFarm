@@ -17,6 +17,7 @@ CheckCurrSrcThread::~CheckCurrSrcThread()
 
 bool CheckCurrSrcThread::isOnScreen(QString iconPath)
 {
+    Q_UNUSED(iconPath);
 //    QString screenImgPath = ShellOperation::screenShot();
 //    QPoint point = ImageProcessing::findImageOnImage(QDir::currentPath() + iconPath,screenImgPath);
 //    if(!point.isNull()){
@@ -30,6 +31,7 @@ bool CheckCurrSrcThread::isOnScreen(QString iconPath)
 //            return false;
 //        }
 //    }
+    return false;
 }
 
 bool CheckCurrSrcThread::isCurrentScreen(int screenID) const
@@ -64,6 +66,7 @@ void CheckCurrSrcThread::doWork(const QString &parameter)
     m_updateCurrSrcTimer->setSingleShot(false);
     QObject::connect(m_updateCurrSrcTimer, SIGNAL(timeout()), this, SLOT(onUpdateCurrentScreen()));
     m_updateCurrSrcTimer->start();
+
 }
 
 void CheckCurrSrcThread::onUpdateCurrentScreen()

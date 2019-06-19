@@ -20,6 +20,7 @@ private:
 
 signals:
     void resultReady(const QString &result);
+    void sigResponeContent(QString *);
 
 public slots:
     void doWork(const QString &parameter);
