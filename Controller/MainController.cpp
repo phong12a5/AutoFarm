@@ -1,4 +1,7 @@
 #include "MainController.h"
+#include "Communication/WebAPI.h"
+
+#define WEB_API WebAPI::instance()
 
 MainController* MainController::m_instance = nullptr;
 
@@ -27,11 +30,14 @@ void MainController::initController()
 void MainController::startLoop()
 {
     LOG;
-    m_webAPI.installAllPackages();
-    QEventLoop evenLoop;
-    connect(&m_webAPI, SIGNAL(installAllPackagesCompleted()), &evenLoop, SLOT(quit()));
-    evenLoop.exec();
-    startCheckCurrentActivity();
+    WEB_API->cloneUserData();
+    delay(10000);
+//    WEB_API->updateCheckPoint();
+//    WEB_API->installAllPackages();
+//    QEventLoop evenLoop;
+//    connect(WEB_API, SIGNAL(installAllPackagesCompleted()), &evenLoop, SLOT(quit()));
+//    evenLoop.exec();
+//    startCheckCurrentActivity();
 }
 
 int MainController::currentScreen() const

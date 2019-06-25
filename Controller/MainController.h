@@ -35,7 +35,6 @@ private:
     static MainController* m_instance;
 
     ThreadController multiThreadController;
-    WebAPI m_webAPI;
 
     int m_currentScreen;
     QString m_currentActivity;

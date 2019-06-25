@@ -3,9 +3,19 @@
 
 #define MODEL Model::instance()
 
+WebAPI* WebAPI::s_instance = nullptr;
+
 WebAPI::WebAPI(QObject *parent) : QObject(parent)
 {
     downloadedPackagedCount = 0;
+}
+
+WebAPI *WebAPI::instance()
+{
+    if(s_instance == nullptr){
+        s_instance = new WebAPI();
+    }
+    return s_instance;
 }
 
 QString WebAPI::saveFile(QString fileName, QByteArray content)
@@ -72,16 +82,23 @@ void WebAPI::getConfig()
     networkManager->post(request, jsonData);
 }
 
-void WebAPI::cloneUser()
+void WebAPI::cloneUserData()
 {
     QString url = API_SERVER + QString("clone?token=%1").arg(MODEL->token());
     QUrl serviceUrl = QUrl(url);
     QNetworkRequest request(serviceUrl);
+    QJsonObject json;
 
+    json.insert("action", QTextCodec::codecForMib(106)->toUnicode(getEncodedString("getclone")));
+    json.insert("device", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
+
+    QByteArray jsonData = QJsonDocument(json).toJson();
+    request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
+    request.setHeader(QNetworkRequest::ContentLengthHeader,QByteArray::number(jsonData.size()));
     QNetworkAccessManager* networkManager = new QNetworkAccessManager(this);
     QObject::connect(networkManager, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(slotReponseCloningConfig(QNetworkReply*)));
-    networkManager->get(request);
+            this, SLOT(slotReponseCloningUserData(QNetworkReply*)));
+    networkManager->post(request, jsonData);
 }
 
 void WebAPI::updateCheckPoint()
@@ -93,7 +110,63 @@ void WebAPI::updateCheckPoint()
 
     json.insert("action", QTextCodec::codecForMib(106)->toUnicode(getEncodedString("checkpoint")));
     json.insert("device", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
-    json.insert("data", QTextCodec::codecForMib(106)->toUnicode(getEncodedStringByImei(MODEL->userData().uid)));
+    json.insert("fbid", QTextCodec::codecForMib(106)->toUnicode(getEncodedStringByImei(MODEL->userData().uid)));
+
+
+    QByteArray jsonData = QJsonDocument(json).toJson();
+    request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
+    request.setHeader(QNetworkRequest::ContentLengthHeader,QByteArray::number(jsonData.size()));
+    QNetworkAccessManager* networkManager = new QNetworkAccessManager(this);
+    QObject::connect(networkManager, SIGNAL(finished(QNetworkReply*)),
+            this, SLOT(slotReponseUpdatingCheckpoint(QNetworkReply*)));
+    networkManager->post(request, jsonData);
+}
+
+void WebAPI::getDoAction()
+{
+    //https://api.autofarmer.xyz/api/DoAction?token=c6a52e63a8d52869b80af5af1a22c2b5&fbid=100031455291649
+
+    QString url = API_SERVER + QString("DoAction?token=%1&fbid=%2").arg(MODEL->token()).arg(MODEL->userData().uid);
+    LOG << "URL: " << url;
+    QUrl serviceUrl = QUrl(url);
+    QNetworkRequest request(serviceUrl);
+    QJsonObject json;
+
+    json.insert("device", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
+
+
+    QByteArray jsonData = QJsonDocument(json).toJson();
+    request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
+    request.setHeader(QNetworkRequest::ContentLengthHeader,QByteArray::number(jsonData.size()));
+    QNetworkAccessManager* networkManager = new QNetworkAccessManager(this);
+    QObject::connect(networkManager, SIGNAL(finished(QNetworkReply*)),
+            this, SLOT(slotReponseGettingDoAction(QNetworkReply*)));
+    networkManager->post(request, jsonData);
+}
+
+void WebAPI::getDoResult()
+{
+    LOG;
+    // https://api.autofarmer.xyz/api/DoResult?fbid=1000xxxxx&token=d5d3c4c04fc4edeb3db13bd12632fb30
+    QString url = API_SERVER + QString("DoResult?fbid=%1&token=%2").arg(MODEL->token()).arg(MODEL->userData().uid);
+    LOG << "Url: " << url;
+    QUrl serviceUrl = QUrl(url);
+    QNetworkRequest request(serviceUrl);
+
+
+    QJsonObject jsonDataObj;
+    //"action": "viplike",  service_code:JHJKK1,  "fbid": "100031455291649"
+    jsonDataObj["action"] = "viplike";
+    jsonDataObj["service_code"] = "JHJKK1";
+    jsonDataObj["fbid"] = MODEL->userData().uid;
+
+    LOG << "jsonDataObj: " << jsonDataObj;
+
+    QJsonObject json;
+
+    json.insert("fbid", QTextCodec::codecForMib(106)->toUnicode(getEncodedStringByImei("100030998794736")));
+    json.insert("device", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
+    json.insert("data", QTextCodec::codecForMib(106)->toUnicode(getEncodedJsonDoc(QJsonDocument(jsonDataObj))));
 
     LOG << "json: " << json;
 
@@ -102,7 +175,7 @@ void WebAPI::updateCheckPoint()
     request.setHeader(QNetworkRequest::ContentLengthHeader,QByteArray::number(jsonData.size()));
     QNetworkAccessManager* networkManager = new QNetworkAccessManager(this);
     QObject::connect(networkManager, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(slotReponseUpdatingCheckpoint(QNetworkReply*)));
+            this, SLOT(slotReponseGettingDoResult(QNetworkReply*)));
     networkManager->post(request, jsonData);
 }
 
@@ -116,17 +189,23 @@ void WebAPI::downloadApk(QUrl url)
 
 QString WebAPI::getKeyByToken() const
 {
-    return MODEL->token() + "congaubeo@123";
+    QString retVal = MODEL->token() + "congaubeo@123";
+    LOG << retVal;
+    return retVal;
 }
 
 QString WebAPI::getKeyByIMEI() const
 {
-    return MODEL->deviceInfo().iMEI + MODEL->deviceInfo().iMEI + MODEL->deviceInfo().iMEI + MODEL->deviceInfo().iMEI;
+    QString retVal = MODEL->deviceInfo().iMEI + MODEL->deviceInfo().iMEI + MODEL->deviceInfo().iMEI + MODEL->deviceInfo().iMEI;
+    LOG << retVal;
+    return retVal;
 }
 
 QString WebAPI::getIV() const
 {
-    return "0123456789012345";
+    QString retVal = "0123456789012345";
+    LOG << retVal;
+    return retVal;
 }
 
 QByteArray WebAPI::getEncodedDeviceInfo() const
@@ -161,6 +240,13 @@ QByteArray WebAPI::getEncodedStringByImei(QString action) const
 {
     QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
     return encryption.encode(action.toLocal8Bit(), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit()).toBase64();
+}
+
+QByteArray WebAPI::getEncodedJsonDoc(QJsonDocument json) const
+{
+    QByteArray deviceInfoData = json.toJson();
+    QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
+    return encryption.encode(deviceInfoData, getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit()).toBase64();
 }
 
 void WebAPI::installAllPackages()
@@ -248,78 +334,166 @@ void WebAPI::slotReponseGettingConfig(QNetworkReply * reply)
             LOG << "config.encryption: " << config.encryption;
             MODEL->setAppConfig(config);
         }
+    }else{
+        LOG << "Another action!";
+    }
+}
+
+void WebAPI::slotReponseCloningUserData(QNetworkReply * reply)
+{
+    QByteArray responseData = reply->readAll();
+    LOG << "QJsonDocument::fromJson(responseData): " << QJsonDocument::fromJson(responseData);
+    QJsonObject jsonObj = QJsonDocument::fromJson(responseData).object();
+
+    if(jsonObj.isEmpty()){
+        LOG << "jsonObj is empty!";
+        return;
+    }else{
+        // Continue
+    }
+
+    if(jsonObj["action"].toString() == QTextCodec::codecForMib(106)->toUnicode(getEncodedString("getclone"))){
+        QString data =  jsonObj["data"].toString();
+
+        QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
+        QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
+        QJsonDocument jdoc = QJsonDocument::fromJson(encryption.removePadding(decodeText));
+        QJsonObject jsonObj = jdoc.object();
+        if(!jsonObj.isEmpty()){
+            USER_DATA user_data;
+            user_data._id               = jsonObj["_id"].toString();
+            user_data.uid              = jsonObj["uid"].toString();
+            user_data.password         = jsonObj["password"].toString();
+            user_data.cookie           = jsonObj["cookie"].toString();
+            user_data.token            = jsonObj["token"].toString();
+            user_data.birthday         = jsonObj["birthday"].toString();
+            user_data.name             = jsonObj["name"].toString();
+            user_data.sex              = jsonObj["sex"].toString();
+            user_data.country          = jsonObj["country"].toString();
+            user_data.email            = jsonObj["email"].toString();
+            user_data.avartar          = jsonObj["avartar"].toString();
+            user_data.created_date     = jsonObj["created_date"].toString();
+            user_data.farming_status   = jsonObj["farming_status"].toString();
+            user_data.alive_status     = jsonObj["alive_status"].toString();
+            user_data.created_at       = jsonObj["created_at"].toString();
+            user_data.updated_at       = jsonObj["updated_at"].toString();
+            user_data.user_id          = jsonObj["user_id"].toString();
+
+            LOG << "user_data._id           :" << user_data._id           ;
+            LOG << "user_data.uid           :" << user_data.uid           ;
+            LOG << "user_data.password      :" << user_data.password      ;
+            LOG << "user_data.cookie        :" << user_data.cookie        ;
+            LOG << "user_data.token         :" << user_data.token         ;
+            LOG << "user_data.birthday      :" << user_data.birthday      ;
+            LOG << "user_data.name          :" << user_data.name          ;
+            LOG << "user_data.sex           :" << user_data.sex           ;
+            LOG << "user_data.country       :" << user_data.country       ;
+            LOG << "user_data.email         :" << user_data.email         ;
+            LOG << "user_data.avartar       :" << user_data.avartar       ;
+            LOG << "user_data.created_date  :" << user_data.created_date  ;
+            LOG << "user_data.farming_status:" << user_data.farming_status;
+            LOG << "user_data.alive_status  :" << user_data.alive_status  ;
+            LOG << "user_data.created_at    :" << user_data.created_at    ;
+            LOG << "user_data.updated_at    :" << user_data.updated_at    ;
+            LOG << "user_data.user_id       :" << user_data.user_id       ;
+
+            MODEL->setUserData(user_data);
+        }else{
+            LOG << "jsonObj is NULL";
+        }
+
+    }else{
+        LOG << "Another action!";
+    }
+    getDoResult();
+}
+
+void WebAPI::slotReponseUpdatingCheckpoint(QNetworkReply * reply)
+{
+    QByteArray responseData = reply->readAll();
+    QJsonObject jsonObj = QJsonDocument::fromJson(responseData).object();
+
+    if(jsonObj.isEmpty()){
+        LOG << "jsonObj is empty!";
+        return;
+    }else{
+        // Continue
+    }
+
+    if(jsonObj["action"].toString() == QTextCodec::codecForMib(106)->toUnicode(getEncodedString("checkpoint"))){
+        QString data =  jsonObj["data"].toString();
+
+        QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
+        QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
+        QJsonDocument jdoc = QJsonDocument::fromJson(encryption.removePadding(decodeText));
+        QJsonObject jsonObj = jdoc.object();
+        if(!jsonObj.isEmpty()){
+           LOG << "Result: " << jsonObj["updated"].toBool();
+        }else{
+            LOG << "jsonObj is NULL";
+        }
 
     }else{
         LOG << "Another action!";
     }
 }
 
-void WebAPI::slotReponseCloningConfig(QNetworkReply * reply)
+void WebAPI::slotReponseGettingDoAction(QNetworkReply * reply)
 {
     QByteArray responseData = reply->readAll();
+    QJsonObject jsonObj = QJsonDocument::fromJson(responseData).object();
 
-    QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
-    QByteArray decodeText = encryption.decode(QByteArray::fromBase64(responseData), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
-    QJsonDocument jdoc = QJsonDocument::fromJson(encryption.removePadding(decodeText));
-    QJsonObject jsonObj = jdoc.object();
-    if(!jsonObj.isEmpty()){
-        USER_DATA user_data;
-        user_data._id               = jsonObj["_id"].toString();
-        user_data.uid              = jsonObj["uid"].toString();
-        user_data.password         = jsonObj["password"].toString();
-        user_data.cookie           = jsonObj["cookie"].toString();
-        user_data.token            = jsonObj["token"].toString();
-        user_data.birthday         = jsonObj["birthday"].toString();
-        user_data.name             = jsonObj["name"].toString();
-        user_data.sex              = jsonObj["sex"].toString();
-        user_data.country          = jsonObj["country"].toString();
-        user_data.email            = jsonObj["email"].toString();
-        user_data.avartar          = jsonObj["avartar"].toString();
-        user_data.created_date     = jsonObj["created_date"].toString();
-        user_data.farming_status   = jsonObj["farming_status"].toString();
-        user_data.alive_status     = jsonObj["alive_status"].toString();
-        user_data.created_at       = jsonObj["created_at"].toString();
-        user_data.updated_at       = jsonObj["updated_at"].toString();
-        user_data.user_id          = jsonObj["user_id"].toString();
-
-        LOG << "user_data._id           :" << user_data._id           ;
-        LOG << "user_data.uid           :" << user_data.uid           ;
-        LOG << "user_data.password      :" << user_data.password      ;
-        LOG << "user_data.cookie        :" << user_data.cookie        ;
-        LOG << "user_data.token         :" << user_data.token         ;
-        LOG << "user_data.birthday      :" << user_data.birthday      ;
-        LOG << "user_data.name          :" << user_data.name          ;
-        LOG << "user_data.sex           :" << user_data.sex           ;
-        LOG << "user_data.country       :" << user_data.country       ;
-        LOG << "user_data.email         :" << user_data.email         ;
-        LOG << "user_data.avartar       :" << user_data.avartar       ;
-        LOG << "user_data.created_date  :" << user_data.created_date  ;
-        LOG << "user_data.farming_status:" << user_data.farming_status;
-        LOG << "user_data.alive_status  :" << user_data.alive_status  ;
-        LOG << "user_data.created_at    :" << user_data.created_at    ;
-        LOG << "user_data.updated_at    :" << user_data.updated_at    ;
-        LOG << "user_data.user_id       :" << user_data.user_id       ;
-
-        MODEL->setUserData(user_data);
+    if(jsonObj.isEmpty()){
+        LOG << "jsonObj is empty!";
+        return;
     }else{
-        LOG << "jsonObj is NULL";
+        // Continue
+    }
+
+    QString data =  jsonObj["data"].toString();
+    QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
+    QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
+    QJsonDocument jdoc = QJsonDocument::fromJson(encryption.removePadding(decodeText));
+    LOG << "jdoc: " << jdoc;
+    QJsonObject deocdedjsonObj = jdoc.object();
+    LOG << "deocdedjsonObj: " << deocdedjsonObj;
+    if(!deocdedjsonObj.isEmpty()){
+        LOG << "deocdedjsonObj: " << deocdedjsonObj;
+    }else{
+        LOG << "deocdedjsonObj is NULL";
     }
 }
 
-void WebAPI::slotReponseUpdatingCheckpoint(QNetworkReply * reply)
+void WebAPI::slotReponseGettingDoResult(QNetworkReply * reply)
 {
     QByteArray responseData = reply->readAll();
+    QJsonObject jsonObj = QJsonDocument::fromJson(responseData).object();
 
-    QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
-    QByteArray decodeText = encryption.decode(QByteArray::fromBase64(responseData), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
-    QJsonDocument jdoc = QJsonDocument::fromJson(encryption.removePadding(decodeText));
-    QJsonObject jsonObj = jdoc.object();
-    if(!jsonObj.isEmpty()){
-        LOG << "Updated: " << jsonObj["updated"].toBool();
+    LOG << jsonObj;
+
+    if(jsonObj.isEmpty()){
+        LOG << "jsonObj is empty!";
+        return;
     }else{
-        LOG << "jsonObj is NULL";
+        // Continue
     }
-}
+
+    if(jsonObj["action"].toString() == QTextCodec::codecForMib(106)->toUnicode(getEncodedString("checkpoint"))){
+        QString data =  jsonObj["data"].toString();
+
+        QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
+        QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
+        QJsonDocument jdoc = QJsonDocument::fromJson(encryption.removePadding(decodeText));
+        QJsonObject jsonObj = jdoc.object();
+        if(!jsonObj.isEmpty()){
+           LOG << "Result: " << jsonObj["updated"].toBool();
+        }else{
+            LOG << "jsonObj is NULL";
+        }
+
+    }else{
+        LOG << "Another action!";
+    }}
 
 void WebAPI::slotReponseDownloadingApk(QNetworkReply * reply)
 {

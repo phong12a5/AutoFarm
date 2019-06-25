@@ -15,12 +15,17 @@
 class WebAPI : public QObject
 {
     Q_OBJECT
-public:
-    explicit WebAPI(QObject *parent = nullptr);
-
-signals:
 
 private:
+    explicit WebAPI(QObject *parent = nullptr);
+
+public:
+    static WebAPI *instance();
+
+private:
+
+    static WebAPI* s_instance;
+
     QMap<QString, QString> m_neededDownloadPkgList;
     QStringList m_downloadedPackage;
     QStringList m_downloadedFile;
@@ -36,19 +41,24 @@ private:
     QByteArray getEncodedDeviceInfo() const;
     QByteArray getEncodedString(QString action) const;
     QByteArray getEncodedStringByImei(QString action) const;
+    QByteArray getEncodedJsonDoc(QJsonDocument json) const;
 
 public:
     void installAllPackages();
     void getApk();
     void getConfig();
-    void cloneUser();
+    void cloneUserData();
     void updateCheckPoint();
+    void getDoAction();
+    void getDoResult();
 
 public slots:
     void slotReponseGettingApk(QNetworkReply* );
     void slotReponseGettingConfig(QNetworkReply* );
-    void slotReponseCloningConfig(QNetworkReply* );
+    void slotReponseCloningUserData(QNetworkReply* );
     void slotReponseUpdatingCheckpoint(QNetworkReply*);
+    void slotReponseGettingDoAction(QNetworkReply*);
+    void slotReponseGettingDoResult(QNetworkReply*);
     void slotReponseDownloadingApk(QNetworkReply* );
 
 signals:
