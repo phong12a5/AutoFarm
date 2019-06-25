@@ -5,14 +5,14 @@
 
 WebAPI::WebAPI(QObject *parent) : QObject(parent)
 {
-
+    downloadedPackagedCount = 0;
 }
 
-void WebAPI::saveFile(QString fileName, QByteArray content)
+QString WebAPI::saveFile(QString fileName, QByteArray content)
 {
     if(content.isEmpty()){
         LOG << "Content is empty! >> EXIT!";
-        return;
+        return "";
     }else{
         QString pathName = QDir::currentPath() + "/" + fileName;
         LOG << "pathName: " << pathName;
@@ -27,6 +27,7 @@ void WebAPI::saveFile(QString fileName, QByteArray content)
             LOG << "Failed to open file";
         }
         delete file;
+        return pathName;
     }
 }
 
@@ -40,8 +41,6 @@ void WebAPI::getApk()
     json.insert("action", QTextCodec::codecForMib(106)->toUnicode(getEncodedString("getapk")));
     json.insert("device", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
 
-    LOG << "json: " << json;
-
     QByteArray jsonData = QJsonDocument(json).toJson();
     request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
     request.setHeader(QNetworkRequest::ContentLengthHeader,QByteArray::number(jsonData.size()));
@@ -49,6 +48,7 @@ void WebAPI::getApk()
     QObject::connect(networkManager, SIGNAL(finished(QNetworkReply*)),
             this, SLOT(slotReponseGettingApk(QNetworkReply*)));
     networkManager->post(request, jsonData);
+
 }
 
 void WebAPI::getConfig()
@@ -163,10 +163,15 @@ QByteArray WebAPI::getEncodedStringByImei(QString action) const
     return encryption.encode(action.toLocal8Bit(), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit()).toBase64();
 }
 
+void WebAPI::installAllPackages()
+{
+    LOG;
+    this->getApk();
+}
+
 void WebAPI::slotReponseGettingApk(QNetworkReply* reply)
 {
     QByteArray responseData = reply->readAll();
-    LOG << "QJsonDocument::fromJson(responseData): " << QJsonDocument::fromJson(responseData);
     QJsonObject jsonObj = QJsonDocument::fromJson(responseData).object();
 
     if(jsonObj.isEmpty()){
@@ -183,11 +188,26 @@ void WebAPI::slotReponseGettingApk(QNetworkReply* reply)
         QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
         QJsonDocument jdoc = QJsonDocument::fromJson(encryption.removePadding(decodeText));
 
+        m_neededDownloadPkgList.clear();
+        m_downloadedPackage.clear();
+        downloadedPackagedCount = 0;
+
+        QList<QString> keys = MODEL->getUserDataList()->keys();
+
         foreach (QJsonValue data, jdoc.array()) {
             if(data.isObject()){
                 QJsonObject obj = data.toObject();
-                this->downloadApk(QUrl(obj["apk"].toString()));
+                if(!keys.contains(obj["package"].toString())){
+                    m_neededDownloadPkgList.insert(obj["apk"].toString(),obj["package"].toString());
+                    this->downloadApk(QUrl(obj["apk"].toString()));
+                }else{
+                    LOG << obj["package"].toString() << " EXISTED";
+                }
             }
+        }
+
+        if(m_neededDownloadPkgList.isEmpty()){
+            emit installAllPackagesCompleted();
         }
     }else{
         LOG << "Another action!";
@@ -310,7 +330,29 @@ void WebAPI::slotReponseDownloadingApk(QNetworkReply * reply)
         LOG << "Url: " << url;
         if(url.split("/").last().contains("com.facebook")){
             QString fileName = url.split("/").last();
-            this->saveFile(fileName,reply->readAll());
+            QString pathFile = this->saveFile(fileName,reply->readAll());
+            if(!pathFile.isNull()){
+                m_downloadedPackage.append(m_neededDownloadPkgList.value(url));
+                m_downloadedFile.append(pathFile);
+            }
         }
+    }
+
+    downloadedPackagedCount ++;
+
+    if(this->downloadedPackagedCount >= m_neededDownloadPkgList.count()){
+        LOG << "Download completed!";
+        for(int i = 0 ; i < m_downloadedFile.length(); i ++){
+            if(!MODEL->getUserDataList()->contains(m_downloadedPackage.at(i))){
+                if(ShellOperation::installPackage(m_downloadedFile.at(i))){
+                    USER_DATA data;
+                    MODEL->getUserDataList()->insert(m_downloadedPackage.at(i),data);
+                }
+            }else {
+                LOG << "Pacage was installed already";
+            }
+        }
+        MODEL->saveUserDataList();
+        emit installAllPackagesCompleted();
     }
 }

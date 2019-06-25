@@ -24,6 +24,16 @@ void MainController::initController()
     connect(this,SIGNAL(currentActivityChanged()),this,SLOT(onChangeAcitivity()));
 }
 
+void MainController::startLoop()
+{
+    LOG;
+    m_webAPI.installAllPackages();
+    QEventLoop evenLoop;
+    connect(&m_webAPI, SIGNAL(installAllPackagesCompleted()), &evenLoop, SLOT(quit()));
+    evenLoop.exec();
+    startCheckCurrentActivity();
+}
+
 int MainController::currentScreen() const
 {
     return m_currentScreen;

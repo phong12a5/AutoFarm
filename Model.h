@@ -11,6 +11,9 @@
 #include <QString>
 #include "AppDefines.h"
 #include <QThread>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 class Model : public QObject
 {
@@ -35,8 +38,17 @@ public:
     USER_DATA userData() const;
     void setUserData(USER_DATA data);
 
+    void updateUserData(QString packageName, USER_DATA data);
+
+    QMap<QString, USER_DATA>* getUserDataList();
+    void loadUserDataList();
+    void saveUserDataList();
+
 private:
     explicit Model(QObject *parent = nullptr);
+
+    QJsonDocument loadJson(QString fileName);
+    void saveJson(QJsonDocument document, QString fileName);
 
 private:
 
@@ -47,6 +59,7 @@ private:
     DEVICE_INFO m_deviceInfo;
     APP_CONFIG m_appConfig;
     USER_DATA m_userData;
+    QMap<QString, USER_DATA> m_userDataList;
 
 signals:
     void sigStartProgram();

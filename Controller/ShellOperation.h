@@ -23,7 +23,7 @@ public:
     static void callScrollEvent(QPoint point1, QPoint point2);
     static QString getCurrentActivity();
 #endif
-
+    static bool installPackage(QString packagePath);
 private:
 };
 

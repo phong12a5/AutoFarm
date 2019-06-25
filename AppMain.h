@@ -8,7 +8,6 @@
 #include "Model.h"
 #include "AppEnums.h"
 #include "Controller/MainController.h"
-#include "Communication/WebAPI.h"
 
 class AppMain : public QObject
 {
@@ -21,7 +20,6 @@ private:
     void connectSignalSlot() const;
 
 private:
-    WebAPI m_webAPI;
 
 signals:
 

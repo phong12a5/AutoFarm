@@ -5,12 +5,15 @@
 #include <QTest>
 #include <QMap>
 #include <AppEnums.h>
+#include <QDir>
 
 #define LOG qDebug() << "[" << __FUNCTION__ << "][" << __LINE__ << "] >>"
 
-#define delay(milescond)    QTest::qSleep(milescond)
+#define delay(milescond)        QTest::qSleep(milescond)
 
-#define API_SERVER  "https://api.autofarmer.xyz/api/"
+#define CURRENT_DIR             QDir::currentPath()+"/"
+#define USER_DATA_LIST_PATH     CURRENT_DIR+"userDataList.json"
+#define API_SERVER              "https://api.autofarmer.xyz/api/"
 
 #define LOADING_ICON            "assets:/images/loadingIcon.png"
 #define PROFILE_ICON            "assets:/images/profileIcon.png"

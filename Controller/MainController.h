@@ -7,6 +7,7 @@
 #include "Processing/ImageProcessing.h"
 #include "ThreadController.h"
 #include "AppEnums.h"
+#include "Communication/WebAPI.h"
 
 class MainController : public QObject
 {
@@ -18,6 +19,7 @@ private:
 public:
     static MainController* instance();
     void initController();
+    void startLoop();
 
 public:
     int currentScreen() const;
@@ -33,6 +35,7 @@ private:
     static MainController* m_instance;
 
     ThreadController multiThreadController;
+    WebAPI m_webAPI;
 
     int m_currentScreen;
     QString m_currentActivity;

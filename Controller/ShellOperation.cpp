@@ -5,6 +5,22 @@ ShellOperation::ShellOperation(QObject *parent) : QObject(parent)
 
 }
 
+bool ShellOperation::installPackage(QString packagePath)
+{
+    LOG << packagePath;
+    if(!QFile(packagePath).exists()){
+        LOG << "packagePath not existed";
+        return false;
+    }else{
+        QStringList arg = QStringList()<< QString("-c pm install -s %1").arg(packagePath);
+        LOG << "Args: " << arg;
+        QProcess process;
+        process.start("su",arg );
+        process.waitForFinished(-1);
+        return true;
+    }
+}
+
 #ifdef ANDROID_KIT
 void ShellOperation::callTapEvent(const int x, const int y)
 {

@@ -10,6 +10,7 @@
 #include <QJsonArray>
 #include "Processing/QAESEncryption.h"
 #include <QTextCodec>
+#include "Controller/ShellOperation.h"
 
 class WebAPI : public QObject
 {
@@ -20,7 +21,13 @@ public:
 signals:
 
 private:
-    void saveFile(QString fileName, QByteArray content);
+    QMap<QString, QString> m_neededDownloadPkgList;
+    QStringList m_downloadedPackage;
+    QStringList m_downloadedFile;
+    int downloadedPackagedCount;
+
+private:
+    QString saveFile(QString fileName, QByteArray content);
     void downloadApk(QUrl url);
 
     QString getKeyByToken() const;
@@ -31,6 +38,7 @@ private:
     QByteArray getEncodedStringByImei(QString action) const;
 
 public:
+    void installAllPackages();
     void getApk();
     void getConfig();
     void cloneUser();
@@ -42,6 +50,9 @@ public slots:
     void slotReponseCloningConfig(QNetworkReply* );
     void slotReponseUpdatingCheckpoint(QNetworkReply*);
     void slotReponseDownloadingApk(QNetworkReply* );
+
+signals:
+    void installAllPackagesCompleted();
 };
 
 #endif // WEBAPI_H
