@@ -1,7 +1,9 @@
 #include "MainController.h"
 #include "Communication/WebAPI.h"
+#include "Model.h"
 
 #define WEB_API WebAPI::instance()
+#define MODEL Model::instance()
 
 MainController* MainController::m_instance = nullptr;
 
@@ -30,9 +32,8 @@ void MainController::initController()
 void MainController::startLoop()
 {
     LOG;
-    WEB_API->cloneUserData();
-    delay(10000);
-//    WEB_API->updateCheckPoint();
+    MODEL->setUserData(WEB_API->cloneUserData());
+    WEB_API->getApk();
 //    WEB_API->installAllPackages();
 //    QEventLoop evenLoop;
 //    connect(WEB_API, SIGNAL(installAllPackagesCompleted()), &evenLoop, SLOT(quit()));

@@ -14,6 +14,7 @@
 #define CURRENT_DIR             QDir::currentPath()+"/"
 #define USER_DATA_LIST_PATH     CURRENT_DIR+"userDataList.json"
 #define API_SERVER              "https://api.autofarmer.xyz/api/"
+#define DCIM_FOLDER             "/sdcard/DCIM/"
 
 #define LOADING_ICON            "assets:/images/loadingIcon.png"
 #define PROFILE_ICON            "assets:/images/profileIcon.png"
@@ -31,6 +32,7 @@ typedef struct device_info_struct {
     QString wifiMacAddress;
     QString android_verion;
     QString model;
+    QString isNox;
 
     device_info_struct(){
         googleSF = "31b75eb8d";
@@ -39,8 +41,9 @@ typedef struct device_info_struct {
         iMSI = "456789987776";
         sIMCardSerial = "89876656";
         wifiMacAddress = "24:26:38";
-        android_verion = "7.1.1";
+        android_verion = "5.0.1";
         model = "Sony Z3";
+        isNox = "false";
     }
 } DEVICE_INFO;
 

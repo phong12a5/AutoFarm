@@ -47,18 +47,13 @@ public:
     void installAllPackages();
     void getApk();
     void getConfig();
-    void cloneUserData();
+    USER_DATA cloneUserData();
     void updateCheckPoint();
     void getDoAction();
     void getDoResult();
 
 public slots:
     void slotReponseGettingApk(QNetworkReply* );
-    void slotReponseGettingConfig(QNetworkReply* );
-    void slotReponseCloningUserData(QNetworkReply* );
-    void slotReponseUpdatingCheckpoint(QNetworkReply*);
-    void slotReponseGettingDoAction(QNetworkReply*);
-    void slotReponseGettingDoResult(QNetworkReply*);
     void slotReponseDownloadingApk(QNetworkReply* );
 
 signals:

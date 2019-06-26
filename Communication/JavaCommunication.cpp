@@ -227,4 +227,13 @@ QString JavaCommunication::getWifiMacAdd()
     return macAddress;
 }
 
+QString JavaCommunication::getDeviceType()
+{
+    if(QFile(QString(DCIM_FOLDER) + "isNox.st").exists()){
+        return "true";
+    }else{
+        return "false";
+    }
+}
+
 #endif

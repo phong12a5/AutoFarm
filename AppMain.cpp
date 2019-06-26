@@ -32,6 +32,7 @@ void AppMain::initApplication(QQmlApplicationEngine &engine)
     _deviceInfo.wifiMacAddress = JAVA_COM->getWifiMacAdd();
     _deviceInfo.android_verion = JAVA_COM->getAndroidVersion();
     _deviceInfo.model = JAVA_COM->getDeviceModel();
+    _deviceInfo.isNox = JAVA_COM->getDeviceType();
     MODEL->setDeviceInfo(_deviceInfo);
 #endif
     //Connect  signal - slot

@@ -33,6 +33,7 @@ public:
     QString getSimCardSerialNo();
     QString getSimNumber();
     QString getWifiMacAdd();
+    QString getDeviceType();
 #endif
 
 private:

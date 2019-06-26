@@ -48,7 +48,6 @@ QString Model::token() const
 
 void Model::setToken(QString data)
 {
-    LOG << data;
     if(m_token != data){
         m_token = data;
         emit tokenChanged();
