@@ -45,6 +45,7 @@ signals:
 public slots:
     void onChangeScreen();
     void onChangeAcitivity();
+    void onDoAction();
 
 };
 

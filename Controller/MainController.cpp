@@ -27,6 +27,7 @@ void MainController::initController()
     // Do nothing;
     connect(this,SIGNAL(currentScreenChanged()),this,SLOT(onChangeScreen()));
     connect(this,SIGNAL(currentActivityChanged()),this,SLOT(onChangeAcitivity()));
+    connect(MODEL,SIGNAL(nextCurrentControlledObjChanged()),this,SLOT(onDoAction()));
 }
 
 void MainController::startLoop()
@@ -34,10 +35,15 @@ void MainController::startLoop()
     LOG;
     MODEL->setUserData(WEB_API->cloneUserData());
     WEB_API->getApk();
-//    WEB_API->installAllPackages();
-//    QEventLoop evenLoop;
-//    connect(WEB_API, SIGNAL(installAllPackagesCompleted()), &evenLoop, SLOT(quit()));
-//    evenLoop.exec();
+    WEB_API->installAllPackages();
+    QEventLoop evenLoop;
+    connect(WEB_API, SIGNAL(installAllPackagesCompleted()), &evenLoop, SLOT(quit()));
+    evenLoop.exec();
+    MODEL->nextCurrentControlledObj();
+//    for(int i = 0; i < MODEL->getUserDataList().count(); i++){
+//        MODEL->currentControlledUser() = WEB_API->cloneUserData();
+//        MODEL->saveUserDataList();
+//    }
 //    startCheckCurrentActivity();
 }
 
@@ -96,4 +102,17 @@ void MainController::onChangeAcitivity()
         JavaCommunication::instance()->openApplication(FACEBOOK_LITE_PKGNAME,FACEBOOK_LITE_ACT);
 #endif
     }
+}
+
+void MainController::onDoAction()
+{
+    LOG << "Current package: " << MODEL->currentControlledPkg();
+    if(MODEL->currentControlledUser()._id == ""){
+        MODEL->currentControlledUser() = WEB_API->cloneUserData();
+    }else{
+        LOG << "User info has storaged already";
+    }
+
+    WEB_API->getDoAction();
+
 }

@@ -40,7 +40,12 @@ public:
 
     void updateUserData(QString packageName, USER_DATA data);
 
-    QMap<QString, USER_DATA>* getUserDataList();
+    QMap<QString, USER_DATA>& getUserDataList();
+
+    QString currentControlledPkg();
+    USER_DATA &currentControlledUser();
+    void nextCurrentControlledObj();
+
     void loadUserDataList();
     void saveUserDataList();
 
@@ -60,10 +65,12 @@ private:
     APP_CONFIG m_appConfig;
     USER_DATA m_userData;
     QMap<QString, USER_DATA> m_userDataList;
+    int m_currentPkgIndex;
 
 signals:
     void sigStartProgram();
     void tokenChanged();
+    void nextCurrentControlledObjChanged();
 
 public slots:
 };

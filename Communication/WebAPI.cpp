@@ -287,7 +287,6 @@ void WebAPI::getDoAction()
         QJsonDocument jdoc = QJsonDocument::fromJson(encryption.removePadding(decodeText));
         LOG << "jdoc: " << jdoc;
         QJsonObject deocdedjsonObj = jdoc.object();
-        LOG << "deocdedjsonObj: " << deocdedjsonObj;
         if(!deocdedjsonObj.isEmpty()){
             LOG << "deocdedjsonObj: " << deocdedjsonObj;
         }else{
@@ -295,6 +294,7 @@ void WebAPI::getDoAction()
         }
     }
 }
+
 
 void WebAPI::getDoResult()
 {
@@ -450,7 +450,7 @@ void WebAPI::slotReponseGettingApk(QNetworkReply* reply)
         m_downloadedPackage.clear();
         downloadedPackagedCount = 0;
 
-        QList<QString> keys = MODEL->getUserDataList()->keys();
+        QList<QString> keys = MODEL->getUserDataList().keys();
 
         foreach (QJsonValue data, jdoc.array()) {
             if(data.isObject()){
@@ -495,10 +495,10 @@ void WebAPI::slotReponseDownloadingApk(QNetworkReply * reply)
     if(this->downloadedPackagedCount >= m_neededDownloadPkgList.count()){
         LOG << "Download completed!";
         for(int i = 0 ; i < m_downloadedFile.length(); i ++){
-            if(!MODEL->getUserDataList()->contains(m_downloadedPackage.at(i))){
+            if(!MODEL->getUserDataList().contains(m_downloadedPackage.at(i))){
                 if(ShellOperation::installPackage(m_downloadedFile.at(i))){
                     USER_DATA data;
-                    MODEL->getUserDataList()->insert(m_downloadedPackage.at(i),data);
+                    MODEL->getUserDataList().insert(m_downloadedPackage.at(i),data);
                 }
             }else {
                 LOG << "Pacage was installed already";

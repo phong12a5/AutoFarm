@@ -21,8 +21,6 @@ int main(int argc, char *argv[])
         LOG << "rootObject is NULL";
     }
 
-    JavaCommunication::instance()->openFBLiteWithUserID("com.facebook.lizh","vongocanh.vo");
-
     return app.exec();
 }
 

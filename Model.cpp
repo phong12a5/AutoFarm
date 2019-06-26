@@ -8,6 +8,7 @@ Model* Model::m_instance = nullptr;
 Model::Model(QObject *parent) : QObject(parent)
 {
     m_token = "c6a52e63a8d52869b80af5af1a22c2b5";
+    m_currentPkgIndex = -1;
     this->loadUserDataList();
 }
 
@@ -95,9 +96,34 @@ void Model::updateUserData(QString packageName, USER_DATA data)
     }
 }
 
-QMap<QString, USER_DATA>* Model::getUserDataList()
+QMap<QString, USER_DATA>& Model::getUserDataList()
 {
-    return &m_userDataList;
+    return m_userDataList;
+}
+
+QString Model::currentControlledPkg()
+{
+    if(m_currentPkgIndex < m_userDataList.count()){
+        return m_userDataList.keys().at(m_currentPkgIndex);
+    }else{
+        LOG << "m_currentPkgIndex is invalid";
+        return "";
+    }
+}
+
+USER_DATA &Model::currentControlledUser()
+{
+    return m_userDataList[currentControlledPkg()];
+}
+
+void Model::nextCurrentControlledObj()
+{
+    if(m_currentPkgIndex < 0 || m_currentPkgIndex >= m_userDataList.count() - 1){
+        m_currentPkgIndex = 0;
+    }else{
+        m_currentPkgIndex ++;
+    }
+    emit nextCurrentControlledObjChanged();
 }
 
 void Model::loadUserDataList()
