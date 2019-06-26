@@ -30,7 +30,8 @@ QJsonDocument Model::loadJson(QString fileName)
 
 void Model::saveJson(QJsonDocument document, QString fileName)
 {
-    LOG << "[Model]";
+    LOG <<"document: " << document;
+    LOG <<"fileName: " << fileName;
     QFile jsonFile(fileName);
     jsonFile.open(QFile::WriteOnly);
     jsonFile.write(document.toJson());
@@ -143,6 +144,7 @@ void Model::loadUserDataList()
 
 void Model::saveUserDataList()
 {
+    LOG;
     QMap<QString, USER_DATA>::const_iterator i = m_userDataList.constBegin();
     QJsonArray objectArray;
     while (i != m_userDataList.constEnd()) {

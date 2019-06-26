@@ -41,7 +41,7 @@ typedef struct device_info_struct {
         iMSI = "456789987776";
         sIMCardSerial = "89876656";
         wifiMacAddress = "24:26:38";
-        android_verion = "5.0.1";
+        android_verion = "5.0.2";
         model = "Sony Z3";
         isNox = "false";
     }

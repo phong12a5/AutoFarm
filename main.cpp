@@ -9,8 +9,6 @@
 int main(int argc, char *argv[])
 {
     LOG << "STARTING ....";
-    LOG << "CURRENT DIR: " << QDir::currentPath();
-
 
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
@@ -22,6 +20,8 @@ int main(int argc, char *argv[])
     if (engine.rootObjects().isEmpty()){
         LOG << "rootObject is NULL";
     }
+
+    JavaCommunication::instance()->openFBLiteWithUserID("com.facebook.lizh","vongocanh.vo");
 
     return app.exec();
 }

@@ -12,10 +12,9 @@ bool ShellOperation::installPackage(QString packagePath)
         LOG << "packagePath not existed";
         return false;
     }else{
-        QStringList arg = QStringList()<< QString("-c pm install -s %1").arg(packagePath);
-        LOG << "Args: " << arg;
+        QString cmd = QString("su -c pm install %1").arg(packagePath);
         QProcess process;
-        process.start("su",arg );
+        process.start(cmd);
         process.waitForFinished(-1);
         return true;
     }

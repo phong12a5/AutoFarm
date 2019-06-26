@@ -22,6 +22,7 @@ public:
 #ifdef ANDROID_KIT
 
     void openApplication(QString packageName, QString activityName) const;
+    void openFBLiteWithUserID(QString packageName, QString userID) const;
     void backToAppMain() const;
 
     QString getGoogleSF();

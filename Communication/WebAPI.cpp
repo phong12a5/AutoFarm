@@ -24,8 +24,7 @@ QString WebAPI::saveFile(QString fileName, QByteArray content)
         LOG << "Content is empty! >> EXIT!";
         return "";
     }else{
-        QString pathName = QDir::currentPath() + "/" + fileName;
-        LOG << "pathName: " << pathName;
+        QString pathName = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation) + "/" + fileName;;
         QFile *file = new QFile(pathName);
         if(file->open(QIODevice::WriteOnly | QIODevice::Text))
         {
