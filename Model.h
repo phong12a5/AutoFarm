@@ -46,6 +46,13 @@ public:
     USER_DATA &currentControlledUser();
     void nextCurrentControlledObj();
 
+    QList<QJsonObject> actionList();
+    void setActionList(QList<QJsonObject> data);
+    void clearActionList();
+
+    QJsonObject currentAction();
+    void nextCurrentAction();
+
     void loadUserDataList();
     void saveUserDataList();
 
@@ -66,11 +73,14 @@ private:
     USER_DATA m_userData;
     QMap<QString, USER_DATA> m_userDataList;
     int m_currentPkgIndex;
+    QList<QJsonObject> m_actionList;
+    QList<QJsonObject> m_changedActionList;
 
 signals:
     void sigStartProgram();
     void tokenChanged();
     void nextCurrentControlledObjChanged();
+    void currentActionChanged();
 
 public slots:
 };

@@ -4,6 +4,7 @@
 
 #define WEB_API WebAPI::instance()
 #define MODEL Model::instance()
+#define JAVA_COM JavaCommunication::instance()
 
 MainController* MainController::m_instance = nullptr;
 
@@ -27,7 +28,8 @@ void MainController::initController()
     // Do nothing;
     connect(this,SIGNAL(currentScreenChanged()),this,SLOT(onChangeScreen()));
     connect(this,SIGNAL(currentActivityChanged()),this,SLOT(onChangeAcitivity()));
-    connect(MODEL,SIGNAL(nextCurrentControlledObjChanged()),this,SLOT(onDoAction()));
+    connect(MODEL,SIGNAL(nextCurrentControlledObjChanged()),this,SLOT(executeRequiredActions()));
+    connect(MODEL,SIGNAL(currentActionChanged()),this,SLOT(doAction()));
 }
 
 void MainController::startLoop()
@@ -44,7 +46,18 @@ void MainController::startLoop()
 //        MODEL->currentControlledUser() = WEB_API->cloneUserData();
 //        MODEL->saveUserDataList();
 //    }
-//    startCheckCurrentActivity();
+    //    startCheckCurrentActivity();
+}
+
+void MainController::execVipLike()
+{
+    LOG;
+    if(MODEL->currentAction()["fbid"].toString() != ""){
+        JAVA_COM->openFBLiteWithUserID(MODEL->currentControlledPkg(),MODEL->currentControlledUser().uid);
+        startCheckCurrentScreen();
+    }else {
+        LOG << "fbid is empty";
+    }
 }
 
 int MainController::currentScreen() const
@@ -104,7 +117,7 @@ void MainController::onChangeAcitivity()
     }
 }
 
-void MainController::onDoAction()
+void MainController::executeRequiredActions()
 {
     LOG << "Current package: " << MODEL->currentControlledPkg();
     if(MODEL->currentControlledUser()._id == ""){
@@ -113,6 +126,16 @@ void MainController::onDoAction()
         LOG << "User info has storaged already";
     }
 
+    MODEL->clearActionList();
     WEB_API->getDoAction();
+}
 
+void MainController::doAction()
+{
+    LOG << "Current action: " << MODEL->currentAction();
+    if(MODEL->currentAction()["action"] == "viplike"){
+        this->execVipLike();
+    }else{
+        // Do them later
+    }
 }

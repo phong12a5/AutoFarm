@@ -17,7 +17,17 @@
 #define DCIM_FOLDER             "/sdcard/DCIM/"
 
 #define LOADING_ICON            "assets:/images/loadingIcon.png"
+#define NEWSFEED_ICON           "assets:/images/newsFeedIcon.png"
 #define PROFILE_ICON            "assets:/images/profileIcon.png"
+#define PROFILE_ICON            "assets:/images/profileIcon.png"
+#define LIKE_ICON               "assets:/images/like.png"
+#define LIKE_ICON_LITE          "assets:/images/likeIcon-Lite.png"
+#define FRIEND_ICON             "assets:/images/friendIcon.png"
+#define REQUEST_ICON            "assets:/images/requestIcon.png"
+#define SEARCH_ICON             "assets:/images/searchIcon.png"
+#define SUGGEST_ICON            "assets:/images/suggestionsIcon.png"
+#define CONFIRM_ICON            "assets:/images/confirmIcon.png"
+#define ADDFRIEND_ICON          "assets:/images/addFriendIcon.png"
 
 #define FACEBOOK_LITE_SCREEN    "com.facebook.lite/com.facebook.lite.MainActivity"
 #define FACEBOOK_LITE_PKGNAME   "com.facebook.lite"

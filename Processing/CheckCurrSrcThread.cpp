@@ -1,5 +1,5 @@
 #include "CheckCurrSrcThread.h"
-#include "Controller/MainController.h"
+#include "MainController.h"
 
 #define MAIN_CTRL    MainController::instance()
 
@@ -17,21 +17,13 @@ CheckCurrSrcThread::~CheckCurrSrcThread()
 
 bool CheckCurrSrcThread::isOnScreen(QString iconPath)
 {
-    Q_UNUSED(iconPath);
-//    QString screenImgPath = ShellOperation::screenShot();
-//    QPoint point = ImageProcessing::findImageOnImage(QDir::currentPath() + iconPath,screenImgPath);
-//    if(!point.isNull()){
-//        return true;
-//    }else{
-//        screenImgPath = ADBCommand::screenShot();
-//        point = ImageProcessing::findImageOnImage(QDir::currentPath() + iconPath,screenImgPath);
-//        if(!point.isNull()){
-//            return true;
-//        }else{
-//            return false;
-//        }
-//    }
-    return false;
+    QString screenImgPath = ShellOperation::screenShot();
+    QPoint point = ImageProcessing::findImageOnImage(iconPath,screenImgPath);
+    if(!point.isNull()){
+        return true;
+    }else{
+        return false;
+    }
 }
 
 bool CheckCurrSrcThread::isCurrentScreen(int screenID) const
@@ -46,7 +38,7 @@ bool CheckCurrSrcThread::isCurrentScreen(int screenID) const
 //        break;
 //    }
 
-    LOG << "[RegFBController]" << "screenID: " << screenID << " --- reval:" << retVal;
+//    LOG << "[RegFBController]" << "screenID: " << screenID << " --- reval:" << retVal;
 
     return retVal;
 }
@@ -73,4 +65,7 @@ void CheckCurrSrcThread::onUpdateCurrentScreen()
 {
 //    int _tmpScr = MAIN_CTRL->currentScreen();
 //    for
+    LOG << "App loading screen: " << isOnScreen(LOADING_ICON);
+
+    LOG << "News feed screen: " << isOnScreen(NEWSFEED_ICON);
 }

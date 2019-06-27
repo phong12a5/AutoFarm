@@ -36,6 +36,7 @@ public:
 
     QAESEncryption(QAESEncryption::Aes level, QAESEncryption::Mode mode,
                    QAESEncryption::Padding padding = QAESEncryption::PKCS7);
+    ~QAESEncryption();
 
     QByteArray encode(const QByteArray &rawText, const QByteArray &key, const QByteArray &iv = NULL);
     QByteArray decode(const QByteArray &rawText, const QByteArray &key, const QByteArray &iv = NULL);

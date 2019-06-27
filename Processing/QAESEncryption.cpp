@@ -126,6 +126,11 @@ QAESEncryption::QAESEncryption(Aes level, Mode mode,
     }
 
 }
+
+QAESEncryption::~QAESEncryption()
+{
+    m_state = nullptr;
+}
 QByteArray QAESEncryption::getPadding(int currSize, int alignment)
 {
     int size = (alignment - currSize % alignment) % alignment;

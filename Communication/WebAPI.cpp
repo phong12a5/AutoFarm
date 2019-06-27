@@ -50,8 +50,6 @@ void WebAPI::getApk()
     json.insert("action", QTextCodec::codecForMib(106)->toUnicode(getEncodedString("getapk")));
     json.insert("device", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
 
-    LOG << "json: " << json;
-
     QByteArray jsonData = QJsonDocument(json).toJson();
     request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
     request.setHeader(QNetworkRequest::ContentLengthHeader,QByteArray::number(jsonData.size()));
@@ -173,23 +171,23 @@ USER_DATA WebAPI::cloneUserData()
                 user_data.updated_at       = jsonObj["updated_at"].toString();
                 user_data.user_id          = jsonObj["user_id"].toString();
 
-                LOG << "user_data._id           :" << user_data._id           ;
-                LOG << "user_data.uid           :" << user_data.uid           ;
-                LOG << "user_data.password      :" << user_data.password      ;
-                LOG << "user_data.cookie        :" << user_data.cookie        ;
-                LOG << "user_data.token         :" << user_data.token         ;
-                LOG << "user_data.birthday      :" << user_data.birthday      ;
-                LOG << "user_data.name          :" << user_data.name          ;
-                LOG << "user_data.sex           :" << user_data.sex           ;
-                LOG << "user_data.country       :" << user_data.country       ;
-                LOG << "user_data.email         :" << user_data.email         ;
-                LOG << "user_data.avartar       :" << user_data.avartar       ;
-                LOG << "user_data.created_date  :" << user_data.created_date  ;
-                LOG << "user_data.farming_status:" << user_data.farming_status;
-                LOG << "user_data.alive_status  :" << user_data.alive_status  ;
-                LOG << "user_data.created_at    :" << user_data.created_at    ;
-                LOG << "user_data.updated_at    :" << user_data.updated_at    ;
-                LOG << "user_data.user_id       :" << user_data.user_id       ;
+//                LOG << "user_data._id           :" << user_data._id           ;
+//                LOG << "user_data.uid           :" << user_data.uid           ;
+//                LOG << "user_data.password      :" << user_data.password      ;
+//                LOG << "user_data.cookie        :" << user_data.cookie        ;
+//                LOG << "user_data.token         :" << user_data.token         ;
+//                LOG << "user_data.birthday      :" << user_data.birthday      ;
+//                LOG << "user_data.name          :" << user_data.name          ;
+//                LOG << "user_data.sex           :" << user_data.sex           ;
+//                LOG << "user_data.country       :" << user_data.country       ;
+//                LOG << "user_data.email         :" << user_data.email         ;
+//                LOG << "user_data.avartar       :" << user_data.avartar       ;
+//                LOG << "user_data.created_date  :" << user_data.created_date  ;
+//                LOG << "user_data.farming_status:" << user_data.farming_status;
+//                LOG << "user_data.alive_status  :" << user_data.alive_status  ;
+//                LOG << "user_data.created_at    :" << user_data.created_at    ;
+//                LOG << "user_data.updated_at    :" << user_data.updated_at    ;
+//                LOG << "user_data.user_id       :" << user_data.user_id       ;
 
             }else{
                 LOG << "jsonObj is NULL";
@@ -285,10 +283,18 @@ void WebAPI::getDoAction()
         QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
         QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
         QJsonDocument jdoc = QJsonDocument::fromJson(encryption.removePadding(decodeText));
-        LOG << "jdoc: " << jdoc;
         QJsonObject deocdedjsonObj = jdoc.object();
         if(!deocdedjsonObj.isEmpty()){
-            LOG << "deocdedjsonObj: " << deocdedjsonObj;
+            QList<QJsonObject> actionList;
+            foreach (QJsonValue data, deocdedjsonObj["actions"].toArray()) {
+                if(data.isObject()){
+                    QJsonObject action = data.toObject();
+                    if(action["action"] == "viplike")
+                        actionList.append(action);
+                }
+            }
+            MODEL->setActionList(actionList);
+            LOG << MODEL->actionList();
         }else{
             LOG << "deocdedjsonObj is NULL";
         }
@@ -309,8 +315,6 @@ void WebAPI::getDoResult()
     jsonDataObj["action"] = "viplike";
     jsonDataObj["service_code"] = "JHJKK1";
     jsonDataObj["fbid"] = MODEL->userData().uid;
-
-    LOG << "jsonDataObj: " << jsonDataObj;
 
     QJsonObject json;
 
@@ -391,8 +395,6 @@ QByteArray WebAPI::getEncodedDeviceInfo() const
     deviceInfo["android_verion"] =  MODEL->deviceInfo().android_verion;
     deviceInfo["model"] =           MODEL->deviceInfo().model;
     deviceInfo["isNox"] =           MODEL->deviceInfo().isNox;
-
-    LOG << "deviceInfo: " << deviceInfo;
 
     QByteArray deviceInfoData = QJsonDocument(deviceInfo).toJson();
 

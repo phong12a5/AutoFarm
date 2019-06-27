@@ -5,7 +5,7 @@
 #include "AppDefines.h"
 #include "Communication/JavaCommunication.h"
 #include "Processing/ImageProcessing.h"
-#include "ThreadController.h"
+#include "Controller/ThreadController.h"
 #include "AppEnums.h"
 #include "Communication/WebAPI.h"
 
@@ -20,6 +20,9 @@ public:
     static MainController* instance();
     void initController();
     void startLoop();
+
+private:
+    void execVipLike();
 
 public:
     int currentScreen() const;
@@ -45,7 +48,8 @@ signals:
 public slots:
     void onChangeScreen();
     void onChangeAcitivity();
-    void onDoAction();
+    void executeRequiredActions();
+    void doAction();
 
 };
 

@@ -10,9 +10,6 @@ QPoint ImageProcessing::findImageOnImage(const QString &smallImagePath, const QS
 {
     QPoint retVal;
 
-//    LOG << "Small image: " << QImage(smallImagePath).size();
-//    LOG << "Large image: " << QImage(largeImagePath).size();
-
     cv::Mat _smallImage = ImageProcessing::QImage2Mat(QImage(smallImagePath));
     cv::Mat _largeImage = ImageProcessing::QImage2Mat(QImage(largeImagePath));
 

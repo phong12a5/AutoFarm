@@ -24,7 +24,7 @@ HEADERS += \
     Processing/ImageProcessing.h \
     AppMain.h \
     AppEnums.h \
-    Controller/MainController.h \
+    MainController.h \
     Communication/JavaCommunication.h \
     Controller/ThreadController.h \
     Processing/CheckCurrSrcThread.h \
@@ -38,7 +38,7 @@ SOURCES += \
     Controller/ShellOperation.cpp \
     Processing/ImageProcessing.cpp \
     AppMain.cpp \
-    Controller/MainController.cpp \
+    MainController.cpp \
     Communication/JavaCommunication.cpp \
     Controller/ThreadController.cpp \
     Processing/CheckCurrSrcThread.cpp \

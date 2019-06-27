@@ -70,7 +70,6 @@ QString ShellOperation::getCurrentActivity()
 
 QString ShellOperation::screenShot(QString fileName)
 {
-    LOG << "Taking screen >> fileName: " << fileName;
     QString path = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
     if (path.isEmpty()){
         LOG << "Could't not save to " << path;
@@ -78,7 +77,6 @@ QString ShellOperation::screenShot(QString fileName)
     }
 
     path.append(QString("/%1").arg(fileName));
-    LOG << "Path: " << path;
 
     QProcess process;
     process.start("su", QStringList()<< "-c" << "/system/bin/screencap" << "-p" << path);

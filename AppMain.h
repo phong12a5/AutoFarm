@@ -7,7 +7,7 @@
 #include <QQmlApplicationEngine>
 #include "Model.h"
 #include "AppEnums.h"
-#include "Controller/MainController.h"
+#include "MainController.h"
 
 class AppMain : public QObject
 {

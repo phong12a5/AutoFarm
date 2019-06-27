@@ -4,7 +4,6 @@
 #include <QObject>
 #include <AppDefines.h>
 #include <QTimer>
-#include "ADBCommand.h"
 #include <QMutex>
 
 class CheckCurrSrcThread : public QObject

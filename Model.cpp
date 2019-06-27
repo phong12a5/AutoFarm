@@ -126,6 +126,49 @@ void Model::nextCurrentControlledObj()
     emit nextCurrentControlledObjChanged();
 }
 
+QList<QJsonObject> Model::actionList()
+{
+    return m_actionList;
+}
+
+void Model::setActionList(QList<QJsonObject> data)
+{
+    if(m_actionList!= data){
+        m_actionList = data;
+        m_changedActionList = m_actionList;
+        LOG << "----------------------- New circle ------------------------";
+        emit currentActionChanged();
+    }
+}
+
+void Model::clearActionList()
+{
+    m_actionList.clear();
+}
+
+QJsonObject Model::currentAction()
+{
+    if(m_changedActionList.isEmpty()){
+        return QJsonObject();
+    }else{
+        return m_changedActionList.first();
+    }
+}
+
+void Model::nextCurrentAction()
+{
+    LOG;
+    if(m_changedActionList.isEmpty()){
+        nextCurrentControlledObj();
+    }else if(m_changedActionList.length() == 1){
+        m_changedActionList.removeFirst();
+        nextCurrentControlledObj();
+    }else{
+        m_changedActionList.removeFirst();
+    }
+    emit currentActionChanged();
+}
+
 void Model::loadUserDataList()
 {
     LOG;
