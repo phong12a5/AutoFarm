@@ -18,20 +18,13 @@
 
 #define LOADING_ICON            "assets:/images/loadingIcon.png"
 #define NEWSFEED_ICON           "assets:/images/newsFeedIcon.png"
-#define PROFILE_ICON            "assets:/images/profileIcon.png"
-#define PROFILE_ICON            "assets:/images/profileIcon.png"
-#define LIKE_ICON               "assets:/images/like.png"
-#define LIKE_ICON_LITE          "assets:/images/likeIcon-Lite.png"
-#define FRIEND_ICON             "assets:/images/friendIcon.png"
-#define REQUEST_ICON            "assets:/images/requestIcon.png"
-#define SEARCH_ICON             "assets:/images/searchIcon.png"
-#define SUGGEST_ICON            "assets:/images/suggestionsIcon.png"
-#define CONFIRM_ICON            "assets:/images/confirmIcon.png"
-#define ADDFRIEND_ICON          "assets:/images/addFriendIcon.png"
+#define SKIP_FIND_FRIEND_BTN    "assets:/images/SkipFindFriend.png"
+#define OK_BTN_FOR_SAVE_LOGIN   "assets:/images/OKBtnForSaveInfoLogin.png"
+#define LIKE_ICON               "assets:/images/LikeIcon_FBLite.png"
 
 #define FACEBOOK_LITE_SCREEN    "com.facebook.lite/com.facebook.lite.MainActivity"
 #define FACEBOOK_LITE_PKGNAME   "com.facebook.lite"
-#define FACEBOOK_LITE_ACT       "com.facebook.lite.MainActivity"
+#define FACEBOOK_LITE_ACT       "MainActivity"
 
 typedef struct device_info_struct {
     QString googleSF;

@@ -81,6 +81,7 @@ signals:
     void tokenChanged();
     void nextCurrentControlledObjChanged();
     void currentActionChanged();
+    void currentActionListDone();
 
 public slots:
 };

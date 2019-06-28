@@ -15,9 +15,9 @@ JavaCommunication *JavaCommunication::instance()
 }
 #ifdef ANDROID_KIT
 
-void JavaCommunication::openApplication(QString packageName, QString activityName) const
+void JavaCommunication::openFBLiteApplication(QString packageName, QString activityName) const
 {
-    LOG << "Openning " << packageName + "/" + activityName;
+    LOG << "Openning " << packageName + "/" + packageName + "." + activityName;
     QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative", "activity", "()Landroid/app/Activity;");   //activity is valid
     if ( activity.isValid() )
     {
@@ -26,7 +26,7 @@ void JavaCommunication::openApplication(QString packageName, QString activityNam
         if ( intent.isValid() )
         {
             QAndroidJniObject param1 = QAndroidJniObject::fromString(packageName);
-            QAndroidJniObject param2 = QAndroidJniObject::fromString(activityName);
+            QAndroidJniObject param2 = QAndroidJniObject::fromString(packageName + "." + activityName);
 
             if ( param1.isValid() && param2.isValid() )
             {
@@ -76,12 +76,6 @@ void JavaCommunication::openFBLiteWithUserID(QString packageName, QString userID
             }
         }
     }
-}
-
-void JavaCommunication::backToAppMain() const
-{
-    LOG;
-    this->openApplication("org.qtproject.example.AutoTouchQtAndroid","org.qtproject.qt5.android.bindings.QtActivity");
 }
 
 QString JavaCommunication::getDeviceIMEI()

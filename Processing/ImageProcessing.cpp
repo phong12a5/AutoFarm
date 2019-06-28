@@ -6,7 +6,7 @@ ImageProcessing::ImageProcessing(QObject *parent) : QObject(parent)
 }
 
 #ifdef ANDROID_KIT
-QPoint ImageProcessing::findImageOnImage(const QString &smallImagePath, const QString &largeImagePath)
+QPoint ImageProcessing::findImageOnImage(const QString &smallImagePath, const QString &largeImagePath, float threshold)
 {
     QPoint retVal;
 
@@ -31,8 +31,6 @@ QPoint ImageProcessing::findImageOnImage(const QString &smallImagePath, const QS
     //tìm mẫu
     cv::matchTemplate(_largeImage, _smallImage, result, CV_TM_CCORR_NORMED);
 
-
-    double threshold = 0.98;
     cv::threshold(result, result, threshold, 1., CV_THRESH_TOZERO);
     double minval, maxval;
     double bestMaxval = 0;
@@ -56,8 +54,6 @@ QPoint ImageProcessing::findImageOnImage(const QString &smallImagePath, const QS
         else
             break;
     }
-
-//    LOG << "Return values: " << retVal << " --- bestMaxVal: " << bestMaxval;
     return retVal;
 }
 

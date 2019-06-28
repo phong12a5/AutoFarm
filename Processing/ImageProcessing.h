@@ -21,7 +21,7 @@ private:
 
 public:
 #ifdef ANDROID_KIT
-    static QPoint findImageOnImage(const QString& smallImage, const QString& largeImage);
+    static QPoint findImageOnImage(const QString& smallImage, const QString& largeImage, float threshold = 0.98);
     static cv::Mat QImage2Mat(QImage const& src);
 #endif
 

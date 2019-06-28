@@ -5,6 +5,9 @@ ShellOperation::ShellOperation(QObject *parent) : QObject(parent)
 
 }
 
+
+#ifdef ANDROID_KIT
+
 bool ShellOperation::installPackage(QString packagePath)
 {
     LOG << packagePath;
@@ -20,7 +23,6 @@ bool ShellOperation::installPackage(QString packagePath)
     }
 }
 
-#ifdef ANDROID_KIT
 void ShellOperation::callTapEvent(const int x, const int y)
 {
     LOG << QString("Tapping at [%1,%2]").arg(x).arg(y);
@@ -66,6 +68,57 @@ QString ShellOperation::getCurrentActivity()
         retVal = QString(output.at(4)).simplified().remove('}');
     }
     return retVal;
+}
+
+bool ShellOperation::findAndClick(QString iconPath, float threshold)
+{
+    LOG << "[ADBCommand]" << iconPath << " -- threshold: " << threshold;
+    QString screenImgPath = ShellOperation::screenShot();
+    QPoint point = ImageProcessing::findImageOnImage(iconPath,screenImgPath,threshold);
+    if(!point.isNull()){
+        ShellOperation::tapScreen(point);
+        return true;
+    }else{
+        screenImgPath = ShellOperation::screenShot();
+        point = ImageProcessing::findImageOnImage(iconPath,screenImgPath,threshold);
+        if(!point.isNull()){
+            ShellOperation::tapScreen(point);
+            return true;
+        }else{
+            return false;
+        }
+    }
+}
+
+void ShellOperation::tapScreen(QPoint point, bool noDelay)
+{
+    LOG << "Tapping at [" << point.x() << "," << point.y() << "]";
+    QProcess proc;
+    proc.start(QString("su -c input tap %1 %2").arg(point.x()).arg(point.y()));
+    proc.waitForFinished(-1);
+    if(!noDelay)
+        delay(100);
+    return;
+}
+
+bool ShellOperation::enterText(QString text)
+{
+    LOG << "Entering text: " << text;
+    QProcess proc;
+//    for(int i = 0; i < text.length(); i++){
+//        proc.start(QString("adb shell input text %1").arg(text.at(i)));
+//        delay(10);
+//        proc.waitForFinished(-1);
+//    }
+    proc.start(QString("su -c input text %1").arg(text));
+    proc.waitForFinished(-1);
+
+    if(proc.readAllStandardError() != ""){
+        LOG << "[ADBCommand]" << "ERROR: " << proc.readAllStandardError();
+        return false;
+    }else {
+        return true;
+    }
 }
 
 QString ShellOperation::screenShot(QString fileName)

@@ -30,6 +30,7 @@ void MainController::initController()
     connect(this,SIGNAL(currentActivityChanged()),this,SLOT(onChangeAcitivity()));
     connect(MODEL,SIGNAL(nextCurrentControlledObjChanged()),this,SLOT(executeRequiredActions()));
     connect(MODEL,SIGNAL(currentActionChanged()),this,SLOT(doAction()));
+    connect(MODEL,SIGNAL(currentActionListDone()),this,SLOT(updateResult()));
 }
 
 void MainController::startLoop()
@@ -47,17 +48,6 @@ void MainController::startLoop()
 //        MODEL->saveUserDataList();
 //    }
     //    startCheckCurrentActivity();
-}
-
-void MainController::execVipLike()
-{
-    LOG;
-    if(MODEL->currentAction()["fbid"].toString() != ""){
-        JAVA_COM->openFBLiteWithUserID(MODEL->currentControlledPkg(),MODEL->currentControlledUser().uid);
-        startCheckCurrentScreen();
-    }else {
-        LOG << "fbid is empty";
-    }
 }
 
 int MainController::currentScreen() const
@@ -101,7 +91,41 @@ void MainController::startCheckCurrentActivity()
 
 void MainController::onChangeScreen()
 {
-    LOG;
+    LOG << "currentScreen: " << currentScreen();
+    switch(currentScreen()){
+    case AppEnums::HMI_START_UP_SCREEN:
+        // Do nothing
+        break;
+    case AppEnums::HMI_LOGIN_SCREEN:
+        break;
+    case AppEnums::HMI_TURNON_FIND_FRIEND_SCREEN:
+        ShellOperation::findAndClick(SKIP_FIND_FRIEND_BTN);
+        break;
+    case AppEnums::HMI_SAVE_LOGIN_INFO_SCREEN:
+        ShellOperation::findAndClick(OK_BTN_FOR_SAVE_LOGIN);
+        break;
+    case AppEnums::HMI_NEW_FEED_SCREEN:
+        if(MODEL->currentAction()["action"].toString() == "viplike"){
+            if(MODEL->currentAction()["fbid"].toString() != ""){
+                JAVA_COM->openFBLiteWithUserID(MODEL->currentControlledPkg(),MODEL->currentAction()["fbid"].toString());
+
+                for(int i = 0; i < 2; i++){
+                    if(!ShellOperation::findAndClick(LIKE_ICON))
+                        i--;
+                    ShellOperation::callScrollEvent(QPoint(500,1300),QPoint(500,600));
+                    delay(200);
+                }
+                MODEL->nextCurrentAction();
+            }else {
+                LOG << "fbid is empty";
+            }
+        }else{
+            LOG << "current action: " << MODEL->currentAction()["action"].toString();
+        }
+        break;
+    default:
+        break;
+    }
 }
 
 void MainController::onChangeAcitivity()
@@ -112,7 +136,7 @@ void MainController::onChangeAcitivity()
         delay(1000);
     }else{
 #ifdef ANDROID_KIT
-        JavaCommunication::instance()->openApplication(FACEBOOK_LITE_PKGNAME,FACEBOOK_LITE_ACT);
+//        JavaCommunication::instance()->openFBLiteApplication(FACEBOOK_LITE_PKGNAME,FACEBOOK_LITE_ACT);
 #endif
     }
 }
@@ -132,10 +156,22 @@ void MainController::executeRequiredActions()
 
 void MainController::doAction()
 {
+    LOG << " -------------------New Action -----------------";
     LOG << "Current action: " << MODEL->currentAction();
-    if(MODEL->currentAction()["action"] == "viplike"){
-        this->execVipLike();
+    if(MODEL->currentAction()["action"].toString() == "viplike"){
+        if(MODEL->currentAction()["fbid"].toString() != ""){
+            this->setCurrentScreen(AppEnums::HMI_UNKNOW_SCREEN);
+            JAVA_COM->openFBLiteWithUserID(MODEL->currentControlledPkg(),"");
+            startCheckCurrentScreen();
+        }else {
+            LOG << "fbid is empty";
+        }
     }else{
-        // Do them later
+        LOG << "There is no action";
     }
+}
+
+void MainController::updateResult()
+{
+    WEB_API->getDoResult();
 }

@@ -21,9 +21,6 @@ public:
     void initController();
     void startLoop();
 
-private:
-    void execVipLike();
-
 public:
     int currentScreen() const;
     void setCurrentScreen(const int data);
@@ -50,6 +47,7 @@ public slots:
     void onChangeAcitivity();
     void executeRequiredActions();
     void doAction();
+    void updateResult();
 
 };
 

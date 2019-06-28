@@ -310,17 +310,20 @@ void WebAPI::getDoResult()
     QNetworkRequest request(serviceUrl);
 
 
-    QJsonObject jsonDataObj;
+    QJsonArray actionArray;
+    foreach (QJsonObject action, MODEL->actionList()) {
+        actionArray.append(QJsonValue(action));
+    }
+
+    LOG << "QJsonDocument(actionArray): " << QJsonDocument(actionArray);
+
     //"action": "viplike",  service_code:JHJKK1,  "fbid": "100031455291649"
-    jsonDataObj["action"] = "viplike";
-    jsonDataObj["service_code"] = "JHJKK1";
-    jsonDataObj["fbid"] = MODEL->userData().uid;
 
     QJsonObject json;
 
     json.insert("fbid", QTextCodec::codecForMib(106)->toUnicode(getEncodedStringByImei("100030998794736")));
     json.insert("device", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
-    json.insert("data", QTextCodec::codecForMib(106)->toUnicode(getEncodedJsonDoc(QJsonDocument(jsonDataObj))));
+    json.insert("data", QTextCodec::codecForMib(106)->toUnicode(getEncodedJsonDoc(QJsonDocument(actionArray))));
 
     QByteArray jsonData = QJsonDocument(json).toJson();
     request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");

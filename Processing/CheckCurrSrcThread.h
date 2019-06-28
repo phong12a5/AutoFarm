@@ -5,6 +5,7 @@
 #include <AppDefines.h>
 #include <QTimer>
 #include <QMutex>
+#include "AppEnums.h"
 
 class CheckCurrSrcThread : public QObject
 {

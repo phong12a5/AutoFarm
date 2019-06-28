@@ -30,8 +30,11 @@ public:
 
     enum HMI_SCREEN_ID: int
     {
-        HMI_START_UP_SCREEN = 0,
+        HMI_UNKNOW_SCREEN = 0,
+        HMI_START_UP_SCREEN,
         HMI_LOGIN_SCREEN,
+        HMI_TURNON_FIND_FRIEND_SCREEN,
+        HMI_SAVE_LOGIN_INFO_SCREEN,
         HMI_NEW_FEED_SCREEN,
     };
 };

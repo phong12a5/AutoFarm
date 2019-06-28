@@ -158,10 +158,11 @@ QJsonObject Model::currentAction()
 void Model::nextCurrentAction()
 {
     LOG;
-    if(m_changedActionList.isEmpty()){
-        nextCurrentControlledObj();
-    }else if(m_changedActionList.length() == 1){
-        m_changedActionList.removeFirst();
+    if(m_changedActionList.isEmpty() <= 1){
+        if(m_changedActionList.length() == 1){
+            m_changedActionList.removeFirst();
+        }
+        emit currentActionListDone();
         nextCurrentControlledObj();
     }else{
         m_changedActionList.removeFirst();

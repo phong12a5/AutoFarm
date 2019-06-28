@@ -1,7 +1,7 @@
 #include "CheckCurrSrcThread.h"
 #include "MainController.h"
 
-#define MAIN_CTRL    MainController::instance()
+#define MAIN_CTRL   MainController::instance()
 
 CheckCurrSrcThread::CheckCurrSrcThread(QObject *parent) : QObject(parent)
 {
@@ -18,7 +18,7 @@ CheckCurrSrcThread::~CheckCurrSrcThread()
 bool CheckCurrSrcThread::isOnScreen(QString iconPath)
 {
     QString screenImgPath = ShellOperation::screenShot();
-    QPoint point = ImageProcessing::findImageOnImage(iconPath,screenImgPath);
+    QPoint point = ImageProcessing::findImageOnImage(iconPath,screenImgPath,0.99);
     if(!point.isNull()){
         return true;
     }else{
@@ -54,7 +54,7 @@ void CheckCurrSrcThread::doWork(const QString &parameter)
 {
     LOG << "[CheckCurrSrcThread] " << parameter;
     m_updateCurrSrcTimer = new QTimer(this);
-    m_updateCurrSrcTimer->setInterval(500);
+    m_updateCurrSrcTimer->setInterval(100);
     m_updateCurrSrcTimer->setSingleShot(false);
     QObject::connect(m_updateCurrSrcTimer, SIGNAL(timeout()), this, SLOT(onUpdateCurrentScreen()));
     m_updateCurrSrcTimer->start();
@@ -63,9 +63,11 @@ void CheckCurrSrcThread::doWork(const QString &parameter)
 
 void CheckCurrSrcThread::onUpdateCurrentScreen()
 {
-//    int _tmpScr = MAIN_CTRL->currentScreen();
-//    for
-    LOG << "App loading screen: " << isOnScreen(LOADING_ICON);
-
-    LOG << "News feed screen: " << isOnScreen(NEWSFEED_ICON);
+    if(isOnScreen(LOADING_ICON)){
+        MAIN_CTRL->setCurrentScreen(AppEnums::HMI_START_UP_SCREEN);
+    }else if(isOnScreen(NEWSFEED_ICON)){
+        MAIN_CTRL->setCurrentScreen(AppEnums::HMI_NEW_FEED_SCREEN);
+    }else {
+        MAIN_CTRL->setCurrentScreen(AppEnums::HMI_UNKNOW_SCREEN);
+    }
 }
