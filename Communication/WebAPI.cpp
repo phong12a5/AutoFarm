@@ -1,5 +1,5 @@
-#include "WebAPI.h"
-#include "Model.h"
+#include "WebAPI.hpp"
+#include "Model.hpp"
 
 #define MODEL Model::instance()
 
@@ -171,8 +171,10 @@ USER_DATA WebAPI::cloneUserData()
                 user_data.updated_at       = jsonObj["updated_at"].toString();
                 user_data.user_id          = jsonObj["user_id"].toString();
 
-//                LOG << "user_data._id           :" << user_data._id           ;
-//                LOG << "user_data.uid           :" << user_data.uid           ;
+                LOG << "user_data.uid           :" << user_data.uid           ;
+                while(user_data.uid == ""){
+                    user_data = cloneUserData();
+                }
 //                LOG << "user_data.password      :" << user_data.password      ;
 //                LOG << "user_data.cookie        :" << user_data.cookie        ;
 //                LOG << "user_data.token         :" << user_data.token         ;
@@ -209,7 +211,7 @@ void WebAPI::updateCheckPoint()
 
     json.insert("action", QTextCodec::codecForMib(106)->toUnicode(getEncodedString("checkpoint")));
     json.insert("device", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
-    json.insert("fbid", QTextCodec::codecForMib(106)->toUnicode(getEncodedStringByImei(MODEL->userData().uid)));
+    json.insert("fbid", QTextCodec::codecForMib(106)->toUnicode(getEncodedStringByImei(MODEL->currentControlledUser().uid)));
 
 
     QByteArray jsonData = QJsonDocument(json).toJson();
@@ -275,6 +277,7 @@ void WebAPI::getDoAction()
     QByteArray responseData = reply->readAll();
     QJsonObject jsonObj = QJsonDocument::fromJson(responseData).object();
 
+    LOG << "responseData: " << responseData;
     if(jsonObj.isEmpty()){
         LOG << "jsonObj is empty!";
         return;
@@ -284,6 +287,7 @@ void WebAPI::getDoAction()
         QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
         QJsonDocument jdoc = QJsonDocument::fromJson(encryption.removePadding(decodeText));
         QJsonObject deocdedjsonObj = jdoc.object();
+        LOG << "deocdedjsonObj:" << deocdedjsonObj;
         if(!deocdedjsonObj.isEmpty()){
             QList<QJsonObject> actionList;
             foreach (QJsonValue data, deocdedjsonObj["actions"].toArray()) {
@@ -455,7 +459,7 @@ void WebAPI::slotReponseGettingApk(QNetworkReply* reply)
         m_downloadedPackage.clear();
         downloadedPackagedCount = 0;
 
-        QList<QString> keys = MODEL->getUserDataList().keys();
+        QList<QString> keys = MODEL->getUserDataList()->keys();
 
         foreach (QJsonValue data, jdoc.array()) {
             if(data.isObject()){
@@ -500,11 +504,16 @@ void WebAPI::slotReponseDownloadingApk(QNetworkReply * reply)
     if(this->downloadedPackagedCount >= m_neededDownloadPkgList.count()){
         LOG << "Download completed!";
         for(int i = 0 ; i < m_downloadedFile.length(); i ++){
-            if(!MODEL->getUserDataList().contains(m_downloadedPackage.at(i))){
+            if(!MODEL->getUserDataList()->contains(m_downloadedPackage.at(i))){
+#ifdef ANDROID_KIT
                 if(ShellOperation::installPackage(m_downloadedFile.at(i))){
                     USER_DATA data;
-                    MODEL->getUserDataList().insert(m_downloadedPackage.at(i),data);
+                    MODEL->getUserDataList()->insert(m_downloadedPackage.at(i),data);
                 }
+#else
+                USER_DATA data;
+                MODEL->getUserDataList()->insert(m_downloadedPackage.at(i),data);
+#endif
             }else {
                 LOG << "Pacage was installed already";
             }

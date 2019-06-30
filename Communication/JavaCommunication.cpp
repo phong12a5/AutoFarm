@@ -1,4 +1,4 @@
-#include "JavaCommunication.h"
+#include "JavaCommunication.hpp"
 
 JavaCommunication* JavaCommunication::m_instance = nullptr;
 
