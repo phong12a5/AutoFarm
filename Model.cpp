@@ -1,7 +1,5 @@
-#include "Model.h"
+#include "Model.hpp"
 #include <QWidgetList>
-#include <QtWidgets/qwidget.h>
-#include <QWindow>
 
 Model* Model::m_instance = nullptr;
 
@@ -56,6 +54,14 @@ void Model::setToken(QString data)
     }
 }
 
+QString Model::deviceType() const
+{
+    if(m_deviceInfo.isNox == "true")
+        return "Nox Device";
+    else
+        return "Real Device";
+}
+
 DEVICE_INFO Model::deviceInfo() const
 {
     return m_deviceInfo;
@@ -76,33 +82,31 @@ void Model::setAppConfig(APP_CONFIG data)
     m_appConfig = data;
 }
 
-USER_DATA Model::userData() const
+USER_DATA Model::userData()
 {
-    return m_userData;
-}
-
-void Model::setUserData(USER_DATA data)
-{
-    m_userData = data;
+    return m_userDataList.value(currentControlledPkg());
 }
 
 void Model::updateUserData(QString packageName, USER_DATA data)
 {
+    LOG << "packageName: " << packageName << " --- data: " << data.uid;
     if(m_userDataList.contains(packageName)){
         m_userDataList[packageName] = data;
     }else{
         LOG << "Add new pacakge: " << packageName;
         m_userDataList.insert(packageName,data);
     }
+    saveUserDataList();
 }
 
-QMap<QString, USER_DATA>& Model::getUserDataList()
+QMap<QString, USER_DATA>* Model::getUserDataList()
 {
-    return m_userDataList;
+    return &m_userDataList;
 }
 
 QString Model::currentControlledPkg()
 {
+    LOG << "m_currentPkgIndex: " << m_currentPkgIndex;
     if(m_currentPkgIndex < m_userDataList.count()){
         return m_userDataList.keys().at(m_currentPkgIndex);
     }else{
@@ -119,10 +123,16 @@ USER_DATA &Model::currentControlledUser()
 void Model::nextCurrentControlledObj()
 {
     if(m_currentPkgIndex < 0 || m_currentPkgIndex >= m_userDataList.count() - 1){
+        if(m_currentPkgIndex >= m_userDataList.count() - 1){
+            emit finishedListObject();
+            m_currentPkgIndex = 0;
+            return;
+        }
         m_currentPkgIndex = 0;
     }else{
         m_currentPkgIndex ++;
     }
+    LOG << "m_currentPkgIndex: " << m_currentPkgIndex;
     emit nextCurrentControlledObjChanged();
 }
 
@@ -158,7 +168,7 @@ QJsonObject Model::currentAction()
 void Model::nextCurrentAction()
 {
     LOG;
-    if(m_changedActionList.isEmpty() <= 1){
+    if(m_changedActionList.length() <= 1){
         if(m_changedActionList.length() == 1){
             m_changedActionList.removeFirst();
         }
@@ -203,6 +213,25 @@ void Model::loadUserDataList()
                     user_data.created_at       = userDataJson["created_at"].toString();
                     user_data.updated_at       = userDataJson["updated_at"].toString();
                     user_data.user_id          = userDataJson["user_id"].toString();
+
+//                    LOG << "user_data._id           :" << user_data._id           ;
+//                    LOG << "user_data.uid           :" << user_data.uid           ;
+//                    LOG << "user_data.password      :" << user_data.password      ;
+//                    LOG << "user_data.cookie        :" << user_data.cookie        ;
+//                    LOG << "user_data.token         :" << user_data.token         ;
+//                    LOG << "user_data.birthday      :" << user_data.birthday      ;
+//                    LOG << "user_data.name          :" << user_data.name          ;
+//                    LOG << "user_data.sex           :" << user_data.sex           ;
+//                    LOG << "user_data.country       :" << user_data.country       ;
+//                    LOG << "user_data.email         :" << user_data.email         ;
+//                    LOG << "user_data.avartar       :" << user_data.avartar       ;
+//                    LOG << "user_data.created_date  :" << user_data.created_date  ;
+//                    LOG << "user_data.farming_status:" << user_data.farming_status;
+//                    LOG << "user_data.alive_status  :" << user_data.alive_status  ;
+//                    LOG << "user_data.created_at    :" << user_data.created_at    ;
+//                    LOG << "user_data.updated_at    :" << user_data.updated_at    ;
+//                    LOG << "user_data.user_id       :" << user_data.user_id       ;
+
                     m_userDataList.insert(packageName,user_data);
                 }
             }
@@ -239,6 +268,24 @@ void Model::saveUserDataList()
         userDataJson["created_at"]      = user_data.created_at    ;
         userDataJson["updated_at"]      = user_data.updated_at    ;
         userDataJson["user_id"]         = user_data.user_id       ;
+
+//        LOG << "user_data._id           :" << user_data._id           ;
+//        LOG << "user_data.uid           :" << user_data.uid           ;
+//        LOG << "user_data.password      :" << user_data.password      ;
+//        LOG << "user_data.cookie        :" << user_data.cookie        ;
+//        LOG << "user_data.token         :" << user_data.token         ;
+//        LOG << "user_data.birthday      :" << user_data.birthday      ;
+//        LOG << "user_data.name          :" << user_data.name          ;
+//        LOG << "user_data.sex           :" << user_data.sex           ;
+//        LOG << "user_data.country       :" << user_data.country       ;
+//        LOG << "user_data.email         :" << user_data.email         ;
+//        LOG << "user_data.avartar       :" << user_data.avartar       ;
+//        LOG << "user_data.created_date  :" << user_data.created_date  ;
+//        LOG << "user_data.farming_status:" << user_data.farming_status;
+//        LOG << "user_data.alive_status  :" << user_data.alive_status  ;
+//        LOG << "user_data.created_at    :" << user_data.created_at    ;
+//        LOG << "user_data.updated_at    :" << user_data.updated_at    ;
+//        LOG << "user_data.user_id       :" << user_data.user_id       ;
 
         obj["package_name"] = i.key();
         obj["user_data"] = userDataJson;

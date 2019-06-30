@@ -1,5 +1,5 @@
-#include "CheckCurrActivityThread.h"
-#include "AppMain.h"
+#include "CheckCurrActivityThread.hpp"
+#include "AppMain.hpp"
 
 #define MAIN_CONTROLLER MainController::instance()
 

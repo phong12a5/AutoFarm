@@ -1,5 +1,5 @@
-#ifndef MODEL_H
-#define MODEL_H
+#ifndef MODEL_HPP
+#define MODEL_HPP
 
 #include <QGuiApplication>
 #include <QObject>
@@ -9,7 +9,7 @@
 #include <QQuickView>
 #include <QTest>
 #include <QString>
-#include "AppDefines.h"
+#include "AppDefines.hpp"
 #include <QThread>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -19,6 +19,7 @@ class Model : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString token READ token WRITE setToken NOTIFY tokenChanged)
+    Q_PROPERTY(QString deviceType READ deviceType CONSTANT)
 
 public:
     static Model* instance();
@@ -29,18 +30,18 @@ public:
     QString token() const;
     void setToken(QString data);
 
+    QString deviceType() const;
+
     DEVICE_INFO deviceInfo() const;
     void setDeviceInfo(DEVICE_INFO data);
 
     APP_CONFIG appConfig() const;
     void setAppConfig(APP_CONFIG data);
 
-    USER_DATA userData() const;
-    void setUserData(USER_DATA data);
-
+    USER_DATA userData();
     void updateUserData(QString packageName, USER_DATA data);
 
-    QMap<QString, USER_DATA>& getUserDataList();
+    QMap<QString, USER_DATA>* getUserDataList();
 
     QString currentControlledPkg();
     USER_DATA &currentControlledUser();
@@ -82,6 +83,7 @@ signals:
     void nextCurrentControlledObjChanged();
     void currentActionChanged();
     void currentActionListDone();
+    void finishedListObject();
 
 public slots:
 };

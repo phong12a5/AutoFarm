@@ -18,19 +18,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 HEADERS += \
-    Model.h \
-    Controller/ShellOperation.h \
-    AppDefines.h \
-    Processing/ImageProcessing.h \
-    AppMain.h \
-    AppEnums.h \
-    MainController.h \
-    Communication/JavaCommunication.h \
-    Controller/ThreadController.h \
-    Processing/CheckCurrSrcThread.h \
-    Processing/CheckCurrActivityThread.h \
-    Processing/QAESEncryption.h\
-    Communication/WebAPI.h
+    Model.hpp \
+    Controller/ShellOperation.hpp \
+    AppDefines.hpp \
+    Processing/ImageProcessing.hpp \
+    AppMain.hpp \
+    AppEnums.hpp \
+    MainController.hpp \
+    Communication/JavaCommunication.hpp \
+    Controller/ThreadController.hpp \
+    Processing/CheckCurrSrcThread.hpp \
+    Processing/CheckCurrActivityThread.hpp \
+    Processing/QAESEncryption.hpp\
+    Communication/WebAPI.hpp
 
 SOURCES += \
         main.cpp \

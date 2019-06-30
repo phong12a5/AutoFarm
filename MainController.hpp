@@ -2,12 +2,12 @@
 #define MAINCONTROLLER_H
 
 #include <QObject>
-#include "AppDefines.h"
-#include "Communication/JavaCommunication.h"
-#include "Processing/ImageProcessing.h"
-#include "Controller/ThreadController.h"
-#include "AppEnums.h"
-#include "Communication/WebAPI.h"
+#include "AppDefines.hpp"
+#include "Communication/JavaCommunication.hpp"
+#include "Processing/ImageProcessing.hpp"
+#include "Controller/ThreadController.hpp"
+#include "AppEnums.hpp"
+#include "Communication/WebAPI.hpp"
 
 class MainController : public QObject
 {
@@ -16,6 +16,9 @@ class MainController : public QObject
 private:
     explicit MainController(QObject *parent = nullptr);
 
+private:
+    void execVipLike();
+
 public:
     static MainController* instance();
     void initController();
@@ -23,6 +26,7 @@ public:
 
 public:
     int currentScreen() const;
+    QString currentScreenStr() const;
     void setCurrentScreen(const int data);
 
     QString currentActivity() const;
@@ -48,6 +52,7 @@ public slots:
     void executeRequiredActions();
     void doAction();
     void updateResult();
+    void onFinishedListObject();
 
 };
 

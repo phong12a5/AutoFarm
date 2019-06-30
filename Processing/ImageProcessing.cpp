@@ -1,4 +1,4 @@
-#include "ImageProcessing.h"
+#include "ImageProcessing.hpp"
 
 ImageProcessing::ImageProcessing(QObject *parent) : QObject(parent)
 {

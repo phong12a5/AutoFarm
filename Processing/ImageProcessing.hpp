@@ -9,7 +9,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #endif
-#include "AppDefines.h"
+#include "AppDefines.hpp"
 #include "QPoint"
 
 

@@ -6,9 +6,9 @@
 #include <QFile>
 #include <QProcess>
 #include <QImage>
-#include "AppDefines.h"
+#include "AppDefines.hpp"
 #include <QStandardPaths>
-#include "Processing/ImageProcessing.h"
+#include "Processing/ImageProcessing.hpp"
 
 class ShellOperation : public QObject
 {
@@ -26,6 +26,9 @@ public:
     static bool findAndClick(QString iconPath, float threshold = 0.99);
     static void tapScreen(QPoint point, bool noDelay = false);
     static bool enterText(QString text);
+    static void killSpecificApp(QString packageName);
+    static QPoint findAnImageOnScreen(QString iconPath);
+    static void clearPackageData(QString packageName);
 #endif
 private:
 };

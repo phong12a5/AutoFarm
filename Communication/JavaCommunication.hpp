@@ -2,7 +2,7 @@
 #define JAVACOMMUNICATION_H
 
 #include <QObject>
-#include "AppDefines.h"
+#include "AppDefines.hpp"
 
 #ifdef ANDROID_KIT
 #include <QAndroidJniObject>

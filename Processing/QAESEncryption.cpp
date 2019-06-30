@@ -1,4 +1,4 @@
-#include "qaesencryption.h"
+#include "qaesencryption.hpp"
 
 /*
  * Static Functions

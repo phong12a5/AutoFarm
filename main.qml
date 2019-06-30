@@ -5,8 +5,8 @@ import QtQuick.Controls 2.0
 
 Window {
     id: rootScreen
-//    width: 500
-//    height: 800
+    width: 500
+    height: 800
     visible: true
 
 
@@ -23,6 +23,29 @@ Window {
         width: contentWidth + 30
         height: font.pixelSize + 20
         text: APP_MODEL.token
+    }
+
+    Item{
+        height: deviceTypeField.height
+        width: deviceTypeField.width + info.width + 10
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: tokenField.bottom
+        anchors.bottomMargin: 30
+
+        Text {
+            id: deviceTypeField
+            text: qsTr("Device Type: ")
+            font.pixelSize: tokenField.font.pixelSize
+        }
+
+        Text{
+            id: info
+            anchors.verticalCenter: deviceTypeField.verticalCenter
+            anchors.left: deviceTypeField.right
+            anchors.leftMargin: 10
+            font.pixelSize: tokenField.font.pixelSize
+            text: APP_MODEL.deviceType
+        }
     }
 
     Rectangle{

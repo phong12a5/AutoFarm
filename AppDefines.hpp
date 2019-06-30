@@ -4,7 +4,7 @@
 #include <QDebug>
 #include <QTest>
 #include <QMap>
-#include <AppEnums.h>
+#include <AppEnums.hpp>
 #include <QDir>
 
 #define LOG qDebug() << "[" << __FUNCTION__ << "][" << __LINE__ << "] >>"
@@ -15,16 +15,29 @@
 #define USER_DATA_LIST_PATH     CURRENT_DIR+"userDataList.json"
 #define API_SERVER              "https://api.autofarmer.xyz/api/"
 #define DCIM_FOLDER             "/sdcard/DCIM/"
+#define ENDSCRIPT_PATH          "/sdcard/DCIM/"
+#define ENDSCRIPT_FILENAME      "endScript.st"
 
 #define LOADING_ICON            "assets:/images/loadingIcon.png"
 #define NEWSFEED_ICON           "assets:/images/newsFeedIcon.png"
 #define SKIP_FIND_FRIEND_BTN    "assets:/images/SkipFindFriend.png"
 #define OK_BTN_FOR_SAVE_LOGIN   "assets:/images/OKBtnForSaveInfoLogin.png"
+#define LOGIN_SCREEN            "assets:/images/FBLoginScreen.png"
+#define TURNON_FIND_FRIEND      "assets:/images/TurnOnFindFriendScreen.png"
+#define SAVE_LOGIN_SCREEN       "assets:/images/SaveLoginInfoScreen.png"
 #define LIKE_ICON               "assets:/images/LikeIcon_FBLite.png"
+#define LOGIN_BTN               "assets:/images/LoginBtn.png"
+#define EMAIL_FIELD             "assets:/images/MailAndMobileNumberIcon_1.png"
+#define PASSWORD_FIELD          "assets:/images/PasswordIcon_1.png"
+#define ENGLISH_BTN             "assets:/images/EnglishBtn.png"
+#define INCORRECT_PASSWORD      "assets:/images/IncorrectPassowrd.png"
+#define CONFIRM_IDENTIFY        "assets:/images/ConfirmIdentifyScreen.png"
 
 #define FACEBOOK_LITE_SCREEN    "com.facebook.lite/com.facebook.lite.MainActivity"
 #define FACEBOOK_LITE_PKGNAME   "com.facebook.lite"
 #define FACEBOOK_LITE_ACT       "MainActivity"
+
+#define NUMBER_CLICK            2
 
 typedef struct device_info_struct {
     QString googleSF;

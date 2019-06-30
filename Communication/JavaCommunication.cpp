@@ -1,4 +1,4 @@
-#include "JavaCommunication.h"
+#include "JavaCommunication.hpp"
 
 JavaCommunication* JavaCommunication::m_instance = nullptr;
 
@@ -261,11 +261,14 @@ QString JavaCommunication::getWifiMacAdd()
 
 QString JavaCommunication::getDeviceType()
 {
+    QString retVal = "false";
     if(QFile(QString(DCIM_FOLDER) + "isNox.st").exists()){
-        return "true";
+        retVal = "true";
     }else{
-        return "false";
+        // Do nothing
     }
+    LOG << retVal;
+    return retVal;
 }
 
 #endif

@@ -2,10 +2,10 @@
 #define CHECKCURRACTIVITYTHREAD_H
 
 #include <QObject>
-#include <AppDefines.h>
+#include <AppDefines.hpp>
 #include <QTimer>
 #include <QMutex>
-#include "Controller/ShellOperation.h"
+#include "Controller/ShellOperation.hpp"
 
 class CheckCurrActivityThread : public QObject
 {

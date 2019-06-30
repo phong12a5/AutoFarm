@@ -2,12 +2,12 @@
 #define APPMAIN_H
 
 #include <QObject>
-#include "AppDefines.h"
+#include "AppDefines.hpp"
 #include <QQmlContext>
 #include <QQmlApplicationEngine>
-#include "Model.h"
-#include "AppEnums.h"
-#include "MainController.h"
+#include "Model.hpp"
+#include "AppEnums.hpp"
+#include "MainController.hpp"
 
 class AppMain : public QObject
 {

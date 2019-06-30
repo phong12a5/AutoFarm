@@ -1,5 +1,5 @@
-#include "ThreadController.h"
-#include "AppMain.h"
+#include "ThreadController.hpp"
+#include "AppMain.hpp"
 
 ThreadController::ThreadController(QObject *parent) : QObject(parent)
 {

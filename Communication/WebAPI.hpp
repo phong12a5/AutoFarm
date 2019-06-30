@@ -8,9 +8,9 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QJsonArray>
-#include "Processing/QAESEncryption.h"
+#include "Processing/QAESEncryption.hpp"
 #include <QTextCodec>
-#include "Controller/ShellOperation.h"
+#include "Controller/ShellOperation.hpp"
 
 class WebAPI : public QObject
 {

@@ -3,8 +3,8 @@
 
 #include <QObject>
 #include <QThread>
-#include "Processing/CheckCurrSrcThread.h"
-#include "Processing/CheckCurrActivityThread.h"
+#include "Processing/CheckCurrSrcThread.hpp"
+#include "Processing/CheckCurrActivityThread.hpp"
 
 class ThreadController : public QObject
 {

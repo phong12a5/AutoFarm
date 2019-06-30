@@ -1,4 +1,4 @@
-#include "ShellOperation.h"
+#include "ShellOperation.hpp"
 
 ShellOperation::ShellOperation(QObject *parent) : QObject(parent)
 {
@@ -72,7 +72,7 @@ QString ShellOperation::getCurrentActivity()
 
 bool ShellOperation::findAndClick(QString iconPath, float threshold)
 {
-    LOG << "[ADBCommand]" << iconPath << " -- threshold: " << threshold;
+    LOG << iconPath << " -- threshold: " << threshold;
     QString screenImgPath = ShellOperation::screenShot();
     QPoint point = ImageProcessing::findImageOnImage(iconPath,screenImgPath,threshold);
     if(!point.isNull()){
@@ -119,6 +119,31 @@ bool ShellOperation::enterText(QString text)
     }else {
         return true;
     }
+}
+
+void ShellOperation::killSpecificApp(QString packageName)
+{
+    LOG << "Killing " << packageName;
+    QProcess proc;
+    proc.start(QString("su -c am force-stop %1").arg(packageName));
+    proc.waitForFinished(-1);
+    delay(100);
+    return;
+}
+
+QPoint ShellOperation::findAnImageOnScreen(QString iconPath)
+{
+    QString screenImgPath = ShellOperation::screenShot();
+    QPoint point = ImageProcessing::findImageOnImage(iconPath,screenImgPath);
+    return  point;
+}
+
+void ShellOperation::clearPackageData(QString packageName)
+{
+    LOG << packageName;
+    QProcess proc;
+    proc.start(QString("su -c pm clear %1").arg(packageName));
+    proc.waitForFinished(-1);
 }
 
 QString ShellOperation::screenShot(QString fileName)

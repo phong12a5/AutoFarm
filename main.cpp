@@ -1,10 +1,10 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <AppDefines.h>
-#include "Model.h"
-#include "Controller/ShellOperation.h"
-#include "Processing/ImageProcessing.h"
-#include "AppMain.h"
+#include <AppDefines.hpp>
+#include "Model.hpp"
+#include "Controller/ShellOperation.hpp"
+#include "Processing/ImageProcessing.hpp"
+#include "AppMain.hpp"
 
 int main(int argc, char *argv[])
 {

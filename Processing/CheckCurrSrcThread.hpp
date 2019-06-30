@@ -2,10 +2,10 @@
 #define CHECKCURRSRCTHREAD_H
 
 #include <QObject>
-#include <AppDefines.h>
+#include <AppDefines.hpp>
 #include <QTimer>
 #include <QMutex>
-#include "AppEnums.h"
+#include "AppEnums.hpp"
 
 class CheckCurrSrcThread : public QObject
 {
@@ -16,7 +16,7 @@ public:
 
 private:
     bool isOnScreen(QString iconPath);
-    bool isCurrentScreen(int screenID) const;
+    bool isCurrentScreen(int screenID);
     int findScreen() const;
 
 private:

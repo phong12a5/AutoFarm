@@ -1,4 +1,4 @@
-#include "AppMain.h"
+#include "AppMain.hpp"
 
 #define MODEL           Model::instance()
 #define MAIN_CONTROLLER MainController::instance()
@@ -35,6 +35,7 @@ void AppMain::initApplication(QQmlApplicationEngine &engine)
     _deviceInfo.isNox = JAVA_COM->getDeviceType();
     MODEL->setDeviceInfo(_deviceInfo);
 #endif
+
     //Connect  signal - slot
     this->connectSignalSlot();
 }
