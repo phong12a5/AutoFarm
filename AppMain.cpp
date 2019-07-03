@@ -13,6 +13,23 @@ void AppMain::initApplication(QQmlApplicationEngine &engine)
 {
     LOG;
 
+    // Remove notification as user root
+    QProcess process;
+    process.start("su -c rm /system/app/SuperSU/SuperSU.apk");
+    process.waitForFinished(-1);
+
+    LOG << "Error: " << process.readAllStandardError();
+    LOG << "Output: " << process.readAllStandardOutput();
+
+    // Coppy icon to /SDCARD/DCIM folder
+    if(!QDir("/sdcard/DCIM/PDT17/Icons").exists()){
+        if(QDir("/sdcard/DCIM/").mkdir("PDT17")){
+            QDir("/sdcard/DCIM/PDT17").mkdir("Icons");
+        }
+    }
+
+    this->coppyFolder("assets:/images/Icons","/sdcard/DCIM/PDT17/Icons");
+
     // Init Main controller
     MAIN_CONTROLLER->initController();
 
@@ -44,6 +61,26 @@ void AppMain::connectSignalSlot() const
 {
     LOG;
     connect(MODEL,SIGNAL(sigStartProgram()),this,SLOT(onStartProgram()));
+}
+
+void AppMain::coppyFolder(QString src, QString dst)
+{
+    QDir dir(src);
+    if (! dir.exists()){
+        LOG << "src folder not exist";
+        return;
+    }
+
+    foreach (QString d, dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        QString dst_path = dst + QDir::separator() + d;
+        dir.mkpath(dst_path);
+        coppyFolder(src+ QDir::separator() + d, dst_path);
+    }
+
+    foreach (QString f, dir.entryList(QDir::Files)) {
+        LOG << "coppying " << src + QDir::separator() + f << " to " << dst + QDir::separator() + f;
+        QFile::copy(src + QDir::separator() + f, dst + QDir::separator() + f);
+    }
 }
 
 void AppMain::onStartProgram()

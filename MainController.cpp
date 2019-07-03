@@ -10,7 +10,7 @@ MainController* MainController::m_instance = nullptr;
 
 MainController::MainController(QObject *parent) : QObject(parent)
 {
-    m_currentScreen = -1;
+    m_currentScreen = AppEnums::HMI_UNKNOW_SCREEN;
     m_currentActivity = "";
 }
 
@@ -31,26 +31,39 @@ void MainController::execVipLike()
             delay(100);
         }
         ShellOperation::findAndClick(EMAIL_FIELD);
-        ShellOperation::enterText(MODEL->currentControlledUser().email);
+        delay(1000);
+        ShellOperation::enterText(MODEL->currentControlledUser().uid);
+        delay(1000);
         ShellOperation::findAndClick(PASSWORD_FIELD);
+        delay(1000);
         ShellOperation::enterText(MODEL->currentControlledUser().password);
-        delay(2000);
+        delay(1000);
         ShellOperation::findAndClick(LOGIN_BTN);
 #endif
     }
         break;
     case AppEnums::HMI_INCORRECT_PASSWORD_SCREEN:
-        MODEL->currentControlledUser() = WEB_API->cloneUserData();
-        MODEL->saveUserDataList();
+#ifdef ANDROID_KIT
+        MODEL->updateCurrentControlleredUser(WEB_API->cloneUserData());
         ShellOperation::clearPackageData(MODEL->currentControlledPkg());
-        emit MODEL->nextCurrentControlledObjChanged();
+        MODEL->nextCurrentControlledObj();
         break;
+#endif
     case AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN:
+#ifdef ANDROID_KIT
         WEB_API->updateCheckPoint();
-        MODEL->currentControlledUser() = WEB_API->cloneUserData();
-        MODEL->saveUserDataList();
+        MODEL->updateCurrentControlleredUser(WEB_API->cloneUserData());
         ShellOperation::clearPackageData(MODEL->currentControlledPkg());
-        emit MODEL->nextCurrentControlledObjChanged();
+        MODEL->nextCurrentControlledObj();
+#endif
+        break;
+    case AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN:
+#ifdef ANDROID_KIT
+        WEB_API->updateCheckPoint();
+        MODEL->updateCurrentControlleredUser(WEB_API->cloneUserData());
+        ShellOperation::clearPackageData(MODEL->currentControlledPkg());
+        MODEL->nextCurrentControlledObj();
+#endif
         break;
     case AppEnums::HMI_TURNON_FIND_FRIEND_SCREEN:
 #ifdef ANDROID_KIT
@@ -62,6 +75,16 @@ void MainController::execVipLike()
         ShellOperation::findAndClick(OK_BTN_FOR_SAVE_LOGIN);
 #endif
         break;
+    case AppEnums::HMI_CHOOSE_AVATAR_SCREEN:
+#ifdef ANDROID_KIT
+        ShellOperation::findAndClick(SKIP_AVARTAR);
+#endif
+        break;
+    case AppEnums::HMI_ADDFRIEND_SUGGESTION_SCREEN:
+#ifdef ANDROID_KIT
+        ShellOperation::findAndClick(SKIP_AVARTAR);
+#endif
+        break;
     case AppEnums::HMI_NEW_FEED_SCREEN:
 #ifdef ANDROID_KIT
         if(MODEL->currentAction()["action"].toString() == "viplike"){
@@ -69,9 +92,28 @@ void MainController::execVipLike()
                 JAVA_COM->openFBLiteWithUserID(MODEL->currentControlledPkg(),MODEL->currentAction()["fbid"].toString());
 
                 int count = 0;
+                int failureCount = 0;
                 while(count < NUMBER_CLICK){
-                    if(ShellOperation::findAndClick(LIKE_ICON)) count ++;
+#ifdef CLICK_MULTI_POINT
+                    if(ShellOperation::findAndClickList(LIKE_ICON)){
+#else
+                    if(ShellOperation::findAndClick(LIKE_ICON)){
+#endif
+                        count ++;
+                        failureCount = 0;
+                    }else
+                        failureCount ++;
+
+                    if(failureCount >= 10){
+                        LOG << "Couldn't find any like button";
+                        break;
+                    }
+
+#ifdef CLICK_MULTI_POINT
                     if(count < NUMBER_CLICK)ShellOperation::callScrollEvent(QPoint(540,1770),QPoint(540,230));
+#else
+                    if(count < NUMBER_CLICK)ShellOperation::callScrollEvent(QPoint(540,1200),QPoint(540,230));
+#endif
                     delay(200);
                 }
                 MODEL->nextCurrentAction();
@@ -111,7 +153,6 @@ void MainController::initController()
 void MainController::startLoop()
 {
     LOG;
-    WEB_API->getApk();
     WEB_API->installAllPackages();
     QEventLoop evenLoop;
     connect(WEB_API, SIGNAL(installAllPackagesCompleted()), &evenLoop, SLOT(quit()));
@@ -143,11 +184,20 @@ QString MainController::currentScreenStr() const
     case AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN:
         retVal = "HMI_CONFIRM_INDENTIFY_SCREEN";
         break;
+    case AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN:
+        retVal = "HMI_DEACTIVE_ACCOUNT_SCREEN";
+        break;
     case AppEnums::HMI_TURNON_FIND_FRIEND_SCREEN:
         retVal = "HMI_TURNON_FIND_FRIEND_SCREEN";
         break;
     case AppEnums::HMI_SAVE_LOGIN_INFO_SCREEN:
         retVal = "HMI_SAVE_LOGIN_INFO_SCREEN";
+        break;
+    case AppEnums::HMI_CHOOSE_AVATAR_SCREEN:
+        retVal = "HMI_CHOOSE_AVATAR_SCREEN";
+        break;
+    case AppEnums::HMI_ADDFRIEND_SUGGESTION_SCREEN:
+        retVal = "HMI_ADDFRIEND_SUGGESTION_SCREEN";
         break;
     case AppEnums::HMI_NEW_FEED_SCREEN:
         retVal = "HMI_NEW_FEED_SCREEN";
@@ -216,8 +266,7 @@ void MainController::executeRequiredActions()
 {
     LOG << "Current package: " << MODEL->currentControlledPkg();
     if(MODEL->currentControlledUser()._id == ""){
-        MODEL->currentControlledUser() = WEB_API->cloneUserData();
-        MODEL->saveUserDataList();
+        MODEL->updateCurrentControlleredUser(WEB_API->cloneUserData());
     }else{
         LOG << "User info has storaged already";
     }
@@ -236,6 +285,7 @@ void MainController::doAction()
 #ifdef ANDROID_KIT
             JAVA_COM->openFBLiteWithUserID(MODEL->currentControlledPkg(),"");
 #endif
+            delay(3000);
             startCheckCurrentScreen();
 
         }else {
@@ -256,7 +306,7 @@ void MainController::updateResult()
 
 void MainController::onFinishedListObject()
 {
-    LOG;
+    LOG << "The last user: " << MODEL->currentControlledUser().uid;
     if(MODEL->deviceInfo().isNox == "true"){
         QProcess process;
         process.start(QString("touch %1%2").arg(ENDSCRIPT_PATH).arg(ENDSCRIPT_FILENAME));

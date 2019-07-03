@@ -30,7 +30,7 @@ Window {
         width: deviceTypeField.width + info.width + 10
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: tokenField.bottom
-        anchors.bottomMargin: 30
+        anchors.topMargin: 50
 
         Text {
             id: deviceTypeField
@@ -68,9 +68,27 @@ Window {
             anchors.fill: parent
             onClicked: {
                 // do something
+                startBtn.enabled = false
                 APP_MODEL.token = tokenField.text
                 APP_MODEL.start()
             }
         }
+    }
+
+    Timer{
+        id: autoStartTimer
+        interval: 15000
+        repeat: false
+        onTriggered: {
+            if(startBtn.enabled){
+                startBtn.enabled = false
+                APP_MODEL.token = tokenField.text
+                APP_MODEL.start()
+            }
+        }
+    }
+
+    Component.onCompleted: {
+        autoStartTimer.start()
     }
 }

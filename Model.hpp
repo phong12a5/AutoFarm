@@ -38,13 +38,10 @@ public:
     APP_CONFIG appConfig() const;
     void setAppConfig(APP_CONFIG data);
 
-    USER_DATA userData();
-    void updateUserData(QString packageName, USER_DATA data);
-
     QMap<QString, USER_DATA>* getUserDataList();
-
     QString currentControlledPkg();
-    USER_DATA &currentControlledUser();
+    USER_DATA currentControlledUser();
+    void updateCurrentControlleredUser(USER_DATA data);
     void nextCurrentControlledObj();
 
     QList<QJsonObject> actionList();

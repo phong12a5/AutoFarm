@@ -5,9 +5,12 @@ Model* Model::m_instance = nullptr;
 
 Model::Model(QObject *parent) : QObject(parent)
 {
-    m_token = "c6a52e63a8d52869b80af5af1a22c2b5";
+    m_token = "00261f5687fee223f35e3c2080e167a8";
     m_currentPkgIndex = -1;
     this->loadUserDataList();
+    foreach (QString key, m_userDataList.keys()) {
+        LOG << "Key: " << key << " -- " << m_userDataList.value(key).uid;
+    }
 }
 
 
@@ -82,23 +85,6 @@ void Model::setAppConfig(APP_CONFIG data)
     m_appConfig = data;
 }
 
-USER_DATA Model::userData()
-{
-    return m_userDataList.value(currentControlledPkg());
-}
-
-void Model::updateUserData(QString packageName, USER_DATA data)
-{
-    LOG << "packageName: " << packageName << " --- data: " << data.uid;
-    if(m_userDataList.contains(packageName)){
-        m_userDataList[packageName] = data;
-    }else{
-        LOG << "Add new pacakge: " << packageName;
-        m_userDataList.insert(packageName,data);
-    }
-    saveUserDataList();
-}
-
 QMap<QString, USER_DATA>* Model::getUserDataList()
 {
     return &m_userDataList;
@@ -106,7 +92,7 @@ QMap<QString, USER_DATA>* Model::getUserDataList()
 
 QString Model::currentControlledPkg()
 {
-    LOG << "m_currentPkgIndex: " << m_currentPkgIndex;
+    LOG << m_currentPkgIndex;
     if(m_currentPkgIndex < m_userDataList.count()){
         return m_userDataList.keys().at(m_currentPkgIndex);
     }else{
@@ -115,9 +101,18 @@ QString Model::currentControlledPkg()
     }
 }
 
-USER_DATA &Model::currentControlledUser()
+USER_DATA Model::currentControlledUser()
 {
-    return m_userDataList[currentControlledPkg()];
+    LOG << m_userDataList.value(currentControlledPkg()).uid;
+    return m_userDataList.value(currentControlledPkg());
+}
+
+void Model::updateCurrentControlleredUser(USER_DATA data)
+{
+    if(m_userDataList[currentControlledPkg()] != data){
+        m_userDataList[currentControlledPkg()] = data;
+        saveUserDataList();
+    }
 }
 
 void Model::nextCurrentControlledObj()
@@ -215,7 +210,7 @@ void Model::loadUserDataList()
                     user_data.user_id          = userDataJson["user_id"].toString();
 
 //                    LOG << "user_data._id           :" << user_data._id           ;
-//                    LOG << "user_data.uid           :" << user_data.uid           ;
+                    LOG << "user_data.uid           :" << user_data.uid           ;
 //                    LOG << "user_data.password      :" << user_data.password      ;
 //                    LOG << "user_data.cookie        :" << user_data.cookie        ;
 //                    LOG << "user_data.token         :" << user_data.token         ;
@@ -247,7 +242,6 @@ void Model::saveUserDataList()
     QMap<QString, USER_DATA>::const_iterator i = m_userDataList.constBegin();
     QJsonArray objectArray;
     while (i != m_userDataList.constEnd()) {
-        LOG << i.key() << ": " << static_cast<USER_DATA>(i.value())._id;
         QJsonObject obj;
         USER_DATA user_data = static_cast<USER_DATA>(i.value());
         QJsonObject userDataJson;

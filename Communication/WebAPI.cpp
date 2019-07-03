@@ -51,6 +51,7 @@ void WebAPI::getApk()
     json.insert("device", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
 
     QByteArray jsonData = QJsonDocument(json).toJson();
+
     request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
     request.setHeader(QNetworkRequest::ContentLengthHeader,QByteArray::number(jsonData.size()));
     QNetworkAccessManager* networkManager = new QNetworkAccessManager(this);
@@ -120,6 +121,7 @@ void WebAPI::getConfig()
 USER_DATA WebAPI::cloneUserData()
 {
     QString url = API_SERVER + QString("clone?token=%1").arg(MODEL->token());
+    LOG << "url: " << url;
     QUrl serviceUrl = QUrl(url);
     QNetworkRequest request(serviceUrl);
     QJsonObject json;
@@ -128,6 +130,7 @@ USER_DATA WebAPI::cloneUserData()
     json.insert("action", QTextCodec::codecForMib(106)->toUnicode(getEncodedString("getclone")));
     json.insert("device", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
 
+    LOG << "json: " << json;
     QByteArray jsonData = QJsonDocument(json).toJson();
     request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
     request.setHeader(QNetworkRequest::ContentLengthHeader,QByteArray::number(jsonData.size()));
@@ -141,7 +144,7 @@ USER_DATA WebAPI::cloneUserData()
 
     QByteArray responseData = reply->readAll();
     QJsonObject jsonObj = QJsonDocument::fromJson(responseData).object();
-
+    LOG << "responseData:" << responseData;
     if(jsonObj.isEmpty()){
         LOG << "jsonObj is empty!";
     }else{
@@ -152,6 +155,7 @@ USER_DATA WebAPI::cloneUserData()
             QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
             QJsonDocument jdoc = QJsonDocument::fromJson(encryption.removePadding(decodeText));
             QJsonObject jsonObj = jdoc.object();
+            LOG << "jsonObj: " << jsonObj;
             if(!jsonObj.isEmpty()){
                 user_data._id               = jsonObj["_id"].toString();
                 user_data.uid              = jsonObj["uid"].toString();
@@ -172,24 +176,21 @@ USER_DATA WebAPI::cloneUserData()
                 user_data.user_id          = jsonObj["user_id"].toString();
 
                 LOG << "user_data.uid           :" << user_data.uid           ;
-                while(user_data.uid == ""){
-                    user_data = cloneUserData();
-                }
-//                LOG << "user_data.password      :" << user_data.password      ;
-//                LOG << "user_data.cookie        :" << user_data.cookie        ;
-//                LOG << "user_data.token         :" << user_data.token         ;
-//                LOG << "user_data.birthday      :" << user_data.birthday      ;
-//                LOG << "user_data.name          :" << user_data.name          ;
-//                LOG << "user_data.sex           :" << user_data.sex           ;
-//                LOG << "user_data.country       :" << user_data.country       ;
-//                LOG << "user_data.email         :" << user_data.email         ;
-//                LOG << "user_data.avartar       :" << user_data.avartar       ;
-//                LOG << "user_data.created_date  :" << user_data.created_date  ;
-//                LOG << "user_data.farming_status:" << user_data.farming_status;
-//                LOG << "user_data.alive_status  :" << user_data.alive_status  ;
-//                LOG << "user_data.created_at    :" << user_data.created_at    ;
-//                LOG << "user_data.updated_at    :" << user_data.updated_at    ;
-//                LOG << "user_data.user_id       :" << user_data.user_id       ;
+                LOG << "user_data.password      :" << user_data.password      ;
+                LOG << "user_data.cookie        :" << user_data.cookie        ;
+                LOG << "user_data.token         :" << user_data.token         ;
+                LOG << "user_data.birthday      :" << user_data.birthday      ;
+                LOG << "user_data.name          :" << user_data.name          ;
+                LOG << "user_data.sex           :" << user_data.sex           ;
+                LOG << "user_data.country       :" << user_data.country       ;
+                LOG << "user_data.email         :" << user_data.email         ;
+                LOG << "user_data.avartar       :" << user_data.avartar       ;
+                LOG << "user_data.created_date  :" << user_data.created_date  ;
+                LOG << "user_data.farming_status:" << user_data.farming_status;
+                LOG << "user_data.alive_status  :" << user_data.alive_status  ;
+                LOG << "user_data.created_at    :" << user_data.created_at    ;
+                LOG << "user_data.updated_at    :" << user_data.updated_at    ;
+                LOG << "user_data.user_id       :" << user_data.user_id       ;
 
             }else{
                 LOG << "jsonObj is NULL";
@@ -255,7 +256,7 @@ void WebAPI::updateCheckPoint()
 
 void WebAPI::getDoAction()
 {
-    QString url = API_SERVER + QString("DoAction?token=%1&fbid=%2").arg(MODEL->token()).arg(MODEL->userData().uid);
+    QString url = API_SERVER + QString("DoAction?token=%1&fbid=%2").arg(MODEL->token()).arg(MODEL->currentControlledUser().uid);
     QUrl serviceUrl = QUrl(url);
     QNetworkRequest request(serviceUrl);
     QJsonObject json;
@@ -277,7 +278,6 @@ void WebAPI::getDoAction()
     QByteArray responseData = reply->readAll();
     QJsonObject jsonObj = QJsonDocument::fromJson(responseData).object();
 
-    LOG << "responseData: " << responseData;
     if(jsonObj.isEmpty()){
         LOG << "jsonObj is empty!";
         return;
@@ -287,7 +287,6 @@ void WebAPI::getDoAction()
         QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
         QJsonDocument jdoc = QJsonDocument::fromJson(encryption.removePadding(decodeText));
         QJsonObject deocdedjsonObj = jdoc.object();
-        LOG << "deocdedjsonObj:" << deocdedjsonObj;
         if(!deocdedjsonObj.isEmpty()){
             QList<QJsonObject> actionList;
             foreach (QJsonValue data, deocdedjsonObj["actions"].toArray()) {
@@ -298,7 +297,9 @@ void WebAPI::getDoAction()
                 }
             }
             MODEL->setActionList(actionList);
-            LOG << MODEL->actionList();
+            foreach (QJsonObject data, MODEL->actionList()) {
+                LOG << "action: " << data;
+            }
         }else{
             LOG << "deocdedjsonObj is NULL";
         }
@@ -309,7 +310,7 @@ void WebAPI::getDoAction()
 void WebAPI::getDoResult()
 {
     LOG;
-    QString url = API_SERVER + QString("DoResult?fbid=%1&token=%2").arg(MODEL->userData().uid).arg(MODEL->token());
+    QString url = API_SERVER + QString("DoResult?fbid=%1&token=%2").arg(MODEL->currentControlledUser().uid).arg(MODEL->token());
     QUrl serviceUrl = QUrl(url);
     QNetworkRequest request(serviceUrl);
 
@@ -465,6 +466,7 @@ void WebAPI::slotReponseGettingApk(QNetworkReply* reply)
             if(data.isObject()){
                 QJsonObject obj = data.toObject();
                 if(!keys.contains(obj["package"].toString())){
+                    LOG << obj["package"].toString();
                     m_neededDownloadPkgList.insert(obj["apk"].toString(),obj["package"].toString());
                     this->downloadApk(QUrl(obj["apk"].toString()));
                 }else{
@@ -472,6 +474,7 @@ void WebAPI::slotReponseGettingApk(QNetworkReply* reply)
                 }
             }
         }
+
 
         if(m_neededDownloadPkgList.isEmpty()){
             emit installAllPackagesCompleted();
@@ -515,7 +518,7 @@ void WebAPI::slotReponseDownloadingApk(QNetworkReply * reply)
                 MODEL->getUserDataList()->insert(m_downloadedPackage.at(i),data);
 #endif
             }else {
-                LOG << "Pacage was installed already";
+                LOG << m_downloadedPackage.at(i) << " package  was installed already";
             }
         }
         MODEL->saveUserDataList();

@@ -42,6 +42,7 @@ private:
 
     int m_currentScreen;
     QString m_currentActivity;
+
 signals:
     void currentScreenChanged();
     void currentActivityChanged();

@@ -18,7 +18,7 @@ public:
 
 private:
     void connectSignalSlot() const;
-
+    void coppyFolder(QString src, QString dst);
 private:
 
 signals:

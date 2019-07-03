@@ -20,15 +20,16 @@ public:
 #ifdef ANDROID_KIT
     static bool installPackage(QString packagePath);
     static QString screenShot(QString fileName = "screen.png");
-    static void callTapEvent(const int x, const int y);
     static void callScrollEvent(QPoint point1, QPoint point2);
     static QString getCurrentActivity();
-    static bool findAndClick(QString iconPath, float threshold = 0.99);
-    static void tapScreen(QPoint point, bool noDelay = false);
+    static bool findAndClick(QString iconPath);
+    static bool findAndClickList(QString iconPath);
+    static void tapScreen(QPoint point);
     static bool enterText(QString text);
     static void killSpecificApp(QString packageName);
     static QPoint findAnImageOnScreen(QString iconPath);
     static void clearPackageData(QString packageName);
+    static bool pressTap();
 #endif
 private:
 };
