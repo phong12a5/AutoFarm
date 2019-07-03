@@ -1,11 +1,14 @@
 #include "ImageProcessing.hpp"
+#include "Model.hpp"
+
+#define MODEL Model::instance()
 
 ImageProcessing::ImageProcessing(QObject *parent) : QObject(parent)
 {
 
 }
 #ifdef ANDROID_KIT
-QPoint ImageProcessing::findImageOnImage(const QString &smallImagePath, const QString &largeImagePath, float threshold)
+QPoint ImageProcessing::findImageOnImage(const QString &smallImagePath, const QString &largeImagePath)
 {
     QPoint retVal;
 
@@ -13,6 +16,19 @@ QPoint ImageProcessing::findImageOnImage(const QString &smallImagePath, const QS
 //    cv::Mat _largeImage = ImageProcessing::QImage2Mat(QImage(largeImagePath));
     cv::Mat _smallImage = cv::imread(smallImagePath.toUtf8().constData(),CV_LOAD_IMAGE_COLOR);
     cv::Mat _largeImage = cv::imread(largeImagePath.toUtf8().constData(),CV_LOAD_IMAGE_COLOR);
+
+    // Resize image
+    float threshold = ImageProcessing::getThreshhold();
+    float scale = ImageProcessing::getScale();
+
+    if(scale != 1){
+         cv::Mat _smallImageCoppy = _smallImage;
+         LOG << "_smallImage.rows: " << _smallImage.rows;
+
+        cv::resize(_smallImageCoppy,_smallImage,cv::Size(),scale,scale);
+        LOG << "_smallImage.rows: " << _smallImage.rows;
+        LOG << "_smallImageCoppy.rows: " << _smallImageCoppy.rows;
+    }
 
     //kiểm tra kích cỡ của ảnh input & template
     if (_smallImage.rows > _largeImage.rows || _smallImage.cols > _largeImage.cols)
@@ -60,11 +76,11 @@ QPoint ImageProcessing::findImageOnImage(const QString &smallImagePath, const QS
         else
             break;
     }
-    LOG << smallImagePath.split("/").last() << " : " << retVal;
+    LOG << smallImagePath.split("/").last() << " : " << retVal << QString(" %1--%2").arg(threshold).arg(scale);
     return retVal;
 }
 
-QList<QPoint> ImageProcessing::findImageListOnImage(const QString &smallImage, const QString &largeImage, float threshold)
+QList<QPoint> ImageProcessing::findImageListOnImage(const QString &smallImagePath, const QString &largeImagePath)
 {
     QList<QPoint> retVal;
 
@@ -72,6 +88,19 @@ QList<QPoint> ImageProcessing::findImageListOnImage(const QString &smallImage, c
 //    cv::Mat _largeImage = ImageProcessing::QImage2Mat(QImage(largeImagePath));
     cv::Mat _smallImage = cv::imread(smallImagePath.toUtf8().constData(),CV_LOAD_IMAGE_COLOR);
     cv::Mat _largeImage = cv::imread(largeImagePath.toUtf8().constData(),CV_LOAD_IMAGE_COLOR);
+
+    // Resize image
+    float threshold = ImageProcessing::getThreshhold();
+    float scale = ImageProcessing::getScale();
+
+    if(scale != 1){
+         cv::Mat _smallImageCoppy = _smallImage;
+         LOG << "_smallImage.rows: " << _smallImage.rows;
+
+        cv::resize(_smallImageCoppy,_smallImage,cv::Size(),scale,scale);
+        LOG << "_smallImage.rows: " << _smallImage.rows;
+        LOG << "_smallImageCoppy.rows: " << _smallImageCoppy.rows;
+    }
 
     //kiểm tra kích cỡ của ảnh input & template
     if (_smallImage.rows > _largeImage.rows || _smallImage.cols > _largeImage.cols)
@@ -113,7 +142,7 @@ QList<QPoint> ImageProcessing::findImageListOnImage(const QString &smallImage, c
         else
             break;
     }
-    LOG << smallImagePath.split("/").last() << " : " << retVal;
+    LOG << smallImagePath.split("/").last() << " : " << retVal << QString(" %1--%2").arg(threshold).arg(scale);
     return retVal;
 }
 
@@ -123,5 +152,39 @@ cv::Mat ImageProcessing::QImage2Mat(const QImage &src)
     cv::Mat result; // deep copy just in case (my lack of knowledge with open cv)
     cvtColor(tmp, result,CV_BGR2RGB);
     return result;
+}
+
+float ImageProcessing::getThreshhold()
+{
+    float dpi = MODEL->deviceInfo().disInfo.dpi;
+    if (dpi<160)
+        return 0.83;
+    else if (dpi<213)
+        return 0.83;
+    else if (dpi<320)
+        return 0.8;
+    else if (dpi<480)
+        return 0.8;
+    else if (dpi<640)
+        return 0.8;
+    else /*if (dpi>=640)*/
+        return 0.8;
+}
+
+float ImageProcessing::getScale()
+{
+    float dpi = MODEL->deviceInfo().disInfo.dpi;
+    if (dpi<160)
+        return 0.263;
+    else if (dpi<213)
+        return 0.3575;
+    else if (dpi<320)
+        return 0.503;
+    else if (dpi<480)
+        return 0.705;
+    else if (dpi<640)
+        return 1;
+    else /*if (dpi>=640)*/
+        return 1.174;
 }
 #endif

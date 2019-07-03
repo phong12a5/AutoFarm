@@ -20,6 +20,7 @@ class Model : public QObject
     Q_OBJECT
     Q_PROPERTY(QString token READ token WRITE setToken NOTIFY tokenChanged)
     Q_PROPERTY(QString deviceType READ deviceType CONSTANT)
+    Q_PROPERTY(QString logContent READ logContent WRITE setLogContent NOTIFY logContentChanged)
 
 public:
     static Model* instance();
@@ -34,6 +35,9 @@ public:
 
     DEVICE_INFO deviceInfo() const;
     void setDeviceInfo(DEVICE_INFO data);
+
+    QString logContent();
+    void setLogContent(QString data);
 
     APP_CONFIG appConfig() const;
     void setAppConfig(APP_CONFIG data);
@@ -73,6 +77,7 @@ private:
     int m_currentPkgIndex;
     QList<QJsonObject> m_actionList;
     QList<QJsonObject> m_changedActionList;
+    QString m_logContent;
 
 signals:
     void sigStartProgram();
@@ -81,6 +86,7 @@ signals:
     void currentActionChanged();
     void currentActionListDone();
     void finishedListObject();
+    void logContentChanged();
 
 public slots:
 };

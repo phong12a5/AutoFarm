@@ -282,11 +282,10 @@ void MainController::doAction()
     if(MODEL->currentAction()["action"].toString() == "viplike"){
         if(MODEL->currentAction()["fbid"].toString() != ""){
             this->setCurrentScreen(AppEnums::HMI_UNKNOW_SCREEN);
+            startCheckCurrentScreen();
 #ifdef ANDROID_KIT
             JAVA_COM->openFBLiteWithUserID(MODEL->currentControlledPkg(),"");
 #endif
-            delay(3000);
-            startCheckCurrentScreen();
 
         }else {
             LOG << "fbid is empty";

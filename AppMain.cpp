@@ -51,6 +51,21 @@ void AppMain::initApplication(QQmlApplicationEngine &engine)
     _deviceInfo.model = JAVA_COM->getDeviceModel();
     _deviceInfo.isNox = JAVA_COM->getDeviceType();
     MODEL->setDeviceInfo(_deviceInfo);
+    _deviceInfo.disInfo = JAVA_COM->getDisplayInfo();
+    MODEL->setDeviceInfo(_deviceInfo);
+
+    LOG << _deviceInfo.googleSF;
+    LOG << _deviceInfo.androidID;
+    LOG << _deviceInfo.iMEI;
+    LOG << _deviceInfo.iMSI;
+    LOG << _deviceInfo.sIMCardSerial;
+    LOG << _deviceInfo.wifiMacAddress;
+    LOG << _deviceInfo.android_verion;
+    LOG << _deviceInfo.model;
+    LOG << _deviceInfo.isNox;
+    LOG << _deviceInfo.disInfo.width;
+    LOG << _deviceInfo.disInfo.height;
+    LOG << _deviceInfo.disInfo.dpi;
 #endif
 
     //Connect  signal - slot

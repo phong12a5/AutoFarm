@@ -68,7 +68,7 @@ android {
 
     DEFINES += ANDROID_KIT
     DEFINES += INPUT_STRING
-    DEFINES += CLICK_MULTI_POINT
+#    DEFINES += CLICK_MULTI_POINT
 
     LIBS += \
         -L"$$_PRO_FILE_PWD_/../OpenCV-android-sdk/sdk/native/3rdparty/libs/armeabi-v7a"\

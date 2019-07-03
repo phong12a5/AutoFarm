@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "AppDefines.hpp"
+#include "QProcess"
 
 #ifdef ANDROID_KIT
 #include <QAndroidJniObject>
@@ -34,6 +35,7 @@ public:
     QString getSimNumber();
     QString getWifiMacAdd();
     QString getDeviceType();
+    DISPLAY_INFO getDisplayInfo();
 #endif
 
 private:

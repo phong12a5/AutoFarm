@@ -65,6 +65,18 @@
 
 #define NUMBER_CLICK            2
 
+typedef struct display_info
+{
+    int width;
+    int height;
+    int dpi;
+    display_info(){
+        width = 1920;
+        height = 1080;
+        dpi = 480;
+    }
+} DISPLAY_INFO;
+
 typedef struct device_info_struct {
     QString googleSF;
     QString androidID;
@@ -75,6 +87,7 @@ typedef struct device_info_struct {
     QString android_verion;
     QString model;
     QString isNox;
+    DISPLAY_INFO disInfo;
 
     device_info_struct(){
         googleSF = "31b75eb8d";

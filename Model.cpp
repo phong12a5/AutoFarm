@@ -75,6 +75,17 @@ void Model::setDeviceInfo(DEVICE_INFO data)
     m_deviceInfo = data;
 }
 
+QString Model::logContent()
+{
+    return m_logContent;
+}
+
+void Model::setLogContent(QString data)
+{
+    m_logContent += (data + "\n") ;
+    emit logContentChanged();
+}
+
 APP_CONFIG Model::appConfig() const
 {
     return m_appConfig;

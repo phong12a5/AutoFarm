@@ -48,6 +48,32 @@ Window {
         }
     }
 
+    Flickable{
+        anchors.fill: parent
+        contentWidth: log.width
+        contentHeight: log.height
+
+        Rectangle{
+            clip: true
+            color: "green"
+            opacity: 0.2
+            visible:  APP_MODEL.deviceType == "Nox Device"
+            anchors.fill: parent
+        }
+
+        Text {
+            id: log
+            width: parent.width
+            height: contentHeight
+            wrapMode: Text.WordWrap
+            anchors.bottom: parent.bottom
+            text: APP_MODEL.logContent
+        }
+    }
+
+
+
+
     Rectangle{
         id: startBtn
         width: 300

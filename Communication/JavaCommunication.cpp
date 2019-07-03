@@ -1,4 +1,8 @@
 #include "JavaCommunication.hpp"
+#include "Model.hpp"
+
+#define MODEL           Model::instance()
+
 
 JavaCommunication* JavaCommunication::m_instance = nullptr;
 
@@ -102,12 +106,10 @@ QString JavaCommunication::getGoogleSF(){
     /*Cursor query = context.getContentResolver().query(sUri, null, null, new String[] { "android_id" }, null); */
 
     // Get ContentResolver: context.getContentResolver()
-    LOG << "Get ContentResolver";
     QAndroidJniObject qtActivityObj = QAndroidJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative",  "activity", "()Landroid/app/Activity;");
     QAndroidJniObject contentResolver = qtActivityObj.callObjectMethod("getContentResolver", "()Landroid/content/ContentResolver;");
 
     // Init String[] { "android_id"}
-    LOG << "Init String[] {\"android_id\"}";
     QAndroidJniEnvironment env;
     jobjectArray stringArrJava;
     stringArrJava = (jobjectArray)env->NewObjectArray(1,env->FindClass("java/lang/String"),env->NewStringUTF(""));
@@ -115,7 +117,6 @@ QString JavaCommunication::getGoogleSF(){
 
     // Init sUri
     // String: "content://com.google.android.gsf.gservices"
-    LOG << "Init sUri";
     jstring uriString = env->NewStringUTF("content://com.google.android.gsf.gservices");
 
     QAndroidJniObject sUriObj;
@@ -124,7 +125,6 @@ QString JavaCommunication::getGoogleSF(){
                                                          "(Ljava/lang/String;)Landroid/net/Uri;",\
                                                          uriString);
 
-    LOG << "Get Cursor";
     QAndroidJniObject query = contentResolver.callObjectMethod("query", "(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;", sUriObj.object<jobject>(), 0, 0, stringArrJava, 0);
 
     QString retVal("");
@@ -269,6 +269,37 @@ QString JavaCommunication::getDeviceType()
     }
     LOG << retVal;
     return retVal;
+}
+
+DISPLAY_INFO JavaCommunication::getDisplayInfo()
+{
+    DISPLAY_INFO info;
+    QProcess proc;
+    if(MODEL->deviceInfo().isNox =="true"){
+        proc.start("su -c 'wm size'");
+    }else{
+        proc.start("su -c wm size");
+    }
+    proc.waitForFinished(-1);
+    QString sizeInfo = proc.readAllStandardOutput();
+
+    if(MODEL->deviceInfo().isNox =="true"){
+        proc.start("su -c 'wm density'");
+    }else{
+        proc.start("su -c wm density");
+    }
+    proc.waitForFinished(-1);
+    QString dpiInfo = proc.readAllStandardOutput();
+
+    if(sizeInfo.contains("Physical size")){
+        info.width = (sizeInfo.split(":").length() < 2? info.width : sizeInfo.split(":").at(1).simplified().split("x").at(0).simplified().toInt());
+        info.height = (sizeInfo.split(":").length() < 2? info.height : sizeInfo.split(":").at(1).simplified().split("x").at(1).simplified().toInt());
+    }
+
+    if(sizeInfo.contains("Physical density")){
+        info.dpi = (sizeInfo.split(":").length() < 2? info.dpi : sizeInfo.split(":").at(1).simplified().toInt());
+    }
+    return info;
 }
 
 #endif

@@ -21,9 +21,11 @@ private:
 
 public:
 #ifdef ANDROID_KIT
-    static QPoint findImageOnImage(const QString& smallImage, const QString& largeImage, float threshold = 0.8);
-    static QList<QPoint> findImageListOnImage(const QString& smallImage, const QString& largeImage, float threshold = 0.8);
+    static QPoint findImageOnImage(const QString &smallImagePath, const QString &largeImagePath);
+    static QList<QPoint> findImageListOnImage(const QString &smallImagePath, const QString &largeImagePath);
     static cv::Mat QImage2Mat(QImage const& src);
+    static float getThreshhold();
+    static float getScale();
 #endif
 
 public slots:
