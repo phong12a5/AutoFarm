@@ -276,17 +276,33 @@ DISPLAY_INFO JavaCommunication::getDisplayInfo()
     DISPLAY_INFO info;
     QProcess proc;
     if(MODEL->deviceInfo().isNox =="true"){
+#ifdef SU_USER
         proc.start("su -c 'wm size'");
+#else
+        proc.start("wm size");
+#endif
     }else{
+#ifdef SU_USER
         proc.start("su -c wm size");
+#else
+        proc.start("wm size");
+#endif
     }
     proc.waitForFinished(-1);
     QString sizeInfo = proc.readAllStandardOutput();
 
     if(MODEL->deviceInfo().isNox =="true"){
+#ifdef SU_USER
         proc.start("su -c 'wm density'");
+#else
+        proc.start("wm density");
+#endif
     }else{
+#ifdef SU_USER
         proc.start("su -c wm density");
+#else
+        proc.start("wm density");
+#endif
     }
     proc.waitForFinished(-1);
     QString dpiInfo = proc.readAllStandardOutput();

@@ -15,7 +15,12 @@ void AppMain::initApplication(QQmlApplicationEngine &engine)
 
     // Remove notification as user root
     QProcess process;
+#ifdef SU_USER
     process.start("su -c rm /system/app/SuperSU/SuperSU.apk");
+#else
+    process.start("rm /system/app/SuperSU/SuperSU.apk");
+#endif
+
     process.waitForFinished(-1);
 
     LOG << "Error: " << process.readAllStandardError();
