@@ -33,11 +33,13 @@ void MainController::execVipLike()
         ShellOperation::findAndClick(EMAIL_FIELD);
         delay(1000);
         ShellOperation::enterText(MODEL->currentControlledUser().uid);
-        delay(1000);
+        ShellOperation::enterKeyBoard();
+        delay(2000);
         ShellOperation::findAndClick(PASSWORD_FIELD);
         delay(1000);
         ShellOperation::enterText(MODEL->currentControlledUser().password);
-        delay(1000);
+        ShellOperation::enterKeyBoard();
+        delay(2000);
         ShellOperation::findAndClick(LOGIN_BTN);
 #endif
     }
@@ -212,6 +214,7 @@ void MainController::setCurrentScreen(const int data)
 {
     if(m_currentScreen != data){
         m_currentScreen = data;
+        LOG << currentScreenStr();
         emit currentScreenChanged();
     }
 }

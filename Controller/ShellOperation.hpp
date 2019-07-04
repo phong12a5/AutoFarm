@@ -30,6 +30,9 @@ public:
     static QPoint findAnImageOnScreen(QString iconPath);
     static void clearPackageData(QString packageName);
     static bool pressTap();
+    static DISPLAY_INFO getDisplayInfo();
+    static void removeFile(QString path);
+    static void enterKeyBoard();
 #endif
 private:
 };

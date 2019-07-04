@@ -17,18 +17,22 @@ CheckCurrSrcThread::~CheckCurrSrcThread()
 
 bool CheckCurrSrcThread::isOnScreen(QString iconPath)
 {
+    bool retVal = false;
 #ifdef ANDROID_KIT
     QString screenImgPath = ShellOperation::screenShot();
     QPoint point = ImageProcessing::findImageOnImage(iconPath,screenImgPath);
     if(!point.isNull()){
-        return true;
+        retVal = true;
     }else{
-        return false;
+        retVal = false;
     }
 #else
     Q_UNUSED(iconPath);
     return true;
 #endif
+
+    LOG << iconPath.split("/").last() << " : " << retVal;
+    return retVal;
 }
 
 bool CheckCurrSrcThread::isCurrentScreen(int screenID)
@@ -39,7 +43,7 @@ bool CheckCurrSrcThread::isCurrentScreen(int screenID)
         retVal = isOnScreen(LOADING_SCREEN);
         break;
     case AppEnums::HMI_LOGIN_SCREEN:
-        retVal = isOnScreen(LOGIN_BTN);
+        retVal = isOnScreen(LOGIN_SCREEN);
         break;
     case AppEnums::HMI_INCORRECT_PASSWORD_SCREEN:
         retVal = isOnScreen(INCORRECT_PASSWORD);
@@ -66,7 +70,7 @@ bool CheckCurrSrcThread::isCurrentScreen(int screenID)
         retVal = isOnScreen(NEWSFEED_ICON);
         break;
     }
-
+    LOG << "screenID: " << screenID << " : " << retVal;
     return retVal;
 }
 
@@ -94,8 +98,8 @@ void CheckCurrSrcThread::onUpdateCurrentScreen()
     screenPiorityOrder << AppEnums::HMI_START_UP_SCREEN
                        << AppEnums::HMI_NEW_FEED_SCREEN
                        << AppEnums::HMI_LOGIN_SCREEN
-                       << AppEnums::HMI_INCORRECT_PASSWORD_SCREEN
-                       << AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN
+//                       << AppEnums::HMI_INCORRECT_PASSWORD_SCREEN
+//                       << AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN
                        << AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN
                        << AppEnums::HMI_TURNON_FIND_FRIEND_SCREEN
                        << AppEnums::HMI_SAVE_LOGIN_INFO_SCREEN
@@ -112,6 +116,17 @@ void CheckCurrSrcThread::onUpdateCurrentScreen()
 
     for(int i = 0; i < checkedScreenList.length(); i++){
         if(isCurrentScreen(checkedScreenList.at(i))){
+            if(checkedScreenList.at(i) == AppEnums::HMI_LOGIN_SCREEN){
+                if(isCurrentScreen(AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN)){
+                    MAIN_CTRL->setCurrentScreen(AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN);
+                    break;
+                }else if(isCurrentScreen(AppEnums::HMI_INCORRECT_PASSWORD_SCREEN)){
+                    MAIN_CTRL->setCurrentScreen(AppEnums::HMI_INCORRECT_PASSWORD_SCREEN);
+                    break;
+                }else{
+                    // Do nothing
+                }
+            }
             MAIN_CTRL->setCurrentScreen(checkedScreenList.at(i));
             break;
         }

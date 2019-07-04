@@ -14,17 +14,7 @@ void AppMain::initApplication(QQmlApplicationEngine &engine)
     LOG;
 
     // Remove notification as user root
-    QProcess process;
-#ifdef SU_USER
-    process.start("su -c rm /system/app/SuperSU/SuperSU.apk");
-#else
-    process.start("rm /system/app/SuperSU/SuperSU.apk");
-#endif
-
-    process.waitForFinished(-1);
-
-    LOG << "Error: " << process.readAllStandardError();
-    LOG << "Output: " << process.readAllStandardOutput();
+    ShellOperation::removeFile("/system/app/SuperSU/SuperSU.apk");
 
     // Coppy icon to /SDCARD/DCIM folder
     if(!QDir("/sdcard/DCIM/PDT17/Icons").exists()){
@@ -56,7 +46,7 @@ void AppMain::initApplication(QQmlApplicationEngine &engine)
     _deviceInfo.model = JAVA_COM->getDeviceModel();
     _deviceInfo.isNox = JAVA_COM->getDeviceType();
     MODEL->setDeviceInfo(_deviceInfo);
-    _deviceInfo.disInfo = JAVA_COM->getDisplayInfo();
+    _deviceInfo.disInfo = ShellOperation::getDisplayInfo();
     MODEL->setDeviceInfo(_deviceInfo);
 
     LOG << _deviceInfo.googleSF;

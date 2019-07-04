@@ -287,6 +287,91 @@ bool ShellOperation::pressTap()
     }
 }
 
+DISPLAY_INFO ShellOperation::getDisplayInfo()
+{
+    DISPLAY_INFO info;
+    QProcess proc;
+    if(MODEL->deviceInfo().isNox =="true"){
+#ifdef SU_USER
+        proc.start("su -c 'wm size'");
+#else
+        proc.start("wm size");
+#endif
+    }else{
+#ifdef SU_USER
+        proc.start("su -c wm size");
+#else
+        proc.start("wm size");
+#endif
+    }
+    proc.waitForFinished(-1);
+    QString sizeInfo = proc.readAllStandardOutput();
+
+    if(MODEL->deviceInfo().isNox =="true"){
+#ifdef SU_USER
+        proc.start("su -c 'wm density'");
+#else
+        proc.start("wm density");
+#endif
+    }else{
+#ifdef SU_USER
+        proc.start("su -c wm density");
+#else
+        proc.start("wm density");
+#endif
+    }
+    proc.waitForFinished(-1);
+    QString dpiInfo = proc.readAllStandardOutput();
+
+    if(sizeInfo.contains("Physical size")){
+        info.width = (sizeInfo.split(":").length() < 2? info.width : sizeInfo.split(":").at(1).simplified().split("x").at(0).simplified().toInt());
+        info.height = (sizeInfo.split(":").length() < 2? info.height : sizeInfo.split(":").at(1).simplified().split("x").at(1).simplified().toInt());
+    }
+
+    if(sizeInfo.contains("Physical density")){
+        info.dpi = (sizeInfo.split(":").length() < 2? info.dpi : sizeInfo.split(":").at(1).simplified().toInt());
+    }
+    return info;
+}
+
+void ShellOperation::removeFile(QString path)
+{
+    QProcess process;
+#ifdef SU_USER
+    process.start(QString("su -c rm %1").arg(path));
+#else
+    process.start(QString("rm %1").arg(path));
+#endif
+    process.waitForFinished(-1);
+}
+
+void ShellOperation::enterKeyBoard()
+{
+    LOG << "Pressing Tap Key ...";
+    QProcess proc;
+    QProcess process;
+    if(MODEL->deviceInfo().isNox =="true"){
+#ifdef SU_USER
+        proc.start(QString("su -c 'input keyevent KEYCODE_ENTER'"));
+#else
+        proc.start(QString("input keyevent KEYCODE_ENTER"));
+#endif
+    }else{
+#ifdef SU_USER
+        proc.start(QString("su -c input keyevent KEYCODE_ENTER"));
+#else
+        proc.start(QString("input keyevent KEYCODE_ENTER"));
+#endif
+    }
+    proc.waitForFinished(-1);
+    QString error = proc.readAllStandardError();
+    if(error != ""){
+        LOG << "ERROR: " << error;
+    }else {
+        // Do nothing
+    }
+}
+
 QString ShellOperation::screenShot(QString fileName)
 {
     QString path = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);

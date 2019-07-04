@@ -35,7 +35,6 @@ public:
     QString getSimNumber();
     QString getWifiMacAdd();
     QString getDeviceType();
-    DISPLAY_INFO getDisplayInfo();
 #endif
 
 private:
