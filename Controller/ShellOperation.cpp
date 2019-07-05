@@ -36,6 +36,9 @@ bool ShellOperation::installPackage(QString packagePath)
         process.start(cmd);
         process.waitForFinished(-1);
 
+        LOG << process.readAllStandardError();
+        LOG << process.readAllStandardOutput();
+
 //        Model::instance()->setLogContent("cmd: " + cmd);
 //        Model::instance()->setLogContent(process.readAllStandardError());
 //        Model::instance()->setLogContent(process.readAllStandardOutput());
@@ -397,7 +400,8 @@ QString ShellOperation::screenShot(QString fileName)
 #endif
     }
     process.waitForFinished(-1);
-
+    LOG << process.readAllStandardError();
+    LOG << process.readAllStandardOutput();
     return path;
 }
 #endif

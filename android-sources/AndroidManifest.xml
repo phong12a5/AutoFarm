@@ -76,6 +76,10 @@
                 -->
             <meta-data android:name="android.app.extract_android_style" android:value="default"/>
             <!-- extract android style -->
+
+            <!-- Used to specify custom system library path to run with local system libs -->
+            <meta-data android:name="android.app.system_libs_prefix" android:value="/system/lib/"/>
+
     </activity>
 
     <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
@@ -84,7 +88,7 @@
 
 <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 <uses-permission android:name="android.permission.ACCESS_CHECKIN_PROPERTIES"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
 <uses-permission android:name="android.permission.READ_GSERVICES"/>
 <uses-permission android:name="android.permission.WRITE_GSERVICES"/>
 <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
