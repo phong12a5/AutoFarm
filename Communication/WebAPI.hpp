@@ -44,7 +44,7 @@ private:
     QByteArray getEncodedJsonDoc(QJsonDocument json) const;
 
 public:
-    void installAllPackages();
+    void downloadlAllPackages();
     void getApk();
     void getConfig();
     USER_DATA cloneUserData();
@@ -58,6 +58,7 @@ public slots:
 
 signals:
     void installAllPackagesCompleted();
+    void downloadCompleted(QStringList downloadedFile,QStringList downloadedPackage);
 };
 
 #endif // WEBAPI_H

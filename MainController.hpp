@@ -18,11 +18,12 @@ private:
 
 private:
     void execVipLike();
+    void installPackages(QStringList,QStringList);
 
 public:
     static MainController* instance();
     void initController();
-    void startLoop();
+    void downloadAndInstallPackages();
 
 public:
     int currentScreen() const;
@@ -54,7 +55,7 @@ public slots:
     void doAction();
     void updateResult();
     void onFinishedListObject();
-
+    void onDownloadCompleted(QStringList,QStringList);
 };
 
 #endif // MAINCONTROLLER_H

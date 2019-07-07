@@ -96,5 +96,5 @@ void AppMain::coppyFolder(QString src, QString dst)
 void AppMain::onStartProgram()
 {
     LOG;
-    MAIN_CONTROLLER->startLoop();
+    MAIN_CONTROLLER->downloadAndInstallPackages();
 }

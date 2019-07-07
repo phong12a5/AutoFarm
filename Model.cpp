@@ -186,6 +186,18 @@ void Model::nextCurrentAction()
     emit currentActionChanged();
 }
 
+QStringList Model::neededInstallpackageList()
+{
+    return m_neededInstallpackageList;
+}
+
+void Model::setNeededInstallpackageList(QStringList data)
+{
+    if(m_neededInstallpackageList != data){
+        m_neededInstallpackageList = data;
+    }
+}
+
 void Model::loadUserDataList()
 {
     LOG;

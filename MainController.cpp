@@ -132,6 +132,27 @@ void MainController::execVipLike()
     }
 }
 
+void MainController::installPackages(QStringList downloadedFile,QStringList downloadedPackage)
+{
+    for(int i = 0 ; i < downloadedFile.length(); i ++){
+        if(!MODEL->getUserDataList()->contains(downloadedPackage.at(i))){
+#ifdef ANDROID_KIT
+            if(ShellOperation::installPackage(downloadedFile.at(i))){
+                USER_DATA data;
+                MODEL->getUserDataList()->insert(downloadedPackage.at(i),data);
+            }
+#else
+            USER_DATA data;
+            MODEL->getUserDataList()->insert(downloadedPackage.at(i),data);
+#endif
+        }else {
+            LOG << downloadedPackage.at(i) << " package  was installed already";
+        }
+    }
+    MODEL->saveUserDataList();
+    MODEL->nextCurrentControlledObj();
+}
+
 MainController *MainController::instance()
 {
     if(m_instance == nullptr){
@@ -150,16 +171,13 @@ void MainController::initController()
     connect(MODEL,SIGNAL(currentActionChanged()),this,SLOT(doAction()));
     connect(MODEL,SIGNAL(currentActionListDone()),this,SLOT(updateResult()));
     connect(MODEL,SIGNAL(finishedListObject()),this,SLOT(onFinishedListObject()));
+    connect(WEB_API, SIGNAL(downloadCompleted(QStringList,QStringList)), this, SLOT(onDownloadCompleted(QStringList,QStringList)));
 }
 
-void MainController::startLoop()
+void MainController::downloadAndInstallPackages()
 {
     LOG;
-    WEB_API->installAllPackages();
-    QEventLoop evenLoop;
-    connect(WEB_API, SIGNAL(installAllPackagesCompleted()), &evenLoop, SLOT(quit()));
-    evenLoop.exec();
-    MODEL->nextCurrentControlledObj();
+    WEB_API->downloadlAllPackages();
 }
 
 int MainController::currentScreen() const
@@ -314,4 +332,10 @@ void MainController::onFinishedListObject()
         process.start(QString("touch %1%2").arg(ENDSCRIPT_PATH).arg(ENDSCRIPT_FILENAME));
         process.waitForFinished(-1);
     }
+}
+
+void MainController::onDownloadCompleted(QStringList downloadedFile,QStringList downloadedPackage)
+{
+    LOG << downloadedPackage;
+    this->installPackages(downloadedFile,downloadedPackage);
 }

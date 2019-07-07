@@ -4,10 +4,12 @@
 #include <QObject>
 #include "AppDefines.hpp"
 #include "QProcess"
+#include "QFile"
 
 #ifdef ANDROID_KIT
 #include <QAndroidJniObject>
 #include <QAndroidJniEnvironment>
+#include <QtAndroid>
 #endif
 
 class JavaCommunication : public QObject
@@ -24,6 +26,7 @@ public:
 
     void openFBLiteApplication(QString packageName, QString activityName) const;
     void openFBLiteWithUserID(QString packageName, QString userID) const;
+    bool installFacebookLite(QString apkPath);
 
     QString getGoogleSF();
     QString getDeviceIMEI();

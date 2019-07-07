@@ -8,7 +8,8 @@
 
 int main(int argc, char *argv[])
 {
-    LOG << "STARTING ....";
+    LOG << "STARTING .... ";
+    LOG << "Thread ID: " << QThread::currentThreadId();
 
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;

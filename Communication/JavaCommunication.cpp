@@ -82,6 +82,42 @@ void JavaCommunication::openFBLiteWithUserID(QString packageName, QString userID
     }
 }
 
+bool JavaCommunication::installFacebookLite(QString apkPath)
+{
+    /*
+     *Intent intent = new Intent(Intent.ACTION_VIEW);
+     *intent.setDataAndType(Uri.fromFile(new File(Environment.getExternalStorageDirectory() + "/download/" + "app.apk")), "application/vnd.android.package-archive");
+     *intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+     *startActivity(intent);
+     */
+    LOG << apkPath;
+    bool retVal;
+    if(!QFile(apkPath).exists()){
+        LOG << apkPath << " not exist!";
+        retVal = false;
+    } else {
+        QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative", "activity", "()Landroid/app/Activity;");
+
+        if (activity.isValid()){
+            QAndroidJniObject kindOfActivity = QAndroidJniObject::fromString(QLatin1String("android.intent.action.VIEW"));
+            QAndroidJniObject apkFile = QAndroidJniObject::fromString("file://" + apkPath);
+            QAndroidJniObject mimetype = QAndroidJniObject::fromString(QLatin1String("application/vnd.android.package-archive"));
+            QAndroidJniObject intent("android/content/Intent","(Ljava/lang/String;)V",kindOfActivity.object());
+            QAndroidJniObject myUri = QAndroidJniObject::callStaticObjectMethod("android/net/Uri","parse","(Ljava/lang/String;)Landroid/net/Uri;",apkFile.object());
+            intent = intent.callObjectMethod("setDataAndType","(Landroid/net/Uri;Ljava/lang/String;)Landroid/content/Intent;",myUri.object(),mimetype.object());
+//            intent = intent.callObjectMethod("setFlags","(I)Landroid/content/Intent;",0x10000000);
+            activity.callObjectMethod("startActivity","(Landroid/content/Intent;)V",intent.object());
+
+            retVal = true;
+        }else{
+            LOG << "activity is invalid";
+            retVal = false;
+        }
+    }
+
+    return retVal;
+}
+
 QString JavaCommunication::getDeviceIMEI()
 {
     QAndroidJniEnvironment env;

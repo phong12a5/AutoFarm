@@ -14,6 +14,8 @@ ShellOperation::ShellOperation(QObject *parent) : QObject(parent)
 bool ShellOperation::installPackage(QString packagePath)
 {
     LOG << packagePath;
+    LOG << "Thread ID " << QThread::currentThreadId();
+
     if(!QFile(packagePath).exists()){
         LOG << "packagePath not existed";
         return false;
@@ -32,16 +34,13 @@ bool ShellOperation::installPackage(QString packagePath)
             cmd = QString("pm install %1").arg(packagePath);
 #endif
         }
+
         QProcess process;
         process.start(cmd);
         process.waitForFinished(-1);
 
         LOG << process.readAllStandardError();
         LOG << process.readAllStandardOutput();
-
-//        Model::instance()->setLogContent("cmd: " + cmd);
-//        Model::instance()->setLogContent(process.readAllStandardError());
-//        Model::instance()->setLogContent(process.readAllStandardOutput());
 
         return true;
     }

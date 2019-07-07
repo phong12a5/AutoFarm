@@ -1,5 +1,6 @@
 #include "WebAPI.hpp"
 #include "Model.hpp"
+#include "Communication/JavaCommunication.hpp"
 
 #define MODEL Model::instance()
 
@@ -430,9 +431,8 @@ QByteArray WebAPI::getEncodedJsonDoc(QJsonDocument json) const
     return encryption.encode(deviceInfoData, getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit()).toBase64();
 }
 
-void WebAPI::installAllPackages()
+void WebAPI::downloadlAllPackages()
 {
-    LOG;
     this->getApk();
 }
 
@@ -477,7 +477,7 @@ void WebAPI::slotReponseGettingApk(QNetworkReply* reply)
 
 
         if(m_neededDownloadPkgList.isEmpty()){
-            emit installAllPackagesCompleted();
+            emit downloadCompleted(QStringList(), QStringList());
         }
     }else{
         LOG << "Another action!";
@@ -506,22 +506,6 @@ void WebAPI::slotReponseDownloadingApk(QNetworkReply * reply)
 
     if(this->downloadedPackagedCount >= m_neededDownloadPkgList.count()){
         LOG << "Download completed!";
-        for(int i = 0 ; i < m_downloadedFile.length(); i ++){
-            if(!MODEL->getUserDataList()->contains(m_downloadedPackage.at(i))){
-#ifdef ANDROID_KIT
-                if(ShellOperation::installPackage(m_downloadedFile.at(i))){
-                    USER_DATA data;
-                    MODEL->getUserDataList()->insert(m_downloadedPackage.at(i),data);
-                }
-#else
-                USER_DATA data;
-                MODEL->getUserDataList()->insert(m_downloadedPackage.at(i),data);
-#endif
-            }else {
-                LOG << m_downloadedPackage.at(i) << " package  was installed already";
-            }
-        }
-        MODEL->saveUserDataList();
-        emit installAllPackagesCompleted();
+        emit downloadCompleted(m_downloadedFile,m_downloadedPackage);
     }
 }

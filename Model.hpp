@@ -55,6 +55,9 @@ public:
     QJsonObject currentAction();
     void nextCurrentAction();
 
+    QStringList neededInstallpackageList();
+    void setNeededInstallpackageList(QStringList data);
+
     void loadUserDataList();
     void saveUserDataList();
 
@@ -78,6 +81,7 @@ private:
     QList<QJsonObject> m_actionList;
     QList<QJsonObject> m_changedActionList;
     QString m_logContent;
+    QStringList m_neededInstallpackageList;
 
 signals:
     void sigStartProgram();
