@@ -20,23 +20,8 @@ bool ShellOperation::installPackage(QString packagePath)
         LOG << "packagePath not existed";
         return false;
     }else{
-        QString cmd;
-        if(MODEL->deviceInfo().isNox =="true"){
-#ifdef SU_USER
-            cmd = QString("su -c 'pm install %1'").arg(packagePath);
-#else
-            cmd = QString("pm install %1").arg(packagePath);
-#endif
-        }else{
-#ifdef SU_USER
-            cmd = QString("su -c pm install %1").arg(packagePath);
-#else
-            cmd = QString("pm install %1").arg(packagePath);
-#endif
-        }
-
         QProcess process;
-        process.start(cmd);
+        process.start("sh", QStringList() << "-c" << QString("pm install %1").arg(packagePath));
         process.waitForFinished(-1);
 
         LOG << process.readAllStandardError();
@@ -53,31 +38,10 @@ void ShellOperation::callScrollEvent(QPoint point1, QPoint point2)
            .arg(point2.x()).arg(point2.y());
 
     QProcess process;
-    if(MODEL->deviceInfo().isNox =="true"){
-#ifdef SU_USER
-        process.start(QString("su -c 'input swipe %1 %2 %3 %4'").arg(QString::number(point1.x())).\
-                                                                arg(QString::number(point1.y())).\
-                                                                arg(QString::number(point2.x())).\
-                                                                arg(QString::number(point2.y())));
-#else
-        process.start(QString("input swipe %1 %2 %3 %4").arg(QString::number(point1.x())).\
-                                                                arg(QString::number(point1.y())).\
-                                                                arg(QString::number(point2.x())).\
-                                                                arg(QString::number(point2.y())));
-#endif
-    }else{
-#ifdef SU_USER
-        process.start(QString("su -c input swipe %1 %2 %3 %4").arg(QString::number(point1.x())).\
-                                                                arg(QString::number(point1.y())).\
-                                                                arg(QString::number(point2.x())).\
-                                                                arg(QString::number(point2.y())));
-#else
-        process.start(QString("input swipe %1 %2 %3 %4").arg(QString::number(point1.x())).\
-                                                                arg(QString::number(point1.y())).\
-                                                                arg(QString::number(point2.x())).\
-                                                                arg(QString::number(point2.y())));
-#endif
-    }
+    process.start("sh",QStringList() << "-c" << QString("input swipe %1 %2 %3 %4").arg(QString::number(point1.x())).\
+                                                            arg(QString::number(point1.y())).\
+                                                            arg(QString::number(point2.x())).\
+                                                            arg(QString::number(point2.y())));
 
 
     process.waitForFinished(-1);
@@ -86,14 +50,10 @@ void ShellOperation::callScrollEvent(QPoint point1, QPoint point2)
 QString ShellOperation::getCurrentActivity()
 {
     QString retVal = "";
-    QProcess proc;
-    if(MODEL->deviceInfo().isNox =="true"){
-        proc.start("su -c 'dumpsys window windows | grep -E 'mCurrentFocus''");
-    }else{
-        proc.start("su -c dumpsys window windows | grep -E 'mCurrentFocus'");
-    }
-    proc.waitForFinished(-1);
-    QStringList output = QString(proc.readAllStandardOutput()).split(' ');
+    QProcess process;
+    process.start("sh", QStringList() << "-c" << QString("dumpsys window windows | grep -E 'mCurrentFocus'"));
+    process.waitForFinished(-1);
+    QStringList output = QString(process.readAllStandardOutput()).split(' ');
     if(output.length() > 4){
         retVal = QString(output.at(4)).simplified().remove('}');
     }
@@ -140,27 +100,15 @@ void ShellOperation::tapScreen(QPoint point)
 {
     LOG << "Tapping at [" << point.x() << "," << point.y() << "]";
     QProcess proc;
-    if(MODEL->deviceInfo().isNox =="true"){
-#ifdef SU_USER
-        proc.start(QString("su -c 'input tap %1 %2'").arg(point.x()).arg(point.y()));
-#else
-        proc.start(QString("input tap %1 %2").arg(point.x()).arg(point.y()));
-#endif
-    }else{
-#ifdef SU_USER
-        proc.start(QString("su -c input tap %1 %2").arg(point.x()).arg(point.y()));
-#else
-        proc.start(QString("input tap %1 %2").arg(point.x()).arg(point.y()));
-#endif
+//    proc.start("sh", QStringList() << "-c" << QString("input tap %1 %2").arg(point.x()).arg(point.y()));
+    for(int i = 0; i < 20 ; i++){
+        LOG << QProcess::execute("sh", QStringList() << "-c" << QString("input tap 540 %1").arg(i * 100));
+        delay(100);
     }
+    proc.start("sh", QStringList() << "-c" << "input tap 539 279");
     proc.waitForFinished(-1);
-    proc.waitForFinished(-1);
-    QString error = proc.readAllStandardError();
-    if(error != ""){
-        LOG << "ERROR: " << error;
-    }else {
-        // Do nothing
-    }
+    LOG << proc.readAllStandardError();
+    LOG << proc.readAllStandardOutput();
     return;
 }
 
@@ -168,21 +116,8 @@ bool ShellOperation::enterText(QString text)
 {
     LOG << "Entering text: " << text;
     QProcess proc;
-
 #ifdef INPUT_STRING
-    if(MODEL->deviceInfo().isNox =="true"){
-#ifdef SU_USER
-        proc.start(QString("su -c 'input text %1'").arg(text));
-#else
-        proc.start(QString("input text %1").arg(text));
-#endif
-    }else{
-#ifdef SU_USER
-        proc.start(QString("su -c input text %1").arg(text));
-#else
-        proc.start(QString("input text %1").arg(text));
-#endif
-    }
+    proc.start("sh", QStringList() << "-c" << QString("input text %1").arg(text));
     proc.waitForFinished(-1);
     QString error = proc.readAllStandardError();
     if(error != ""){
@@ -193,18 +128,7 @@ bool ShellOperation::enterText(QString text)
     }
 #else
     for(int i = 0; i < text.length(); i++){
-        if(MODEL->deviceInfo().isNox =="true"){
-#ifdef SU_USER
-            proc.start(QString("su -c 'input text %1'").arg(text.at(i)));
-#else
-            proc.start(QString("input text %1").arg(text.at(i)));
-#endif
-        }else{
-#ifdef SU_USER
-            proc.start(QString("su -c input text %1").arg(text.at(i)));
-#else
-            proc.start(QString("input text %1").arg(text.at(i)));
-#endif
+            proc.start("sh", QStringList() << "-c" << QString("input text %1").arg(text.at(i));
         }
         proc.waitForFinished(-1);
     }
@@ -216,19 +140,7 @@ void ShellOperation::killSpecificApp(QString packageName)
 {
     LOG << "Killing " << packageName;
     QProcess proc;
-    if(MODEL->deviceInfo().isNox =="true"){
-#ifdef SU_USER
-        proc.start(QString("su -c 'am force-stop %1'").arg(packageName));
-#else
-        proc.start(QString("am force-stop %1").arg(packageName));
-#endif
-    }else{
-#ifdef SU_USER
-        proc.start(QString("su -c am force-stop %1").arg(packageName));
-#else
-        proc.start(QString("am force-stop %1").arg(packageName));
-#endif
-    }
+    proc.start("sh", QStringList() << "-c" << QString("am force-stop %1").arg(packageName));
     proc.waitForFinished(-1);
     delay(100);
     return;
@@ -245,19 +157,7 @@ void ShellOperation::clearPackageData(QString packageName)
 {
     LOG << packageName;
     QProcess proc;
-    if(MODEL->deviceInfo().isNox =="true"){
-#ifdef SU_USER
-        proc.start(QString("su -c 'pm clear %1'").arg(packageName));
-#else
-        proc.start(QString("pm clear %1").arg(packageName));
-#endif
-    }else{
-#ifdef SU_USER
-        proc.start(QString("su -c pm clear %1").arg(packageName));
-#else
-        proc.start(QString("pm clear %1").arg(packageName));
-#endif
-    }
+    proc.start("sh", QStringList() << "-c" << QString("pm clear %1").arg(packageName));
     proc.waitForFinished(-1);
 }
 
@@ -266,19 +166,7 @@ bool ShellOperation::pressTap()
     LOG << "Pressing Tap Key ...";
     QProcess proc;
     QProcess process;
-    if(MODEL->deviceInfo().isNox =="true"){
-#ifdef SU_USER
-        proc.start(QString("su -c 'input keyevent KEYCODE_TAB'"));
-#else
-        proc.start(QString("input keyevent KEYCODE_TAB"));
-#endif
-    }else{
-#ifdef SU_USER
-        proc.start(QString("su -c input keyevent KEYCODE_TAB"));
-#else
-        proc.start(QString("input keyevent KEYCODE_TAB"));
-#endif
-    }
+    proc.start("sh", QStringList() << "-c" << QString("input keyevent KEYCODE_TAB"));
     proc.waitForFinished(-1);
     QString error = proc.readAllStandardError();
     if(error != ""){
@@ -293,35 +181,12 @@ DISPLAY_INFO ShellOperation::getDisplayInfo()
 {
     DISPLAY_INFO info;
     QProcess proc;
-    if(MODEL->deviceInfo().isNox =="true"){
-#ifdef SU_USER
-        proc.start("su -c 'wm size'");
-#else
-        proc.start("wm size");
-#endif
-    }else{
-#ifdef SU_USER
-        proc.start("su -c wm size");
-#else
-        proc.start("wm size");
-#endif
-    }
+
+    proc.start("sh", QStringList() << "-c" << "wm size");
     proc.waitForFinished(-1);
     QString sizeInfo = proc.readAllStandardOutput();
 
-    if(MODEL->deviceInfo().isNox =="true"){
-#ifdef SU_USER
-        proc.start("su -c 'wm density'");
-#else
-        proc.start("wm density");
-#endif
-    }else{
-#ifdef SU_USER
-        proc.start("su -c wm density");
-#else
-        proc.start("wm density");
-#endif
-    }
+    proc.start("sh", QStringList() << "-c" << "wm density");
     proc.waitForFinished(-1);
     QString dpiInfo = proc.readAllStandardOutput();
 
@@ -339,11 +204,7 @@ DISPLAY_INFO ShellOperation::getDisplayInfo()
 void ShellOperation::removeFile(QString path)
 {
     QProcess process;
-#ifdef SU_USER
-    process.start(QString("su -c rm %1").arg(path));
-#else
-    process.start(QString("rm %1").arg(path));
-#endif
+    process.start("sh", QStringList() << "-c" << QString("rm %1").arg(path));
     process.waitForFinished(-1);
 }
 
@@ -352,19 +213,7 @@ void ShellOperation::enterKeyBoard()
     LOG << "Pressing Tap Key ...";
     QProcess proc;
     QProcess process;
-    if(MODEL->deviceInfo().isNox =="true"){
-#ifdef SU_USER
-        proc.start(QString("su -c 'input keyevent KEYCODE_ENTER'"));
-#else
-        proc.start(QString("input keyevent KEYCODE_ENTER"));
-#endif
-    }else{
-#ifdef SU_USER
-        proc.start(QString("su -c input keyevent KEYCODE_ENTER"));
-#else
-        proc.start(QString("input keyevent KEYCODE_ENTER"));
-#endif
-    }
+    proc.start("sh", QStringList() << "-c" << QString("input keyevent KEYCODE_ENTER"));
     proc.waitForFinished(-1);
     QString error = proc.readAllStandardError();
     if(error != ""){
@@ -385,22 +234,8 @@ QString ShellOperation::screenShot(QString fileName)
     path.append(QString("/%1").arg(fileName));
 
     QProcess process;
-    if(MODEL->deviceInfo().isNox =="true"){
-#ifdef SU_USER
-        process.start(QString("su -c 'screencap -p %1'").arg(path));
-#else
-        process.start(QString("screencap -p %1").arg(path));
-#endif
-    }else{
-#ifdef SU_USER
-        process.start(QString("su -c screencap -p %1").arg(path));
-#else
-        process.start(QString("screencap -p %1").arg(path));
-#endif
-    }
+    process.start("sh", QStringList() << "-c" << QString("screencap -p %1").arg(path));
     process.waitForFinished(-1);
-    LOG << process.readAllStandardError();
-    LOG << process.readAllStandardOutput();
     return path;
 }
 #endif

@@ -45,6 +45,7 @@ void MainController::execVipLike()
     }
         break;
     case AppEnums::HMI_INCORRECT_PASSWORD_SCREEN:
+    case AppEnums::HMI_MISSING_PASSWORD_SCREEN:
 #ifdef ANDROID_KIT
         MODEL->updateCurrentControlleredUser(WEB_API->cloneUserData());
         ShellOperation::clearPackageData(MODEL->currentControlledPkg());
@@ -185,10 +186,10 @@ int MainController::currentScreen() const
     return m_currentScreen;
 }
 
-QString MainController::currentScreenStr() const
+QString MainController::screenStr(int screenID) const
 {
     QString retVal = "";
-    switch (m_currentScreen) {
+    switch (screenID) {
     case AppEnums::HMI_UNKNOW_SCREEN:
         retVal = "HMI_UNKNOW_SCREEN";
         break;
@@ -200,6 +201,9 @@ QString MainController::currentScreenStr() const
         break;
     case AppEnums::HMI_INCORRECT_PASSWORD_SCREEN:
         retVal = "HMI_INCORRECT_PASSWORD_SCREEN";
+        break;
+    case AppEnums::HMI_MISSING_PASSWORD_SCREEN:
+        retVal = "HMI_MISSING_PASSWORD_SCREEN";
         break;
     case AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN:
         retVal = "HMI_CONFIRM_INDENTIFY_SCREEN";
@@ -232,7 +236,7 @@ void MainController::setCurrentScreen(const int data)
 {
     if(m_currentScreen != data){
         m_currentScreen = data;
-        LOG << currentScreenStr();
+        LOG << screenStr(currentScreen());
         emit currentScreenChanged();
     }
 }
@@ -264,7 +268,7 @@ void MainController::startCheckCurrentActivity()
 
 void MainController::onChangeScreen()
 {
-    LOG << "currentScreen: " << currentScreenStr();
+    LOG << "currentScreen: " << screenStr(currentScreen());
     if(MODEL->currentAction()["action"].toString() == "viplike"){
         this->execVipLike();
     }

@@ -13,8 +13,6 @@ void AppMain::initApplication(QQmlApplicationEngine &engine)
 {
     LOG;
 
-    // Remove notification as user root
-    ShellOperation::removeFile("/system/app/SuperSU/SuperSU.apk");
 
     // Coppy icon to /SDCARD/DCIM folder
     if(!QDir("/sdcard/DCIM/PDT17/Icons").exists()){

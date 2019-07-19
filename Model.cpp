@@ -132,6 +132,7 @@ void Model::nextCurrentControlledObj()
         if(m_currentPkgIndex >= m_userDataList.count() - 1){
             emit finishedListObject();
             m_currentPkgIndex = 0;
+            emit nextCurrentControlledObjChanged();
             return;
         }
         m_currentPkgIndex = 0;

@@ -27,7 +27,7 @@ public:
 
 public:
     int currentScreen() const;
-    QString currentScreenStr() const;
+    QString screenStr(int screenID) const;
     void setCurrentScreen(const int data);
 
     QString currentActivity() const;

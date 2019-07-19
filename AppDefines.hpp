@@ -40,8 +40,10 @@
 
 #define LOADING_ICON            "/sdcard/DCIM/PDT17/Icons/loadingIcon.png"
 #define LOADING_SCREEN          "/sdcard/DCIM/PDT17/Icons/loadingScreen.png"
+#define LOADING_SCREEN2         "/sdcard/DCIM/PDT17/Icons/loadingScreen2.png"
 #define NEWSFEED_ICON           "/sdcard/DCIM/PDT17/Icons/newsFeedIcon.png"
 #define NEWSFEED_ICON2          "/sdcard/DCIM/PDT17/Icons/newsFeedIcon2.png"
+#define NEWSFEED_ICON3          "/sdcard/DCIM/PDT17/Icons/newsFeedIcon3.png"
 #define SKIP_FIND_FRIEND_BTN    "/sdcard/DCIM/PDT17/Icons/SkipFindFriend.png"
 #define OK_BTN_FOR_SAVE_LOGIN   "/sdcard/DCIM/PDT17/Icons/OKBtnForSaveInfoLogin.png"
 #define LOGIN_SCREEN            "/sdcard/DCIM/PDT17/Icons/FBLoginScreen.png"
@@ -54,10 +56,12 @@
 #define ENGLISH_BTN             "/sdcard/DCIM/PDT17/Icons/EnglishBtn.png"
 #define INCORRECT_PASSWORD      "/sdcard/DCIM/PDT17/Icons/IncorrectPassowrd.png"
 #define CONFIRM_IDENTIFY        "/sdcard/DCIM/PDT17/Icons/ConfirmIdentifyScreen.png"
+#define CONFIRM_IDENTIFY2       "/sdcard/DCIM/PDT17/Icons/ConfirmIdentifyScreen2.png"
 #define CHOOSE_AVATAR           "/sdcard/DCIM/PDT17/Icons/ChooseAvt.png"
 #define SKIP_AVARTAR            "/sdcard/DCIM/PDT17/Icons/SkipAvatar.png"
 #define ADD_FRIEND_SUGGESTION   "/sdcard/DCIM/PDT17/Icons/AddFriendScreen.png"
 #define DOWNLOAD_INFO_BTN       "/sdcard/DCIM/PDT17/Icons/DownloadYourInfomation.png"
+#define MISSING_PWD_SCREEN      "/sdcard/DCIM/PDT17/Icons/MissingPasswordIcon.png"
 
 #define FACEBOOK_LITE_SCREEN    "com.facebook.lite/com.facebook.lite.MainActivity"
 #define FACEBOOK_LITE_PKGNAME   "com.facebook.lite"
