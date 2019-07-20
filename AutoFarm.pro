@@ -61,7 +61,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 INSTALLS += target
 
-INCLUDEPATH += "$$_PRO_FILE_PWD_/../OpenCV-android-sdk/sdk/native/jni/include"
 
 android {
     QT += androidextras
@@ -71,6 +70,7 @@ android {
 #    DEFINES += CLICK_MULTI_POINT
 #    DEFINES += SU_USER
 
+    INCLUDEPATH += "$$_PRO_FILE_PWD_/../OpenCV-android-sdk/sdk/native/jni/include"
     LIBS += \
         -L"$$_PRO_FILE_PWD_/../OpenCV-android-sdk/sdk/native/3rdparty/libs/armeabi-v7a"\
         -L"$$_PRO_FILE_PWD_/../OpenCV-android-sdk/sdk/native/libs/armeabi-v7a"\
@@ -111,6 +111,19 @@ android {
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
     ANDROID_EXTRA_LIBS = \
         $$PWD/../OpenCV-android-sdk/sdk/native/libs/armeabi-v7a/libopencv_java.so
+}
+
+win32 {
+    INCLUDEPATH += "$$_PRO_FILE_PWD_/../OpenCV-Library/install/include"
+
+    LIBS += \
+    -L"$$_PRO_FILE_PWD_/../OpenCV-Library/install/x86/mingw/lib"\
+    -lopencv_core410        \
+    -lopencv_highgui410     \
+    -lopencv_imgcodecs410   \
+    -lopencv_imgproc410     \
+    -lopencv_features2d410  \
+    -lopencv_calib3d410
 }
 
 

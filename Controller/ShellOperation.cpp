@@ -21,7 +21,7 @@ bool ShellOperation::installPackage(QString packagePath)
         return false;
     }else{
         QProcess process;
-        process.start("sh", QStringList() << "-c" << QString("pm install %1").arg(packagePath));
+        process.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("pm install %1").arg(packagePath));
         process.waitForFinished(-1);
 
         LOG << process.readAllStandardError();
@@ -38,11 +38,13 @@ void ShellOperation::callScrollEvent(QPoint point1, QPoint point2)
            .arg(point2.x()).arg(point2.y());
 
     QProcess process;
-    process.start("sh",QStringList() << "-c" << QString("input swipe %1 %2 %3 %4").arg(QString::number(point1.x())).\
+#if 0
+    process.start(SHELL_CMD_PREFIX,QStringList() << "-c" << QString("input swipe %1 %2 %3 %4").arg(QString::number(point1.x())).\
                                                             arg(QString::number(point1.y())).\
                                                             arg(QString::number(point2.x())).\
                                                             arg(QString::number(point2.y())));
-
+#endif
+    process.start(SHELL_CMD_PREFIX, QStringList() << "-c" << "input swipe 500 1200 500 500");
 
     process.waitForFinished(-1);
 }
@@ -51,7 +53,7 @@ QString ShellOperation::getCurrentActivity()
 {
     QString retVal = "";
     QProcess process;
-    process.start("sh", QStringList() << "-c" << QString("dumpsys window windows | grep -E 'mCurrentFocus'"));
+    process.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("dumpsys window windows | grep -E 'mCurrentFocus'"));
     process.waitForFinished(-1);
     QStringList output = QString(process.readAllStandardOutput()).split(' ');
     if(output.length() > 4){
@@ -100,12 +102,7 @@ void ShellOperation::tapScreen(QPoint point)
 {
     LOG << "Tapping at [" << point.x() << "," << point.y() << "]";
     QProcess proc;
-//    proc.start("sh", QStringList() << "-c" << QString("input tap %1 %2").arg(point.x()).arg(point.y()));
-    for(int i = 0; i < 20 ; i++){
-        LOG << QProcess::execute("sh", QStringList() << "-c" << QString("input tap 540 %1").arg(i * 100));
-        delay(100);
-    }
-    proc.start("sh", QStringList() << "-c" << "input tap 539 279");
+    proc.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("input tap %1 %2").arg(point.x()).arg(point.y()));
     proc.waitForFinished(-1);
     LOG << proc.readAllStandardError();
     LOG << proc.readAllStandardOutput();
@@ -117,7 +114,7 @@ bool ShellOperation::enterText(QString text)
     LOG << "Entering text: " << text;
     QProcess proc;
 #ifdef INPUT_STRING
-    proc.start("sh", QStringList() << "-c" << QString("input text %1").arg(text));
+    proc.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("input text %1").arg(text));
     proc.waitForFinished(-1);
     QString error = proc.readAllStandardError();
     if(error != ""){
@@ -128,7 +125,7 @@ bool ShellOperation::enterText(QString text)
     }
 #else
     for(int i = 0; i < text.length(); i++){
-            proc.start("sh", QStringList() << "-c" << QString("input text %1").arg(text.at(i));
+            proc.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("input text %1").arg(text.at(i));
         }
         proc.waitForFinished(-1);
     }
@@ -140,7 +137,7 @@ void ShellOperation::killSpecificApp(QString packageName)
 {
     LOG << "Killing " << packageName;
     QProcess proc;
-    proc.start("sh", QStringList() << "-c" << QString("am force-stop %1").arg(packageName));
+    proc.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("am force-stop %1").arg(packageName));
     proc.waitForFinished(-1);
     delay(100);
     return;
@@ -157,7 +154,7 @@ void ShellOperation::clearPackageData(QString packageName)
 {
     LOG << packageName;
     QProcess proc;
-    proc.start("sh", QStringList() << "-c" << QString("pm clear %1").arg(packageName));
+    proc.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("pm clear %1").arg(packageName));
     proc.waitForFinished(-1);
 }
 
@@ -166,7 +163,7 @@ bool ShellOperation::pressTap()
     LOG << "Pressing Tap Key ...";
     QProcess proc;
     QProcess process;
-    proc.start("sh", QStringList() << "-c" << QString("input keyevent KEYCODE_TAB"));
+    proc.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("input keyevent KEYCODE_TAB"));
     proc.waitForFinished(-1);
     QString error = proc.readAllStandardError();
     if(error != ""){
@@ -182,11 +179,11 @@ DISPLAY_INFO ShellOperation::getDisplayInfo()
     DISPLAY_INFO info;
     QProcess proc;
 
-    proc.start("sh", QStringList() << "-c" << "wm size");
+    proc.start(SHELL_CMD_PREFIX, QStringList() << "-c" << "wm size");
     proc.waitForFinished(-1);
     QString sizeInfo = proc.readAllStandardOutput();
 
-    proc.start("sh", QStringList() << "-c" << "wm density");
+    proc.start(SHELL_CMD_PREFIX, QStringList() << "-c" << "wm density");
     proc.waitForFinished(-1);
     QString dpiInfo = proc.readAllStandardOutput();
 
@@ -204,7 +201,7 @@ DISPLAY_INFO ShellOperation::getDisplayInfo()
 void ShellOperation::removeFile(QString path)
 {
     QProcess process;
-    process.start("sh", QStringList() << "-c" << QString("rm %1").arg(path));
+    process.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("rm %1").arg(path));
     process.waitForFinished(-1);
 }
 
@@ -213,7 +210,7 @@ void ShellOperation::enterKeyBoard()
     LOG << "Pressing Tap Key ...";
     QProcess proc;
     QProcess process;
-    proc.start("sh", QStringList() << "-c" << QString("input keyevent KEYCODE_ENTER"));
+    proc.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("input keyevent KEYCODE_ENTER"));
     proc.waitForFinished(-1);
     QString error = proc.readAllStandardError();
     if(error != ""){
@@ -234,7 +231,7 @@ QString ShellOperation::screenShot(QString fileName)
     path.append(QString("/%1").arg(fileName));
 
     QProcess process;
-    process.start("sh", QStringList() << "-c" << QString("screencap -p %1").arg(path));
+    process.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("screencap -p %1").arg(path));
     process.waitForFinished(-1);
     return path;
 }

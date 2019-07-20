@@ -7,15 +7,20 @@ ImageProcessing::ImageProcessing(QObject *parent) : QObject(parent)
 {
 
 }
-#ifdef ANDROID_KIT
 QPoint ImageProcessing::findImageOnImage(const QString &smallImagePath, const QString &largeImagePath)
 {
     QPoint retVal;
 
+
 //    cv::Mat _smallImage = ImageProcessing::QImage2Mat(QImage(smallImagePath));
 //    cv::Mat _largeImage = ImageProcessing::QImage2Mat(QImage(largeImagePath));
+#ifdef ANDROID_KIT
     cv::Mat _smallImage = cv::imread(smallImagePath.toUtf8().constData(),CV_LOAD_IMAGE_COLOR);
     cv::Mat _largeImage = cv::imread(largeImagePath.toUtf8().constData(),CV_LOAD_IMAGE_COLOR);
+#else
+    cv::Mat _smallImage = cv::imread(smallImagePath.toUtf8().constData(),1);
+    cv::Mat _largeImage = cv::imread(largeImagePath.toUtf8().constData(),1);
+#endif
 
     // Resize image
     float threshold = ImageProcessing::getThreshhold();
@@ -76,9 +81,52 @@ QPoint ImageProcessing::findImageOnImage(const QString &smallImagePath, const QS
         else
             break;
     }
-    LOG << smallImagePath.split("/").last() << " : " << retVal << QString(" %1--%2").arg(threshold).arg(scale);
+//    LOG << smallImagePath.split("/").last() << " : " << retVal << QString(" %1--%2").arg(threshold).arg(scale);
     return retVal;
 }
+
+float ImageProcessing::getThreshhold()
+{
+#ifdef ANDROID_KIT
+    float dpi = MODEL->deviceInfo().disInfo.dpi;
+    if (dpi<160)
+        return 0.83;
+    else if (dpi<213)
+        return 0.83;
+    else if (dpi<320)
+        return 0.8;
+    else if (dpi<480)
+        return 0.8;
+    else if (dpi<640)
+        return 0.8;
+    else /*if (dpi>=640)*/
+        return 0.8;
+#else
+    return 0.8;
+#endif
+}
+
+float ImageProcessing::getScale()
+{
+#ifdef ANDROID_KIT
+    float dpi = MODEL->deviceInfo().disInfo.dpi;
+    if (dpi<160)
+        return 0.263;
+    else if (dpi<213)
+        return 0.3575;
+    else if (dpi<320)
+        return 0.503;
+    else if (dpi<480)
+        return 0.705;
+    else if (dpi<640)
+        return 1;
+    else /*if (dpi>=640)*/
+        return 1.174;
+#else
+    return 1;
+#endif
+}
+#ifdef ANDROID_KIT
 
 QList<QPoint> ImageProcessing::findImageListOnImage(const QString &smallImagePath, const QString &largeImagePath)
 {
@@ -154,37 +202,4 @@ cv::Mat ImageProcessing::QImage2Mat(const QImage &src)
     return result;
 }
 
-float ImageProcessing::getThreshhold()
-{
-    float dpi = MODEL->deviceInfo().disInfo.dpi;
-    if (dpi<160)
-        return 0.83;
-    else if (dpi<213)
-        return 0.83;
-    else if (dpi<320)
-        return 0.8;
-    else if (dpi<480)
-        return 0.8;
-    else if (dpi<640)
-        return 0.8;
-    else /*if (dpi>=640)*/
-        return 0.8;
-}
-
-float ImageProcessing::getScale()
-{
-    float dpi = MODEL->deviceInfo().disInfo.dpi;
-    if (dpi<160)
-        return 0.263;
-    else if (dpi<213)
-        return 0.3575;
-    else if (dpi<320)
-        return 0.503;
-    else if (dpi<480)
-        return 0.705;
-    else if (dpi<640)
-        return 1;
-    else /*if (dpi>=640)*/
-        return 1.174;
-}
 #endif

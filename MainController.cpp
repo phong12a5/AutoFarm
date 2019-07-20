@@ -12,6 +12,9 @@ MainController::MainController(QObject *parent) : QObject(parent)
 {
     m_currentScreen = AppEnums::HMI_UNKNOW_SCREEN;
     m_currentActivity = "";
+    changeScreenTimer.setSingleShot(true);
+    changeScreenTimer.setInterval(60000);
+    QObject::connect(&changeScreenTimer, SIGNAL(timeout()), this, SLOT(onchangeScreenTimerTimeout()));
 }
 
 void MainController::execVipLike()
@@ -30,16 +33,19 @@ void MainController::execVipLike()
             ShellOperation::findAndClick(ENGLISH_BTN);
             delay(100);
         }
-        ShellOperation::findAndClick(EMAIL_FIELD);
+        LOG << "Click email: " << ShellOperation::findAndClick(EMAIL_FIELD);
         delay(1000);
+        LOG << "Enter email";
         ShellOperation::enterText(MODEL->currentControlledUser().uid);
         ShellOperation::enterKeyBoard();
         delay(2000);
-        ShellOperation::findAndClick(PASSWORD_FIELD);
+        LOG << "Click password: " << ShellOperation::findAndClick(PASSWORD_FIELD);
         delay(1000);
+        LOG << "Enter password";
         ShellOperation::enterText(MODEL->currentControlledUser().password);
         ShellOperation::enterKeyBoard();
         delay(2000);
+        LOG << "Click Login button";
         ShellOperation::findAndClick(LOGIN_BTN);
 #endif
     }
@@ -75,7 +81,7 @@ void MainController::execVipLike()
         break;
     case AppEnums::HMI_SAVE_LOGIN_INFO_SCREEN:
 #ifdef ANDROID_KIT
-        ShellOperation::findAndClick(OK_BTN_FOR_SAVE_LOGIN);
+        ShellOperation::findAndClick(OK_BUTTON);
 #endif
         break;
     case AppEnums::HMI_CHOOSE_AVATAR_SCREEN:
@@ -269,9 +275,11 @@ void MainController::startCheckCurrentActivity()
 void MainController::onChangeScreen()
 {
     LOG << "currentScreen: " << screenStr(currentScreen());
+    changeScreenTimer.stop();
     if(MODEL->currentAction()["action"].toString() == "viplike"){
         this->execVipLike();
     }
+    changeScreenTimer.start();
 }
 
 void MainController::onChangeAcitivity()
@@ -307,10 +315,10 @@ void MainController::doAction()
     if(MODEL->currentAction()["action"].toString() == "viplike"){
         if(MODEL->currentAction()["fbid"].toString() != ""){
             this->setCurrentScreen(AppEnums::HMI_UNKNOW_SCREEN);
-            startCheckCurrentScreen();
 #ifdef ANDROID_KIT
             JAVA_COM->openFBLiteWithUserID(MODEL->currentControlledPkg(),"");
 #endif
+            startCheckCurrentScreen();
 
         }else {
             LOG << "fbid is empty";
@@ -342,4 +350,13 @@ void MainController::onDownloadCompleted(QStringList downloadedFile,QStringList 
 {
     LOG << downloadedPackage;
     this->installPackages(downloadedFile,downloadedPackage);
+}
+
+void MainController::onchangeScreenTimerTimeout()
+{
+    LOG << screenStr(currentScreen());
+    if(currentScreen() != AppEnums::HMI_NEW_FEED_SCREEN){
+        ShellOperation::clearPackageData(MODEL->currentControlledPkg());
+        MODEL->nextCurrentControlledObj();
+    }
 }

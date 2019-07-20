@@ -5,8 +5,8 @@ import QtQuick.Controls 2.0
 
 Window {
     id: rootScreen
-    width: 500
-    height: 800
+    width: 480
+    height: 720
     visible: true
 
 
@@ -111,6 +111,30 @@ Window {
                 APP_MODEL.token = tokenField.text
                 APP_MODEL.start()
             }
+        }
+    }
+
+    Image {
+        id: testImage
+        source: APP_MODEL.testingImageSource == ""? "" : "file:///" + APP_MODEL.testingImageSource
+        anchors.centerIn: parent
+        width: parent.width
+        height: parent.height
+        visible: APP_MODEL.testImageMode
+
+        Rectangle{
+            width: parent.width
+            height: textF.contentHeight
+            anchors.fill: textF
+            opacity: 0.7
+        }
+
+        Text{
+            id: textF
+            text: APP_MODEL.screenName
+            font.pixelSize: 15
+            color: "red"
+            anchors.centerIn: parent
         }
     }
 

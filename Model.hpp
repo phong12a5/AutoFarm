@@ -22,6 +22,11 @@ class Model : public QObject
     Q_PROPERTY(QString deviceType READ deviceType CONSTANT)
     Q_PROPERTY(QString logContent READ logContent WRITE setLogContent NOTIFY logContentChanged)
 
+    /* For test checking image */
+    Q_PROPERTY(QString testingImageSource READ testingImageSource WRITE setTestingImageSource NOTIFY testingImageSourceChanged)
+    Q_PROPERTY(QString screenName READ screenName WRITE setScreenName NOTIFY screenNameChanged)
+    Q_PROPERTY(bool testImageMode READ testImageMode CONSTANT)
+
 public:
     static Model* instance();
 
@@ -61,6 +66,13 @@ public:
     void loadUserDataList();
     void saveUserDataList();
 
+    /* For test checking image */
+    QString testingImageSource() const;
+    void setTestingImageSource(QString data);
+    QString screenName() const;
+    void setScreenName(QString data);
+    bool testImageMode();
+
 private:
     explicit Model(QObject *parent = nullptr);
 
@@ -82,6 +94,8 @@ private:
     QList<QJsonObject> m_changedActionList;
     QString m_logContent;
     QStringList m_neededInstallpackageList;
+    QString m_testingImageSource;
+    QString m_screenName;
 
 signals:
     void sigStartProgram();
@@ -91,6 +105,8 @@ signals:
     void currentActionListDone();
     void finishedListObject();
     void logContentChanged();
+    void testingImageSourceChanged();
+    void screenNameChanged();
 
 public slots:
 };

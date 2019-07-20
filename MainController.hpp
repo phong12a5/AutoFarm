@@ -43,6 +43,7 @@ private:
 
     int m_currentScreen;
     QString m_currentActivity;
+    QTimer changeScreenTimer;
 
 signals:
     void currentScreenChanged();
@@ -56,6 +57,7 @@ public slots:
     void updateResult();
     void onFinishedListObject();
     void onDownloadCompleted(QStringList,QStringList);
+    void onchangeScreenTimerTimeout();
 };
 
 #endif // MAINCONTROLLER_H

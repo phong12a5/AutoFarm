@@ -1,5 +1,6 @@
 #include "Model.hpp"
 #include <QWidgetList>
+#include "Processing/ImageProcessing.hpp"
 
 Model* Model::m_instance = nullptr;
 
@@ -41,7 +42,57 @@ void Model::saveJson(QJsonDocument document, QString fileName)
 
 void Model::start()
 {
-    emit sigStartProgram();
+    if(testImageMode()){
+        delay(5000);
+        QDir screenshotDir =  QDir(QDir::currentPath() + "/images/Screenshots");
+        screenshotDir.setNameFilters(QStringList() << "*.png");
+
+        QDir iconDir =  QDir(QDir::currentPath() + "/images/Icons");
+        iconDir.setNameFilters(QStringList() << "*.png");
+
+        foreach (QFileInfo file, screenshotDir.entryInfoList()) {
+            Model::instance()->setTestingImageSource(file.absoluteFilePath());
+            Model::instance()->setScreenName("");
+
+            LOG << Model::instance()->testingImageSource();
+
+            QTimer timer;
+            timer.setInterval(2000);
+            timer.setSingleShot(true);
+
+            QEventLoop event;
+            connect(&timer, SIGNAL(timeout()), &event, SLOT(quit()));
+            timer.start();
+            event.exec();
+
+            foreach (QFileInfo icon, iconDir.entryInfoList()) {
+                QString iconName = icon.absoluteFilePath();
+                LOG << iconName;
+                QPoint result = ImageProcessing::findImageOnImage(iconName, Model::instance()->testingImageSource());
+                if(!result.isNull()){
+                    Model::instance()->setScreenName(Model::instance()->screenName() + "\n" + iconName.split("/").last());
+                }
+
+                QTimer timer2;
+                timer2.setInterval(100);
+                timer2.setSingleShot(true);
+
+                QEventLoop event2;
+                connect(&timer2, SIGNAL(timeout()), &event2, SLOT(quit()));
+
+                if(icon == iconDir.entryInfoList().last()){
+                    Model::instance()->setScreenName(Model::instance()->screenName() + "\n Done");
+                    timer2.setInterval(10000);
+                }
+
+                timer2.start();
+                event2.exec();
+            }
+        }
+        delay(2000);
+    }else{
+        emit sigStartProgram();
+    }
 }
 
 QString Model::token() const
@@ -311,6 +362,37 @@ void Model::saveUserDataList()
         ++i;
     }
     this->saveJson(QJsonDocument(objectArray),USER_DATA_LIST_PATH);
+}
+
+QString Model::testingImageSource() const
+{
+    return m_testingImageSource;
+}
+
+void Model::setTestingImageSource(QString data)
+{
+    if(m_testingImageSource != data){
+        m_testingImageSource = data;
+        emit testingImageSourceChanged();
+    }
+}
+
+QString Model::screenName() const
+{
+    return m_screenName;
+}
+
+void Model::setScreenName(QString data)
+{
+    if(m_screenName != data){
+        m_screenName = data;
+        emit screenNameChanged();
+    }
+}
+
+bool Model::testImageMode()
+{
+    return false;
 }
 
 
