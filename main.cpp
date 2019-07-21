@@ -15,6 +15,14 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
+#ifdef SU_USER
+    while(QProcess::execute("su -c ls") != 0){
+        delay(10000);
+        LOG << "Request Superuser again!";
+    }
+#endif
+    LOG << "Superuser is granted!";
+
     AppMain appMain;
     appMain.initApplication(engine);
 

@@ -68,7 +68,7 @@ android {
     DEFINES += ANDROID_KIT
     DEFINES += INPUT_STRING
 #    DEFINES += CLICK_MULTI_POINT
-#    DEFINES += SU_USER
+    DEFINES += SU_USER
 
     INCLUDEPATH += "$$_PRO_FILE_PWD_/../OpenCV-android-sdk/sdk/native/jni/include"
     LIBS += \
