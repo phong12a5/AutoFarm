@@ -171,13 +171,14 @@ void ShellOperation::enterKeyBoard()
 
 QString ShellOperation::screenShot(QString fileName)
 {
-    QString path = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
-    if (path.isEmpty()){
-        LOG << "Could't not save to " << path;
-        return QString("");
-    }
+//    QString path = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+//    if (path.isEmpty()){
+//        LOG << "Could't not save to " << path;
+//        return QString("");
+//    }
+    QString path = "/sdcard/Pictures/screen.png";
 
-    path.append(QString("/%1").arg(fileName));
+//    path.append(QString("/%1").arg(fileName));
     ShellOperation::shellCommand(QString("screencap -p %1").arg(path));
     return path;
 }
