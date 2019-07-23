@@ -40,6 +40,9 @@ bool CheckCurrSrcThread::isCurrentScreen(int screenID)
         case AppEnums::HMI_START_UP_SCREEN:
         retVal = isOnScreen(LOADING_SCREEN2);
         break;
+    case AppEnums::HMI_SELECT_LANGUAGE_SCREEN:
+        retVal = isOnScreen(SELECT_LANGUAGE_SCREEN);
+        break;
     case AppEnums::HMI_LOGIN_SCREEN:
         retVal = isOnScreen(LOGIN_SCREEN_1);
         break;
@@ -101,6 +104,7 @@ void CheckCurrSrcThread::onUpdateCurrentScreen()
     int currentScreen = MAIN_CTRL->currentScreen();
     screenPiorityOrder <<   AppEnums::HMI_START_UP_SCREEN
                        <<   AppEnums::HMI_NEW_FEED_SCREEN
+                       <<   AppEnums::HMI_SELECT_LANGUAGE_SCREEN
                        <<   AppEnums::HMI_LOGIN_SCREEN
                        <<   AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN
                        <<   AppEnums::HMI_MISSING_PASSWORD_SCREEN

@@ -8,6 +8,7 @@ ShellOperation::ShellOperation(QObject *parent) : QObject(parent)
 
 }
 
+#ifdef ANDROID_KIT
 bool ShellOperation::shellCommand(QString cmd)
 {
        int retVal = QProcess::execute("su", QStringList() << "-c" << cmd);
@@ -25,7 +26,6 @@ bool ShellOperation::shellCommand(QString cmd, QString &output)
 }
 
 
-#ifdef ANDROID_KIT
 
 bool ShellOperation::installPackage(QString packagePath)
 {
@@ -171,14 +171,7 @@ void ShellOperation::enterKeyBoard()
 
 QString ShellOperation::screenShot(QString fileName)
 {
-//    QString path = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
-//    if (path.isEmpty()){
-//        LOG << "Could't not save to " << path;
-//        return QString("");
-//    }
-    QString path = "/sdcard/Pictures/screen.png";
-
-//    path.append(QString("/%1").arg(fileName));
+    QString path = QString("/sdcard/Pictures/%1").arg(fileName);
     ShellOperation::shellCommand(QString("screencap -p %1").arg(path));
     return path;
 }

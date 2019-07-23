@@ -24,6 +24,11 @@ void MainController::execVipLike()
     case AppEnums::HMI_START_UP_SCREEN:
         // Do nothing
         break;
+    case AppEnums::HMI_SELECT_LANGUAGE_SCREEN:
+#ifdef ANDROID_KIT
+        ShellOperation::findAndClick(ENGLISH_BTN);
+#endif
+        break;
     case AppEnums::HMI_LOGIN_SCREEN:
     {
 #ifdef ANDROID_KIT
@@ -202,6 +207,9 @@ QString MainController::screenStr(int screenID) const
     case AppEnums::HMI_START_UP_SCREEN:
         retVal = "HMI_START_UP_SCREEN";
         break;
+    case AppEnums::HMI_SELECT_LANGUAGE_SCREEN:
+        retVal = "HMI_SELECT_LANGUAGE_SCREEN";
+        break;
     case AppEnums::HMI_LOGIN_SCREEN:
         retVal = "HMI_LOGIN_SCREEN";
         break;
@@ -340,7 +348,9 @@ void MainController::onFinishedListObject()
 {
     LOG << "The last user: " << MODEL->currentControlledUser().uid;
     if(MODEL->deviceInfo().isNox == "true"){
+#ifdef ANDROID_KIT
         ShellOperation::shellCommand(QString("touch %1%2").arg(ENDSCRIPT_PATH).arg(ENDSCRIPT_FILENAME));
+#endif
     }
 }
 
@@ -354,7 +364,9 @@ void MainController::onchangeScreenTimerTimeout()
 {
     LOG << screenStr(currentScreen());
     if(currentScreen() != AppEnums::HMI_NEW_FEED_SCREEN){
+#ifdef ANDROID_KIT
         ShellOperation::clearPackageData(MODEL->currentControlledPkg());
+#endif
         MODEL->nextCurrentControlledObj();
     }
 }

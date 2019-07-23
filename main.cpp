@@ -5,7 +5,6 @@
 #include "Controller/ShellOperation.hpp"
 #include "Processing/ImageProcessing.hpp"
 #include "AppMain.hpp"
-#include <QPoint>
 
 int main(int argc, char *argv[])
 {
