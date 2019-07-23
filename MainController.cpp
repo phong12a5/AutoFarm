@@ -340,9 +340,7 @@ void MainController::onFinishedListObject()
 {
     LOG << "The last user: " << MODEL->currentControlledUser().uid;
     if(MODEL->deviceInfo().isNox == "true"){
-        QProcess process;
-        process.start(QString("touch %1%2").arg(ENDSCRIPT_PATH).arg(ENDSCRIPT_FILENAME));
-        process.waitForFinished(-1);
+        ShellOperation::shellCommand(QString("touch %1%2").arg(ENDSCRIPT_PATH).arg(ENDSCRIPT_FILENAME));
     }
 }
 

@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include "AppDefines.hpp"
-#include "QProcess"
 #include "QFile"
 
 #ifdef ANDROID_KIT

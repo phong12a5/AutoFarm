@@ -18,6 +18,8 @@ private:
 
 public:
 #ifdef ANDROID_KIT
+    static bool shellCommand(QString cmd);
+    static bool shellCommand(QString cmd, QString& output);
     static bool installPackage(QString packagePath);
     static QString screenShot(QString fileName = "screen.png");
     static void callScrollEvent(QPoint point1, QPoint point2);

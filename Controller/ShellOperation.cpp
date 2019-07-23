@@ -8,6 +8,22 @@ ShellOperation::ShellOperation(QObject *parent) : QObject(parent)
 
 }
 
+bool ShellOperation::shellCommand(QString cmd)
+{
+       int retVal = QProcess::execute("su", QStringList() << "-c" << cmd);
+       LOG << retVal << " : " << cmd;
+       return retVal == 0;
+}
+
+bool ShellOperation::shellCommand(QString cmd, QString &output)
+{
+    QProcess process;
+    process.start("su", QStringList() << "-c" << cmd);
+    process.waitForFinished(-1);
+    output = process.readAllStandardOutput();
+    return process.exitCode() == 0;
+}
+
 
 #ifdef ANDROID_KIT
 
@@ -20,15 +36,7 @@ bool ShellOperation::installPackage(QString packagePath)
         LOG << "packagePath not existed";
         return false;
     }else{
-        QProcess process;
-//        process.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("pm install %1").arg(packagePath));
-        process.start(QString("su -c 'pm install %1'").arg(packagePath));
-        process.waitForFinished(-1);
-
-        LOG << process.readAllStandardError();
-        LOG << process.readAllStandardOutput();
-
-        return true;
+        return ShellOperation::shellCommand(QString("pm install %1").arg(packagePath));
     }
 }
 
@@ -38,28 +46,20 @@ void ShellOperation::callScrollEvent(QPoint point1, QPoint point2)
            .arg(point1.x()).arg(point1.y())\
            .arg(point2.x()).arg(point2.y());
 
-    QProcess process;
-#if 0
-    process.start(SHELL_CMD_PREFIX,QStringList() << "-c" << QString("input swipe %1 %2 %3 %4").arg(QString::number(point1.x())).\
-                                                            arg(QString::number(point1.y())).\
-                                                            arg(QString::number(point2.x())).\
-                                                            arg(QString::number(point2.y())));
-#endif
-//    process.start(SHELL_CMD_PREFIX, QStringList() << "-c" << "input swipe 500 1200 500 500");
-    process.start("su -c 'input swipe 500 1200 500 500'");
-
-    process.waitForFinished(-1);
+    ShellOperation::shellCommand(QString("input swipe %1 %2 %3 %4").arg(QString::number(point1.x())).\
+                                 arg(QString::number(point1.y())).\
+                                 arg(QString::number(point2.x())).\
+                                 arg(QString::number(point2.y())));
 }
 
 QString ShellOperation::getCurrentActivity()
 {
     QString retVal = "";
-    QProcess process;
-    process.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("dumpsys window windows | grep -E 'mCurrentFocus'"));
-    process.waitForFinished(-1);
-    QStringList output = QString(process.readAllStandardOutput()).split(' ');
-    if(output.length() > 4){
-        retVal = QString(output.at(4)).simplified().remove('}');
+    QString output;
+    ShellOperation::shellCommand(QString("dumpsys window windows | grep -E 'mCurrentFocus'"),output);
+    QStringList outputList = output.split(' ');
+    if(outputList.length() > 4){
+        retVal = QString(outputList.at(4)).simplified().remove('}');
     }
     return retVal;
 }
@@ -103,49 +103,19 @@ bool ShellOperation::findAndClickList(QString iconPath)
 void ShellOperation::tapScreen(QPoint point)
 {
     LOG << "Tapping at [" << point.x() << "," << point.y() << "]";
-    QProcess proc;
-//    proc.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("input tap %1 %2").arg(point.x()).arg(point.y()));
-    proc.start(QString("su -c 'input tap %1 %2'").arg(point.x()).arg(point.y()));
-    proc.waitForFinished(-1);
-    LOG << proc.readAllStandardError();
-    LOG << proc.readAllStandardOutput();
-    return;
+    ShellOperation::shellCommand(QString("input tap %1 %2").arg(point.x()).arg(point.y()));
 }
 
 bool ShellOperation::enterText(QString text)
 {
     LOG << "Entering text: " << text;
-    QProcess proc;
-#ifdef INPUT_STRING
-//    proc.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("input text %1").arg(text));
-    proc.start(QString("su -c 'input text %1'").arg(text));
-    proc.waitForFinished(-1);
-    QString error = proc.readAllStandardError();
-    if(error != ""){
-        LOG << "ERROR: " << error;
-        return false;
-    }else {
-        return true;
-    }
-#else
-    for(int i = 0; i < text.length(); i++){
-            proc.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("input text %1").arg(text.at(i));
-        }
-        proc.waitForFinished(-1);
-    }
-    return true;
-#endif
+    return ShellOperation::shellCommand(QString("input text %1").arg(text));
 }
 
 void ShellOperation::killSpecificApp(QString packageName)
 {
     LOG << "Killing " << packageName;
-    QProcess proc;
-//    proc.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("am force-stop %1").arg(packageName));
-    proc.start(QString("su -c 'am force-stop %1'").arg(packageName));
-    proc.waitForFinished(-1);
-    delay(100);
-    return;
+    ShellOperation::shellCommand(QString("am force-stop %1").arg(packageName));
 }
 
 QPoint ShellOperation::findAnImageOnScreen(QString iconPath)
@@ -158,43 +128,24 @@ QPoint ShellOperation::findAnImageOnScreen(QString iconPath)
 void ShellOperation::clearPackageData(QString packageName)
 {
     LOG << packageName;
-    QProcess proc;
-//    proc.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("pm clear %1").arg(packageName));
-    proc.start(QString("su -c 'pm clear %1'").arg(packageName));
-    proc.waitForFinished(-1);
+    ShellOperation::shellCommand(QString("pm clear %1").arg(packageName));
 }
 
 bool ShellOperation::pressTap()
 {
     LOG << "Pressing Tap Key ...";
-    QProcess proc;
-    QProcess process;
-//    proc.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("input keyevent KEYCODE_TAB"));
-    proc.start("su -c 'input keyevent KEYCODE_TAB'");
-    proc.waitForFinished(-1);
-    QString error = proc.readAllStandardError();
-    if(error != ""){
-        LOG << "ERROR: " << error;
-        return false;
-    }else {
-        return true;
-    }
+    return ShellOperation::shellCommand("input keyevent KEYCODE_TAB");
 }
 
 DISPLAY_INFO ShellOperation::getDisplayInfo()
 {
     DISPLAY_INFO info;
-    QProcess proc;
 
-//    proc.start(SHELL_CMD_PREFIX, QStringList() << "-c" << "wm size");
-    proc.start("su -c 'wm size'");
-    proc.waitForFinished(-1);
-    QString sizeInfo = proc.readAllStandardOutput();
+    QString sizeInfo;
+    ShellOperation::shellCommand("wm size",sizeInfo);
 
-//    proc.start(SHELL_CMD_PREFIX, QStringList() << "-c" << "wm density");
-    proc.start("su -c 'wm density'");
-    proc.waitForFinished(-1);
-    QString dpiInfo = proc.readAllStandardOutput();
+    QString dpiInfo;
+    ShellOperation::shellCommand("wm density",dpiInfo);
 
     if(sizeInfo.contains("Physical size")){
         info.width = (sizeInfo.split(":").length() < 2? info.width : sizeInfo.split(":").at(1).simplified().split("x").at(0).simplified().toInt());
@@ -209,26 +160,13 @@ DISPLAY_INFO ShellOperation::getDisplayInfo()
 
 void ShellOperation::removeFile(QString path)
 {
-    QProcess process;
-//    process.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("rm %1").arg(path));
-    process.start(QString("su -c 'rm %1'").arg(path));
-    process.waitForFinished(-1);
+    ShellOperation::shellCommand(QString("rm %1").arg(path));
 }
 
 void ShellOperation::enterKeyBoard()
 {
     LOG << "Pressing Tap Key ...";
-    QProcess proc;
-    QProcess process;
-//    proc.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("input keyevent KEYCODE_ENTER"));
-    proc.start("su -c 'input keyevent KEYCODE_ENTER'");
-    proc.waitForFinished(-1);
-    QString error = proc.readAllStandardError();
-    if(error != ""){
-        LOG << "ERROR: " << error;
-    }else {
-        // Do nothing
-    }
+    ShellOperation::shellCommand("input keyevent KEYCODE_ENTER");
 }
 
 QString ShellOperation::screenShot(QString fileName)
@@ -240,11 +178,7 @@ QString ShellOperation::screenShot(QString fileName)
     }
 
     path.append(QString("/%1").arg(fileName));
-
-    QProcess process;
-//    process.start(SHELL_CMD_PREFIX, QStringList() << "-c" << QString("screencap -p %1").arg(path));
-    process.start(QString("su -c 'screencap -p %1'").arg(path));
-    process.waitForFinished(-1);
+    ShellOperation::shellCommand(QString("screencap -p %1").arg(path));
     return path;
 }
 #endif
