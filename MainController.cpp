@@ -38,13 +38,13 @@ void MainController::execVipLike()
             ShellOperation::findAndClick(ENGLISH_BTN);
             delay(100);
         }
-        LOG << "Click email: " << ShellOperation::findAndClick(EMAIL_FIELD);
+        LOG << "Click email: " << ShellOperation::findAndClick(EMAIL_FIELD, true);
         delay(1000);
         LOG << "Enter email";
         ShellOperation::enterText(MODEL->currentControlledUser().uid);
         ShellOperation::enterKeyBoard();
         delay(2000);
-        LOG << "Click password: " << ShellOperation::findAndClick(PASSWORD_FIELD);
+        LOG << "Click password: " << ShellOperation::findAndClick(PASSWORD_FIELD, true);
         delay(1000);
         LOG << "Enter password";
         ShellOperation::enterText(MODEL->currentControlledUser().password);

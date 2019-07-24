@@ -64,18 +64,26 @@ QString ShellOperation::getCurrentActivity()
     return retVal;
 }
 
-bool ShellOperation::findAndClick(QString iconPath)
+bool ShellOperation::findAndClick(QString iconPath, bool repeat)
 {
     LOG << iconPath;
     QString screenImgPath = ShellOperation::screenShot();
     QPoint point = ImageProcessing::findImageOnImage(iconPath,screenImgPath);
     if(!point.isNull()){
+        if(repeat){
+            ShellOperation::tapScreen(point);
+            delay(200);
+        }
         ShellOperation::tapScreen(point);
         return true;
     }else{
         screenImgPath = ShellOperation::screenShot();
         point = ImageProcessing::findImageOnImage(iconPath,screenImgPath);
         if(!point.isNull()){
+            if(repeat){
+                ShellOperation::tapScreen(point);
+                delay(200);
+            }
             ShellOperation::tapScreen(point);
             return true;
         }else{
@@ -100,10 +108,10 @@ bool ShellOperation::findAndClickList(QString iconPath)
     }
 }
 
-void ShellOperation::tapScreen(QPoint point)
+bool ShellOperation::tapScreen(QPoint point)
 {
     LOG << "Tapping at [" << point.x() << "," << point.y() << "]";
-    ShellOperation::shellCommand(QString("input tap %1 %2").arg(point.x()).arg(point.y()));
+    return ShellOperation::shellCommand(QString("input tap %1 %2").arg(point.x()).arg(point.y()));
 }
 
 bool ShellOperation::enterText(QString text)

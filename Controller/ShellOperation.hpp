@@ -24,9 +24,9 @@ public:
     static QString screenShot(QString fileName = "screen.png");
     static void callScrollEvent(QPoint point1, QPoint point2);
     static QString getCurrentActivity();
-    static bool findAndClick(QString iconPath);
+    static bool findAndClick(QString iconPath, bool repeat = false);
     static bool findAndClickList(QString iconPath);
-    static void tapScreen(QPoint point);
+    static bool tapScreen(QPoint point);
     static bool enterText(QString text);
     static void killSpecificApp(QString packageName);
     static QPoint findAnImageOnScreen(QString iconPath);

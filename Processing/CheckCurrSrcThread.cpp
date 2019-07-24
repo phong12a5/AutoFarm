@@ -102,18 +102,32 @@ void CheckCurrSrcThread::onUpdateCurrentScreen()
 
     QList<int> screenPiorityOrder;
     int currentScreen = MAIN_CTRL->currentScreen();
-    screenPiorityOrder <<   AppEnums::HMI_START_UP_SCREEN
-                       <<   AppEnums::HMI_NEW_FEED_SCREEN
-                       <<   AppEnums::HMI_SELECT_LANGUAGE_SCREEN
-                       <<   AppEnums::HMI_LOGIN_SCREEN
-                       <<   AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN
-                       <<   AppEnums::HMI_MISSING_PASSWORD_SCREEN
-                       <<   AppEnums::HMI_INCORRECT_PASSWORD_SCREEN
-                       <<   AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN
-                       <<   AppEnums::HMI_SAVE_LOGIN_INFO_SCREEN
-                       <<   AppEnums::HMI_CHOOSE_AVATAR_SCREEN
-                       <<   AppEnums::HMI_TURNON_FIND_FRIEND_SCREEN
-                       <<   AppEnums::HMI_ADDFRIEND_SUGGESTION_SCREEN;
+    if(currentScreen == AppEnums::HMI_LOGIN_SCREEN){
+        screenPiorityOrder <<   AppEnums::HMI_START_UP_SCREEN
+                           <<   AppEnums::HMI_NEW_FEED_SCREEN
+                           <<   AppEnums::HMI_SELECT_LANGUAGE_SCREEN
+                           <<   AppEnums::HMI_LOGIN_SCREEN
+                           <<   AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN
+                           <<   AppEnums::HMI_MISSING_PASSWORD_SCREEN
+                           <<   AppEnums::HMI_INCORRECT_PASSWORD_SCREEN
+                           <<   AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN
+                           <<   AppEnums::HMI_SAVE_LOGIN_INFO_SCREEN
+                           <<   AppEnums::HMI_CHOOSE_AVATAR_SCREEN
+                           <<   AppEnums::HMI_TURNON_FIND_FRIEND_SCREEN
+                           <<   AppEnums::HMI_ADDFRIEND_SUGGESTION_SCREEN;
+    }else{
+        screenPiorityOrder <<   AppEnums::HMI_START_UP_SCREEN
+                           <<   AppEnums::HMI_NEW_FEED_SCREEN
+                           <<   AppEnums::HMI_SELECT_LANGUAGE_SCREEN
+                           <<   AppEnums::HMI_LOGIN_SCREEN
+//                           <<   AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN
+//                           <<   AppEnums::HMI_MISSING_PASSWORD_SCREEN
+//                           <<   AppEnums::HMI_INCORRECT_PASSWORD_SCREEN
+//                           <<   AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN
+//                           <<   AppEnums::HMI_SAVE_LOGIN_INFO_SCREEN
+                           <<   AppEnums::HMI_CHOOSE_AVATAR_SCREEN
+                           <<   AppEnums::HMI_TURNON_FIND_FRIEND_SCREEN
+                           <<   AppEnums::HMI_ADDFRIEND_SUGGESTION_SCREEN;    }
 
     QList<int> checkedScreenList = screenPiorityOrder;
     if(screenPiorityOrder.contains(currentScreen)){
