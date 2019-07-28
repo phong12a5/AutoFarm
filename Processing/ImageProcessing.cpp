@@ -11,7 +11,6 @@ QPoint ImageProcessing::findImageOnImage(const QString &smallImagePath, const QS
 {
     QPoint retVal;
 
-
 //    cv::Mat _smallImage = ImageProcessing::QImage2Mat(QImage(smallImagePath));
 //    cv::Mat _largeImage = ImageProcessing::QImage2Mat(QImage(largeImagePath));
 #ifdef ANDROID_KIT

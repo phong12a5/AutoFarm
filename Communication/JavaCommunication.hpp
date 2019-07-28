@@ -27,6 +27,7 @@ public:
     void openFBLiteWithUserID(QString packageName, QString userID) const;
     bool installFacebookLite(QString apkPath);
 
+    bool requestPermission();
     QString getGoogleSF();
     QString getDeviceIMEI();
     QString getDeiceIMSI();

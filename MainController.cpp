@@ -12,9 +12,9 @@ MainController::MainController(QObject *parent) : QObject(parent)
 {
     m_currentScreen = AppEnums::HMI_UNKNOW_SCREEN;
     m_currentActivity = "";
-    changeScreenTimer.setSingleShot(true);
-    changeScreenTimer.setInterval(60000);
-    QObject::connect(&changeScreenTimer, SIGNAL(timeout()), this, SLOT(onchangeScreenTimerTimeout()));
+    m_changeScreenTimer.setSingleShot(true);
+    m_changeScreenTimer.setInterval(60000);
+    QObject::connect(&m_changeScreenTimer, SIGNAL(timeout()), this, SLOT(onchangeScreenTimerTimeout()));
 }
 
 void MainController::execVipLike()
@@ -32,26 +32,28 @@ void MainController::execVipLike()
     case AppEnums::HMI_LOGIN_SCREEN:
     {
 #ifdef ANDROID_KIT
-        QPoint tmp_point = ShellOperation::findAnImageOnScreen(LOGIN_BTN);
-        if(tmp_point.isNull()){
-            LOG << "Couldn't find Login button";
-            ShellOperation::findAndClick(ENGLISH_BTN);
-            delay(100);
-        }
-        LOG << "Click email: " << ShellOperation::findAndClick(EMAIL_FIELD, true);
+        ShellOperation::findAndClick(ENGLISH_BTN);
+        delay(500);
+        ShellOperation::tapScreen(QPoint(EMAIL_FIELD_POS_X * (MODEL->deviceInfo().disInfo.width/STD_SCREEN_WIDTH),
+                                         EMAIL_FIELD_POS_Y * (MODEL->deviceInfo().disInfo.height/STD_SCREEN_HEIGHT)), true);
+
         delay(1000);
-        LOG << "Enter email";
         ShellOperation::enterText(MODEL->currentControlledUser().uid);
-        ShellOperation::enterKeyBoard();
-        delay(2000);
-        LOG << "Click password: " << ShellOperation::findAndClick(PASSWORD_FIELD, true);
+        if(MODEL->deviceType() != "Nox Device"){
+            ShellOperation::enterKeyBoard();
+        }
+
+        delay(500);
+        ShellOperation::tapScreen(QPoint(PASSWD_FIELD_POS_X * (MODEL->deviceInfo().disInfo.width/STD_SCREEN_WIDTH),
+                                         PASSWD_FIELD_POS_Y * (MODEL->deviceInfo().disInfo.height/STD_SCREEN_HEIGHT)), true);
         delay(1000);
-        LOG << "Enter password";
         ShellOperation::enterText(MODEL->currentControlledUser().password);
+        if(MODEL->deviceType() != "Nox Device"){
         ShellOperation::enterKeyBoard();
-        delay(2000);
-        LOG << "Click Login button";
-        ShellOperation::findAndClick(LOGIN_BTN);
+        }
+
+        delay(1000);
+        LOG << "Click Login button: " << ShellOperation::findAndClick(LOGIN_BTN);
 #endif
     }
         break;
@@ -283,11 +285,11 @@ void MainController::startCheckCurrentActivity()
 void MainController::onChangeScreen()
 {
     LOG << "currentScreen: " << screenStr(currentScreen());
-    changeScreenTimer.stop();
+    m_changeScreenTimer.stop();
     if(MODEL->currentAction()["action"].toString() == "viplike"){
         this->execVipLike();
     }
-    changeScreenTimer.start();
+    m_changeScreenTimer.start();
 }
 
 void MainController::onChangeAcitivity()
@@ -357,12 +359,22 @@ void MainController::onFinishedListObject()
 void MainController::onDownloadCompleted(QStringList downloadedFile,QStringList downloadedPackage)
 {
     LOG << downloadedPackage;
+    LOG << downloadedFile;
+
     this->installPackages(downloadedFile,downloadedPackage);
 }
 
 void MainController::onchangeScreenTimerTimeout()
 {
     LOG << screenStr(currentScreen());
+    if(currentScreen() == AppEnums::HMI_LOGIN_SCREEN){
+        LOG << "Click Login again!";
+        if(ShellOperation::findAndClick(LOGIN_BTN)){
+            m_changeScreenTimer.start();
+            return;
+        }
+    }
+
     if(currentScreen() != AppEnums::HMI_NEW_FEED_SCREEN){
 #ifdef ANDROID_KIT
         ShellOperation::clearPackageData(MODEL->currentControlledPkg());

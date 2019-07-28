@@ -12,8 +12,7 @@ ShellOperation::ShellOperation(QObject *parent) : QObject(parent)
 bool ShellOperation::shellCommand(QString cmd)
 {
        int retVal = QProcess::execute("su", QStringList() << "-c" << cmd);
-       LOG << retVal << " : " << cmd;
-       return retVal == 0;
+       return retVal >= 0;
 }
 
 bool ShellOperation::shellCommand(QString cmd, QString &output)
@@ -30,14 +29,15 @@ bool ShellOperation::shellCommand(QString cmd, QString &output)
 bool ShellOperation::installPackage(QString packagePath)
 {
     LOG << packagePath;
-    LOG << "Thread ID " << QThread::currentThreadId();
-
+    bool retVal = false;
     if(!QFile(packagePath).exists()){
         LOG << "packagePath not existed";
-        return false;
+        retVal = false;
     }else{
-        return ShellOperation::shellCommand(QString("pm install %1").arg(packagePath));
+        retVal = ShellOperation::shellCommand(QString("pm install %1").arg(packagePath));
     }
+    LOG << packagePath << " --- retVal: " << retVal;
+    return retVal;
 }
 
 void ShellOperation::callScrollEvent(QPoint point1, QPoint point2)
@@ -69,27 +69,14 @@ bool ShellOperation::findAndClick(QString iconPath, bool repeat)
     LOG << iconPath;
     QString screenImgPath = ShellOperation::screenShot();
     QPoint point = ImageProcessing::findImageOnImage(iconPath,screenImgPath);
-    if(!point.isNull()){
-        if(repeat){
-            ShellOperation::tapScreen(point);
-            delay(200);
-        }
-        ShellOperation::tapScreen(point);
-        return true;
-    }else{
+    if(point.isNull()){
         screenImgPath = ShellOperation::screenShot();
         point = ImageProcessing::findImageOnImage(iconPath,screenImgPath);
-        if(!point.isNull()){
-            if(repeat){
-                ShellOperation::tapScreen(point);
-                delay(200);
-            }
-            ShellOperation::tapScreen(point);
-            return true;
-        }else{
+        if(point.isNull()){
             return false;
         }
     }
+    return ShellOperation::tapScreen(point, repeat);
 }
 
 bool ShellOperation::findAndClickList(QString iconPath)
@@ -108,10 +95,16 @@ bool ShellOperation::findAndClickList(QString iconPath)
     }
 }
 
-bool ShellOperation::tapScreen(QPoint point)
+bool ShellOperation::tapScreen(QPoint point, bool repeat)
 {
     LOG << "Tapping at [" << point.x() << "," << point.y() << "]";
-    return ShellOperation::shellCommand(QString("input tap %1 %2").arg(point.x()).arg(point.y()));
+    bool retVal = false;
+    retVal = ShellOperation::shellCommand(QString("input tap %1 %2").arg(point.x()).arg(point.y()));
+    if(repeat){
+        delay(200);
+        retVal &= ShellOperation::shellCommand(QString("input tap %1 %2").arg(point.x()).arg(point.y()));
+    }
+    return retVal;
 }
 
 bool ShellOperation::enterText(QString text)
@@ -137,6 +130,12 @@ void ShellOperation::clearPackageData(QString packageName)
 {
     LOG << packageName;
     ShellOperation::shellCommand(QString("pm clear %1").arg(packageName));
+    ShellOperation::stopApp(packageName);
+}
+
+void ShellOperation::stopApp(QString packageName)
+{
+    ShellOperation::shellCommand(QString("am force-stop %1").arg(packageName));
 }
 
 bool ShellOperation::pressTap()
@@ -179,6 +178,7 @@ void ShellOperation::enterKeyBoard()
 
 QString ShellOperation::screenShot(QString fileName)
 {
+//    QString path = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + QString("/%1").arg(fileName);
     QString path = QString("/sdcard/Pictures/%1").arg(fileName);
     ShellOperation::shellCommand(QString("screencap -p %1").arg(path));
     return path;

@@ -61,6 +61,19 @@ void AppMain::initApplication(QQmlApplicationEngine &engine)
     LOG << _deviceInfo.disInfo.dpi;
 #endif
 
+    QString _token;
+    ShellOperation::shellCommand(QString("getprop %1").arg(TOKEN_PROP_KEY),_token);
+    _token.simplified();
+
+    LOG << "_token: " << _token;
+
+    if(!_token.isEmpty() && _token.contains("@")){
+        MODEL->setToken(_token.section("@",1,1));
+    }else{
+        MODEL->loadAppConfig();
+    }
+
+
     //Connect  signal - slot
     this->connectSignalSlot();
 }

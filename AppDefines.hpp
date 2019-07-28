@@ -13,10 +13,13 @@
 
 #define CURRENT_DIR             QDir::currentPath()+"/"
 #define USER_DATA_LIST_PATH     CURRENT_DIR+"userDataList.json"
+#define CONFIG_FILE_PATH        CURRENT_DIR+"config.json"
+
 #define API_SERVER              "https://api.autofarmer.xyz/api/"
 #define DCIM_FOLDER             "/sdcard/DCIM/"
 #define ENDSCRIPT_PATH          "/sdcard/DCIM/"
 #define ENDSCRIPT_FILENAME      "endScript.st"
+#define INITSCRIPT_FILENAME     "/sdcard/DCIM/initApp.st"
 
 #ifdef SU_USER
 #define SHELL_CMD_PREFIX        "su"
@@ -55,7 +58,16 @@
 #define FACEBOOK_LITE_PKGNAME   "com.facebook.lite"
 #define FACEBOOK_LITE_ACT       "MainActivity"
 
-#define NUMBER_CLICK            2
+#define TOKEN_PROP_KEY          "farm_token"
+
+#define NUMBER_CLICK            5
+
+#define EMAIL_FIELD_POS_X       540
+#define EMAIL_FIELD_POS_Y       310
+#define PASSWD_FIELD_POS_X      540
+#define PASSWD_FIELD_POS_Y      520
+#define STD_SCREEN_WIDTH        1080
+#define STD_SCREEN_HEIGHT       1920
 
 typedef struct display_info
 {

@@ -66,6 +66,9 @@ public:
     void loadUserDataList();
     void saveUserDataList();
 
+    void loadAppConfig();
+    void saveAppConfig();
+
     /* For test checking image */
     QString testingImageSource() const;
     void setTestingImageSource(QString data);

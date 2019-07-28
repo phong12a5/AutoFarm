@@ -102,8 +102,10 @@ QString Model::token() const
 
 void Model::setToken(QString data)
 {
+    LOG << data;
     if(m_token != data){
         m_token = data;
+        this->saveAppConfig();
         emit tokenChanged();
     }
 }
@@ -362,6 +364,33 @@ void Model::saveUserDataList()
         ++i;
     }
     this->saveJson(QJsonDocument(objectArray),USER_DATA_LIST_PATH);
+}
+
+void Model::loadAppConfig()
+{
+    QFile file(CONFIG_FILE_PATH);
+    if(file.exists()){
+
+        QJsonDocument appConfig = this->loadJson(CONFIG_FILE_PATH);
+        if(!appConfig.isNull()){
+            QJsonObject obj = appConfig.object();
+            LOG << "AppConfig: " << obj;
+            QString _token = obj[TOKEN_PROP_KEY].toString();
+            if(!_token.isEmpty()){
+                this->setToken(_token);
+            }
+        }
+    }else{
+        LOG << CONFIG_FILE_PATH << " not exist";
+    }
+}
+
+void Model::saveAppConfig()
+{
+    LOG;
+    QJsonObject obj;
+    obj[TOKEN_PROP_KEY] = this->token();
+    this->saveJson(QJsonDocument(obj),CONFIG_FILE_PATH);
 }
 
 QString Model::testingImageSource() const

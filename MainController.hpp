@@ -43,7 +43,7 @@ private:
 
     int m_currentScreen;
     QString m_currentActivity;
-    QTimer changeScreenTimer;
+    QTimer m_changeScreenTimer;
 
 signals:
     void currentScreenChanged();

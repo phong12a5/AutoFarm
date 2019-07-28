@@ -15,8 +15,8 @@ public:
     ~CheckCurrSrcThread();
 
 private:
-    bool isOnScreen(QString iconPath);
-    bool isCurrentScreen(int screenID);
+    bool isOnScreen(QString iconPath, QString screenImgPath = "");
+    bool isCurrentScreen(int screenID, QString screenImgPath = "");
     int findScreen() const;
 
 private:

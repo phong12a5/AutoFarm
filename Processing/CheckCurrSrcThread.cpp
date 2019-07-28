@@ -15,11 +15,13 @@ CheckCurrSrcThread::~CheckCurrSrcThread()
     delete m_updateCurrSrcTimer;
 }
 
-bool CheckCurrSrcThread::isOnScreen(QString iconPath)
+bool CheckCurrSrcThread::isOnScreen(QString iconPath, QString screenImgPath)
 {
     bool retVal = false;
 #ifdef ANDROID_KIT
-    QString screenImgPath = ShellOperation::screenShot();
+    if(screenImgPath == ""){
+        screenImgPath = ShellOperation::screenShot("screen_checking.png");
+    }
     QPoint point = ImageProcessing::findImageOnImage(iconPath,screenImgPath);
     if(!point.isNull()){
         retVal = true;
@@ -33,45 +35,45 @@ bool CheckCurrSrcThread::isOnScreen(QString iconPath)
     return retVal;
 }
 
-bool CheckCurrSrcThread::isCurrentScreen(int screenID)
+bool CheckCurrSrcThread::isCurrentScreen(int screenID, QString screenImgPath)
 {
     bool retVal = false;
     switch (screenID) {
         case AppEnums::HMI_START_UP_SCREEN:
-        retVal = isOnScreen(LOADING_SCREEN2);
+        retVal = isOnScreen(LOADING_SCREEN2,screenImgPath);
         break;
     case AppEnums::HMI_SELECT_LANGUAGE_SCREEN:
-        retVal = isOnScreen(SELECT_LANGUAGE_SCREEN);
+        retVal = isOnScreen(SELECT_LANGUAGE_SCREEN,screenImgPath);
         break;
     case AppEnums::HMI_LOGIN_SCREEN:
-        retVal = isOnScreen(LOGIN_SCREEN_1);
+        retVal = isOnScreen(LOGIN_SCREEN_1,screenImgPath);
         break;
     case AppEnums::HMI_INCORRECT_PASSWORD_SCREEN:
-        retVal = isOnScreen(INCORRECT_PASSWORD);
+        retVal = isOnScreen(INCORRECT_PASSWORD,screenImgPath);
         break;
     case AppEnums::HMI_MISSING_PASSWORD_SCREEN:
-        retVal = isOnScreen(MISSING_PWD_SCREEN);
+        retVal = isOnScreen(MISSING_PWD_SCREEN,screenImgPath);
         break;
     case AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN:
-        retVal = isOnScreen(CONFIRM_IDENTIFY) || isOnScreen(CONFIRM_IDENTIFY2);
+        retVal = isOnScreen(CONFIRM_IDENTIFY,screenImgPath) || isOnScreen(CONFIRM_IDENTIFY2,screenImgPath);
         break;
     case AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN:
-        retVal = isOnScreen(DOWNLOAD_INFO_BTN);
+        retVal = isOnScreen(DOWNLOAD_INFO_BTN,screenImgPath);
         break;
     case AppEnums::HMI_TURNON_FIND_FRIEND_SCREEN:
-        retVal = isOnScreen(TURNON_FIND_FRIEND);
+        retVal = isOnScreen(TURNON_FIND_FRIEND,screenImgPath);
         break;
     case AppEnums::HMI_SAVE_LOGIN_INFO_SCREEN:
-        retVal = isOnScreen(SAVE_LOGIN_SCREEN);
+        retVal = isOnScreen(SAVE_LOGIN_SCREEN,screenImgPath);
         break;
     case AppEnums::HMI_CHOOSE_AVATAR_SCREEN:
-        retVal = isOnScreen(CHOOSE_AVATAR);
+        retVal = isOnScreen(CHOOSE_AVATAR,screenImgPath);
         break;
     case AppEnums::HMI_ADDFRIEND_SUGGESTION_SCREEN:
-        retVal = isOnScreen(ADD_FRIEND_SUGGESTION2);
+        retVal = isOnScreen(ADD_FRIEND_SUGGESTION2,screenImgPath);
         break;
     case AppEnums::HMI_NEW_FEED_SCREEN:
-        retVal = isOnScreen(NEWSFEED_ICON) || isOnScreen(NEWSFEED_ICON2);
+        retVal = isOnScreen(NEWSFEED_ICON,screenImgPath) || isOnScreen(NEWSFEED_ICON2,screenImgPath);
         break;
     }
 //    LOG << "screenID: " << MAIN_CTRL->screenStr(screenID) << " : " << retVal;
@@ -120,14 +122,17 @@ void CheckCurrSrcThread::onUpdateCurrentScreen()
                            <<   AppEnums::HMI_NEW_FEED_SCREEN
                            <<   AppEnums::HMI_SELECT_LANGUAGE_SCREEN
                            <<   AppEnums::HMI_LOGIN_SCREEN
-//                           <<   AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN
-//                           <<   AppEnums::HMI_MISSING_PASSWORD_SCREEN
-//                           <<   AppEnums::HMI_INCORRECT_PASSWORD_SCREEN
-//                           <<   AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN
-//                           <<   AppEnums::HMI_SAVE_LOGIN_INFO_SCREEN
+/*
+                           <<   AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN
+                           <<   AppEnums::HMI_MISSING_PASSWORD_SCREEN
+                           <<   AppEnums::HMI_INCORRECT_PASSWORD_SCREEN
+                           <<   AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN
+                           <<   AppEnums::HMI_SAVE_LOGIN_INFO_SCREEN
+*/
                            <<   AppEnums::HMI_CHOOSE_AVATAR_SCREEN
                            <<   AppEnums::HMI_TURNON_FIND_FRIEND_SCREEN
-                           <<   AppEnums::HMI_ADDFRIEND_SUGGESTION_SCREEN;    }
+                           <<   AppEnums::HMI_ADDFRIEND_SUGGESTION_SCREEN;
+    }
 
     QList<int> checkedScreenList = screenPiorityOrder;
     if(screenPiorityOrder.contains(currentScreen)){
@@ -135,6 +140,8 @@ void CheckCurrSrcThread::onUpdateCurrentScreen()
             checkedScreenList.append(checkedScreenList.takeFirst());
         }
     }
+
+    QString _screenImgPath = ShellOperation::screenShot("screen_checking.png");
 
     foreach (int i , checkedScreenList){
         LOG << "Checking: " << MAIN_CTRL->screenStr(i);
@@ -144,7 +151,7 @@ void CheckCurrSrcThread::onUpdateCurrentScreen()
             break;
         }
 
-        if(isCurrentScreen(i)){
+        if(isCurrentScreen(i,_screenImgPath)){
             MAIN_CTRL->setCurrentScreen(i);
             delay(2000);
             break;

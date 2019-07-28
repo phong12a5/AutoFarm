@@ -118,6 +118,27 @@ bool JavaCommunication::installFacebookLite(QString apkPath)
     return retVal;
 }
 
+bool JavaCommunication::requestPermission()
+{
+    //Request requiered permissions at runtime
+
+    QStringList permissions;
+    permissions << "android.permission.READ_PHONE_STATE"
+                << "android.permission.WRITE_EXTERNAL_STORAGE";
+
+    foreach (QString permission, permissions) {
+        auto result = QtAndroid::checkPermission(permission);
+        if(result == QtAndroid::PermissionResult::Denied){
+            auto resultHash = QtAndroid::requestPermissionsSync(QStringList({permission}));
+            if(resultHash[permission] == QtAndroid::PermissionResult::Denied){
+                LOG << permission << " : " << false;
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 QString JavaCommunication::getDeviceIMEI()
 {
     QAndroidJniEnvironment env;

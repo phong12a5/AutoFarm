@@ -11,6 +11,8 @@ int main(int argc, char *argv[])
     LOG << "STARTING .... ";
     LOG << "Thread ID: " << QThread::currentThreadId();
 
+    LOG <<  "supportsSsl: " << QSslSocket::supportsSsl();
+
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
@@ -21,6 +23,14 @@ int main(int argc, char *argv[])
     }
 #endif
     LOG << "Superuser is granted!";
+
+    while (!JavaCommunication::instance()->requestPermission()) {
+        delay(1000);
+    };
+
+#ifdef ANDROID_KIT
+    ShellOperation::shellCommand(QString("touch %1").arg(INITSCRIPT_FILENAME));
+#endif
 
     AppMain appMain;
     appMain.initApplication(engine);

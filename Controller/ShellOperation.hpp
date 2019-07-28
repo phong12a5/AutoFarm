@@ -26,11 +26,12 @@ public:
     static QString getCurrentActivity();
     static bool findAndClick(QString iconPath, bool repeat = false);
     static bool findAndClickList(QString iconPath);
-    static bool tapScreen(QPoint point);
+    static bool tapScreen(QPoint point, bool repeat = false);
     static bool enterText(QString text);
     static void killSpecificApp(QString packageName);
     static QPoint findAnImageOnScreen(QString iconPath);
     static void clearPackageData(QString packageName);
+    static void stopApp(QString packageName);
     static bool pressTap();
     static DISPLAY_INFO getDisplayInfo();
     static void removeFile(QString path);

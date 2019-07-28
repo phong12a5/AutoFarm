@@ -104,12 +104,15 @@ android {
 
     DISTFILES += android-sources/AndroidManifest.xml \
                 android-sources/assets/images/
-
-    OTHER_FILES += android-sources/src/JavaInteraction.java
 }
 
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
-    ANDROID_EXTRA_LIBS = \
+
+    ANDROID_EXTRA_LIBS += \
+        $$PWD/android_openssl-1.0.x/arm/libcrypto.so \
+        $$PWD/android_openssl-1.0.x/arm/libssl.so
+
+    ANDROID_EXTRA_LIBS += \
         $$PWD/../OpenCV-android-sdk/sdk/native/libs/armeabi-v7a/libopencv_java.so
 }
 
