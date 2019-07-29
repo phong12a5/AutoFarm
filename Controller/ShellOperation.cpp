@@ -130,7 +130,7 @@ void ShellOperation::clearPackageData(QString packageName)
 {
     LOG << packageName;
     ShellOperation::shellCommand(QString("pm clear %1").arg(packageName));
-    ShellOperation::stopApp(packageName);
+//    ShellOperation::stopApp(packageName);
 }
 
 void ShellOperation::stopApp(QString packageName)

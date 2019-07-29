@@ -258,6 +258,7 @@ void WebAPI::updateCheckPoint()
 void WebAPI::getDoAction()
 {
     QString url = API_SERVER + QString("DoAction?token=%1&fbid=%2").arg(MODEL->token()).arg(MODEL->currentControlledUser().uid);
+    LOG << url;
     QUrl serviceUrl = QUrl(url);
     QNetworkRequest request(serviceUrl);
     QJsonObject json;
@@ -284,6 +285,7 @@ void WebAPI::getDoAction()
         return;
     }else{
         QString data =  jsonObj["data"].toString();
+        LOG << "data: " << data;
         QAESEncryption encryption(QAESEncryption::AES_256, QAESEncryption::CBC);
         QByteArray decodeText = encryption.decode(QByteArray::fromBase64(data.toUtf8()), getKeyByIMEI().toLocal8Bit(), getIV().toLocal8Bit());
         QJsonDocument jdoc = QJsonDocument::fromJson(encryption.removePadding(decodeText));

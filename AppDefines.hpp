@@ -53,6 +53,7 @@
 #define DOWNLOAD_INFO_BTN       "/sdcard/DCIM/PDT17/Icons/DownloadYourInfomation.png"
 #define MISSING_PWD_SCREEN      "/sdcard/DCIM/PDT17/Icons/MissingPasswordIcon.png"
 #define SELECT_LANGUAGE_SCREEN  "/sdcard/DCIM/PDT17/Icons/SelectLanguage.png"
+#define LOGIN_AGAIN_ICON        "/sdcard/DCIM/PDT17/Icons/LoginAgain.png"
 
 #define FACEBOOK_LITE_SCREEN    "com.facebook.lite/com.facebook.lite.MainActivity"
 #define FACEBOOK_LITE_PKGNAME   "com.facebook.lite"
@@ -66,6 +67,8 @@
 #define EMAIL_FIELD_POS_Y       310
 #define PASSWD_FIELD_POS_X      540
 #define PASSWD_FIELD_POS_Y      520
+#define LOGIN_AGAIN_POS_X       340
+#define LOGIN_AGAIN_POS_Y       340
 #define STD_SCREEN_WIDTH        1080
 #define STD_SCREEN_HEIGHT       1920
 

@@ -31,7 +31,6 @@ public:
     enum HMI_SCREEN_ID: int
     {
         HMI_UNKNOW_SCREEN = 0,
-        HMI_START_UP_SCREEN,
         HMI_SELECT_LANGUAGE_SCREEN,
         HMI_LOGIN_SCREEN,
         HMI_CONFIRM_INDENTIFY_SCREEN,
@@ -43,6 +42,7 @@ public:
         HMI_CHOOSE_AVATAR_SCREEN,
         HMI_ADDFRIEND_SUGGESTION_SCREEN,
         HMI_NEW_FEED_SCREEN,
+        HMI_LOGIN_AGAIN_SCREEN,
         HMI_NUMBER_SCREEN
     };
 };

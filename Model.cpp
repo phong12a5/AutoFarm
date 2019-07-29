@@ -1,6 +1,7 @@
 #include "Model.hpp"
 #include <QWidgetList>
 #include "Processing/ImageProcessing.hpp"
+#include "Controller/ShellOperation.hpp"
 
 Model* Model::m_instance = nullptr;
 
@@ -181,6 +182,10 @@ void Model::updateCurrentControlleredUser(USER_DATA data)
 
 void Model::nextCurrentControlledObj()
 {
+
+    if(m_currentPkgIndex >= 0 && m_currentPkgIndex < m_userDataList.count())
+        ShellOperation::stopApp(this->currentControlledPkg());
+
     if(m_currentPkgIndex < 0 || m_currentPkgIndex >= m_userDataList.count() - 1){
         if(m_currentPkgIndex >= m_userDataList.count() - 1){
             emit finishedListObject();

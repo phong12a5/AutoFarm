@@ -39,9 +39,6 @@ bool CheckCurrSrcThread::isCurrentScreen(int screenID, QString screenImgPath)
 {
     bool retVal = false;
     switch (screenID) {
-        case AppEnums::HMI_START_UP_SCREEN:
-        retVal = isOnScreen(LOADING_SCREEN2,screenImgPath);
-        break;
     case AppEnums::HMI_SELECT_LANGUAGE_SCREEN:
         retVal = isOnScreen(SELECT_LANGUAGE_SCREEN,screenImgPath);
         break;
@@ -75,6 +72,9 @@ bool CheckCurrSrcThread::isCurrentScreen(int screenID, QString screenImgPath)
     case AppEnums::HMI_NEW_FEED_SCREEN:
         retVal = isOnScreen(NEWSFEED_ICON,screenImgPath) || isOnScreen(NEWSFEED_ICON2,screenImgPath);
         break;
+    case AppEnums::HMI_LOGIN_AGAIN_SCREEN:
+        retVal = isOnScreen(LOGIN_AGAIN_ICON,screenImgPath);
+        break;
     }
 //    LOG << "screenID: " << MAIN_CTRL->screenStr(screenID) << " : " << retVal;
     return retVal;
@@ -105,8 +105,7 @@ void CheckCurrSrcThread::onUpdateCurrentScreen()
     QList<int> screenPiorityOrder;
     int currentScreen = MAIN_CTRL->currentScreen();
     if(currentScreen == AppEnums::HMI_LOGIN_SCREEN){
-        screenPiorityOrder <<   AppEnums::HMI_START_UP_SCREEN
-                           <<   AppEnums::HMI_NEW_FEED_SCREEN
+        screenPiorityOrder <<   AppEnums::HMI_NEW_FEED_SCREEN
                            <<   AppEnums::HMI_SELECT_LANGUAGE_SCREEN
                            <<   AppEnums::HMI_LOGIN_SCREEN
                            <<   AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN
@@ -116,10 +115,11 @@ void CheckCurrSrcThread::onUpdateCurrentScreen()
                            <<   AppEnums::HMI_SAVE_LOGIN_INFO_SCREEN
                            <<   AppEnums::HMI_CHOOSE_AVATAR_SCREEN
                            <<   AppEnums::HMI_TURNON_FIND_FRIEND_SCREEN
-                           <<   AppEnums::HMI_ADDFRIEND_SUGGESTION_SCREEN;
+                           <<   AppEnums::HMI_ADDFRIEND_SUGGESTION_SCREEN
+                           <<   AppEnums::HMI_LOGIN_AGAIN_SCREEN;
+
     }else{
-        screenPiorityOrder <<   AppEnums::HMI_START_UP_SCREEN
-                           <<   AppEnums::HMI_NEW_FEED_SCREEN
+        screenPiorityOrder <<   AppEnums::HMI_NEW_FEED_SCREEN
                            <<   AppEnums::HMI_SELECT_LANGUAGE_SCREEN
                            <<   AppEnums::HMI_LOGIN_SCREEN
 /*
@@ -127,11 +127,12 @@ void CheckCurrSrcThread::onUpdateCurrentScreen()
                            <<   AppEnums::HMI_MISSING_PASSWORD_SCREEN
                            <<   AppEnums::HMI_INCORRECT_PASSWORD_SCREEN
                            <<   AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN
-                           <<   AppEnums::HMI_SAVE_LOGIN_INFO_SCREEN
 */
+                           <<   AppEnums::HMI_SAVE_LOGIN_INFO_SCREEN
                            <<   AppEnums::HMI_CHOOSE_AVATAR_SCREEN
                            <<   AppEnums::HMI_TURNON_FIND_FRIEND_SCREEN
-                           <<   AppEnums::HMI_ADDFRIEND_SUGGESTION_SCREEN;
+                           <<   AppEnums::HMI_ADDFRIEND_SUGGESTION_SCREEN
+                           <<   AppEnums::HMI_LOGIN_AGAIN_SCREEN;
     }
 
     QList<int> checkedScreenList = screenPiorityOrder;

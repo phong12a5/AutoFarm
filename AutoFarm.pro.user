@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.6.1, 2019-07-29T10:43:30. -->
+<!-- Written by QtCreator 4.6.1, 2019-07-30T05:01:32. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -308,7 +308,7 @@
   <valuemap type="QVariantMap">
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Android for armeabi-v7a (GCC 4.9, Qt 5.11.0 for Android armv7)</value>
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Android for armeabi-v7a (GCC 4.9, Qt 5.11.0 for Android armv7)</value>
-   <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">{ef5a9f17-886b-4863-9e09-9aacabdb78a6}</value>
+   <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">{ef479c9f-6e24-44f4-9476-2df21c27d3a7}</value>
    <value type="int" key="ProjectExplorer.Target.ActiveBuildConfiguration">1</value>
    <value type="int" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
    <value type="int" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
@@ -561,10 +561,7 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.AndroidDeployConfiguration2</value>
    </valuemap>
    <value type="int" key="ProjectExplorer.Target.DeployConfigurationCount">1</value>
-   <valuemap type="QVariantMap" key="ProjectExplorer.Target.PluginSettings">
-    <value type="QString" key="AndroidDeviceSerialNumber">356594051235093</value>
-    <value type="int" key="AndroidVersion.ApiLevel">21</value>
-   </valuemap>
+   <valuemap type="QVariantMap" key="ProjectExplorer.Target.PluginSettings"/>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.0">
     <value type="bool" key="Analyzer.QmlProfiler.AggregateTraces">false</value>
     <value type="bool" key="Analyzer.QmlProfiler.FlushEnabled">false</value>

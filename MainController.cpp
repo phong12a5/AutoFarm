@@ -13,7 +13,7 @@ MainController::MainController(QObject *parent) : QObject(parent)
     m_currentScreen = AppEnums::HMI_UNKNOW_SCREEN;
     m_currentActivity = "";
     m_changeScreenTimer.setSingleShot(true);
-    m_changeScreenTimer.setInterval(60000);
+    m_changeScreenTimer.setInterval(120000);
     QObject::connect(&m_changeScreenTimer, SIGNAL(timeout()), this, SLOT(onchangeScreenTimerTimeout()));
 }
 
@@ -21,9 +21,6 @@ void MainController::execVipLike()
 {
     LOG;
     switch(currentScreen()){
-    case AppEnums::HMI_START_UP_SCREEN:
-        // Do nothing
-        break;
     case AppEnums::HMI_SELECT_LANGUAGE_SCREEN:
 #ifdef ANDROID_KIT
         ShellOperation::findAndClick(ENGLISH_BTN);
@@ -34,8 +31,8 @@ void MainController::execVipLike()
 #ifdef ANDROID_KIT
         ShellOperation::findAndClick(ENGLISH_BTN);
         delay(500);
-        ShellOperation::tapScreen(QPoint(EMAIL_FIELD_POS_X * (MODEL->deviceInfo().disInfo.width/STD_SCREEN_WIDTH),
-                                         EMAIL_FIELD_POS_Y * (MODEL->deviceInfo().disInfo.height/STD_SCREEN_HEIGHT)), true);
+        ShellOperation::tapScreen(QPoint((EMAIL_FIELD_POS_X * MODEL->deviceInfo().disInfo.width)/STD_SCREEN_WIDTH,
+                                         (EMAIL_FIELD_POS_Y * MODEL->deviceInfo().disInfo.height)/STD_SCREEN_HEIGHT), true);
 
         delay(1000);
         ShellOperation::enterText(MODEL->currentControlledUser().uid);
@@ -44,8 +41,8 @@ void MainController::execVipLike()
         }
 
         delay(500);
-        ShellOperation::tapScreen(QPoint(PASSWD_FIELD_POS_X * (MODEL->deviceInfo().disInfo.width/STD_SCREEN_WIDTH),
-                                         PASSWD_FIELD_POS_Y * (MODEL->deviceInfo().disInfo.height/STD_SCREEN_HEIGHT)), true);
+        ShellOperation::tapScreen(QPoint((PASSWD_FIELD_POS_X * MODEL->deviceInfo().disInfo.width)/STD_SCREEN_WIDTH,
+                                         (PASSWD_FIELD_POS_Y * MODEL->deviceInfo().disInfo.height)/STD_SCREEN_HEIGHT), true);
         delay(1000);
         ShellOperation::enterText(MODEL->currentControlledUser().password);
         if(MODEL->deviceType() != "Nox Device"){
@@ -141,6 +138,12 @@ void MainController::execVipLike()
         }
 #endif
         break;
+    case AppEnums::HMI_LOGIN_AGAIN_SCREEN:
+#ifdef ANDROID_KIT
+        ShellOperation::tapScreen(QPoint((LOGIN_AGAIN_POS_X * MODEL->deviceInfo().disInfo.width)/STD_SCREEN_WIDTH,
+                                         (LOGIN_AGAIN_POS_Y * MODEL->deviceInfo().disInfo.height)/STD_SCREEN_HEIGHT));
+#endif
+        break;
     default:
         break;
     }
@@ -206,9 +209,6 @@ QString MainController::screenStr(int screenID) const
     case AppEnums::HMI_UNKNOW_SCREEN:
         retVal = "HMI_UNKNOW_SCREEN";
         break;
-    case AppEnums::HMI_START_UP_SCREEN:
-        retVal = "HMI_START_UP_SCREEN";
-        break;
     case AppEnums::HMI_SELECT_LANGUAGE_SCREEN:
         retVal = "HMI_SELECT_LANGUAGE_SCREEN";
         break;
@@ -241,6 +241,9 @@ QString MainController::screenStr(int screenID) const
         break;
     case AppEnums::HMI_NEW_FEED_SCREEN:
         retVal = "HMI_NEW_FEED_SCREEN";
+        break;
+    case AppEnums::HMI_LOGIN_AGAIN_SCREEN:
+        retVal = "HMI_LOGIN_AGAIN_SCREEN";
         break;
     default:
         break;
@@ -370,7 +373,6 @@ void MainController::onchangeScreenTimerTimeout()
     if(currentScreen() == AppEnums::HMI_LOGIN_SCREEN){
         LOG << "Click Login again!";
         if(ShellOperation::findAndClick(LOGIN_BTN)){
-            m_changeScreenTimer.start();
             return;
         }
     }
