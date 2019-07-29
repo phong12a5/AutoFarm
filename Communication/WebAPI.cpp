@@ -465,11 +465,15 @@ void WebAPI::slotReponseGettingApk(QNetworkReply* reply)
         foreach (QJsonValue data, jdoc.array()) {
             if(data.isObject()){
                 QJsonObject obj = data.toObject();
-                if(!keys.contains(obj["package"].toString())){
+                if(!ShellOperation::isPackageExisted(obj["package"].toString())){
                     LOG << obj["package"].toString();
                     m_neededDownloadPkgList.insert(obj["apk"].toString(),obj["package"].toString());
                     this->downloadApk(QUrl(obj["apk"].toString()));
                 }else{
+                    if(!keys.contains(obj["package"].toString())){
+                        USER_DATA data;
+                        MODEL->getUserDataList()->insert(obj["package"].toString(),data);
+                    }
                     LOG << obj["package"].toString() << " EXISTED";
                 }
             }

@@ -176,6 +176,21 @@ void ShellOperation::enterKeyBoard()
     ShellOperation::shellCommand("input keyevent KEYCODE_ENTER");
 }
 
+bool ShellOperation::isPackageExisted(QString packageName)
+{
+    QString output;
+    if(ShellOperation::shellCommand(QString("pm list packages | grep %1").arg(packageName),output)){
+        LOG << output;
+        if(output.contains(packageName)){
+            return true;
+        }else{
+            return false;
+        }
+    }else{
+        return false;
+    }
+}
+
 QString ShellOperation::screenShot(QString fileName)
 {
 //    QString path = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + QString("/%1").arg(fileName);

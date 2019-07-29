@@ -36,6 +36,7 @@ public:
     static DISPLAY_INFO getDisplayInfo();
     static void removeFile(QString path);
     static void enterKeyBoard();
+    static bool isPackageExisted(QString packageName);
 #endif
 private:
 };

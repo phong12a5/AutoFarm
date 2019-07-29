@@ -308,7 +308,7 @@ void MainController::onChangeAcitivity()
 void MainController::executeRequiredActions()
 {
     LOG << "Current package: " << MODEL->currentControlledPkg();
-    if(MODEL->currentControlledUser()._id == ""){
+    if(MODEL->currentControlledUser().uid == ""){
         MODEL->updateCurrentControlleredUser(WEB_API->cloneUserData());
     }else{
         LOG << "User info has storaged already";
