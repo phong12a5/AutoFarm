@@ -26,7 +26,7 @@ public:
     static float getScale();
 #ifdef ANDROID_KIT
     static QList<QPoint> findImageListOnImage(const QString &smallImagePath, const QString &largeImagePath);
-    static cv::Mat QImage2Mat(QImage const& src);
+    static cv::Mat QImage2Mat(QImage const& img);
 #endif
 
 public slots:

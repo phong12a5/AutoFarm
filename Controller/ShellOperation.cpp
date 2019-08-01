@@ -193,7 +193,6 @@ bool ShellOperation::isPackageExisted(QString packageName)
 
 QString ShellOperation::screenShot(QString fileName)
 {
-//    QString path = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + QString("/%1").arg(fileName);
     QString path = QString("/sdcard/Pictures/%1").arg(fileName);
     ShellOperation::shellCommand(QString("screencap -p %1").arg(path));
     return path;

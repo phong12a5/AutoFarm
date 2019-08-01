@@ -193,12 +193,22 @@ QList<QPoint> ImageProcessing::findImageListOnImage(const QString &smallImagePat
     return retVal;
 }
 
-cv::Mat ImageProcessing::QImage2Mat(const QImage &src)
+cv::Mat ImageProcessing::QImage2Mat(const QImage &img)
 {
-    cv::Mat tmp(src.height(),src.width(),CV_8UC3,(uchar*)src.bits(),src.bytesPerLine());
-    cv::Mat result; // deep copy just in case (my lack of knowledge with open cv)
-    cvtColor(tmp, result,CV_BGR2RGB);
-    return result;
+    switch(image.format()) {
+        case QImage::Format_RGB32:
+        {
+            return cv::Mat(img.height(),img.width(),CV_8UC4,(void *)img.constBits(),img.bytesPerLine());
+        }
+        case QImage::Format_RGB888:
+        {
+            return cv::Mat(image.height(),image.width(),CV_8UC3,(void *)image.constBits(),image.bytesPerLine());
+        }
+        default:
+        {
+            return cv::Mat(conv.height(),conv.width(),CV_8UC4,(void *)conv.constBits(),conv.bytesPerLine());
+        }
+    }
 }
 
 #endif
