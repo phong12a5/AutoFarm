@@ -27,24 +27,16 @@ QPoint ImageProcessing::findImageOnImage(const QString &smallImagePath, const QS
 
     if(scale != 1){
          cv::Mat _smallImageCoppy = _smallImage;
-         LOG << "_smallImage.rows: " << _smallImage.rows;
-
         cv::resize(_smallImageCoppy,_smallImage,cv::Size(),scale,scale);
-        LOG << "_smallImage.rows: " << _smallImage.rows;
-        LOG << "_smallImageCoppy.rows: " << _smallImageCoppy.rows;
     }
 
     //kiểm tra kích cỡ của ảnh input & template
     if (_smallImage.rows > _largeImage.rows || _smallImage.cols > _largeImage.cols)
     {
         LOG << "Mat template must be smaller than matInput";
-        LOG << "Small image: " << QImage(smallImagePath).size();
-        LOG << "Large image: " << QImage(largeImagePath).size();
         return retVal;
     }else if(_smallImage.rows <= 0 || _smallImage.cols <= 0 || _largeImage.rows <= 0 || _largeImage.cols <= 0){
         LOG << "Invalid Image";
-        LOG << "Small image: " << QImage(smallImagePath).size();
-        LOG << "Large image: " << QImage(largeImagePath).size();
         return retVal;
     }
 
@@ -73,6 +65,81 @@ QPoint ImageProcessing::findImageOnImage(const QString &smallImagePath, const QS
             if(maxval > bestMaxval){
                 bestMaxval = maxval;
                 retVal = QPoint(maxloc.x + _smallImage.cols/2, maxloc.y + _smallImage.rows/2);
+            }
+            cv::floodFill(result, maxloc, cv::Scalar(0), 0, cv::Scalar(.1), cv::Scalar(1.));
+
+        }
+        else
+            break;
+    }
+//    LOG << smallImagePath.split("/").last() << " : " << retVal << QString(" %1--%2").arg(threshold).arg(scale);
+    return retVal;
+}
+
+QPoint ImageProcessing::findImageOnImage(const QString &templatePath, cv::Mat &screenImg)
+{
+    QPoint retVal;
+
+    if(screenImg.empty()){
+        LOG << "screenImg is EMPTY";
+        return retVal;
+    }
+
+#ifdef ANDROID_KIT
+    cv::Mat templateImg = cv::imread(templatePath.toUtf8().constData(),CV_LOAD_IMAGE_COLOR);
+#else
+    cv::Mat _smallImage = cv::imread(smallImagePath.toUtf8().constData(),1);
+    cv::Mat _largeImage = cv::imread(largeImagePath.toUtf8().constData(),1);
+#endif
+
+    // Resize image
+    float threshold = ImageProcessing::getThreshhold();
+    float scale = ImageProcessing::getScale();
+
+    if(scale != 1){
+         cv::Mat templateImgCoppy = templateImg;
+//         LOG << "templateImg.rows: " << templateImg.rows;
+
+        cv::resize(templateImgCoppy,templateImg,cv::Size(),scale,scale);
+//        LOG << "templateImg.rows: " << templateImg.rows;
+//        LOG << "templateImgCoppy.rows: " << templateImgCoppy.rows;
+    }
+
+    //kiểm tra kích cỡ của ảnh input & template
+    if (templateImg.rows > screenImg.rows || templateImg.cols > screenImg.cols)
+    {
+        LOG << "Mat template must be smaller than matInput";
+        return retVal;
+    }else if(templateImg.rows <= 0 || templateImg.cols <= 0 || screenImg.rows <= 0 || screenImg.cols <= 0){
+        LOG << "Invalid Image";
+        return retVal;
+    }
+
+    cv::Mat result;
+    int result_cols = screenImg.cols - templateImg.cols + 1;
+    int result_rows = screenImg.rows - templateImg.rows + 1;
+    result.create(result_rows, result_cols, CV_32FC1);
+
+    //tìm mẫu
+//    cv::matchTemplate(_largeImage, templateImg, result, CV_TM_CCORR_NORMED);
+    cv::matchTemplate(screenImg, templateImg, result, CV_TM_CCOEFF_NORMED);
+
+    cv::threshold(result, result, threshold, 1., CV_THRESH_TOZERO);
+    double minval, maxval;
+    double bestMaxval = 0;
+    //ngưỡng chính xác, giảm xuống thì sẽ tìm được nhiều đối tượng hơn nhưng sai số nhiều hơn
+
+    while (true)
+    {
+        cv::Point minloc, maxloc;
+        cv::minMaxLoc(result, &minval, &maxval, &minloc, &maxloc);
+
+        if (maxval > threshold)
+        {
+            //vẽ hình chữ nhật lên đối tượng tìm được
+            if(maxval > bestMaxval){
+                bestMaxval = maxval;
+                retVal = QPoint(maxloc.x + templateImg.cols/2, maxloc.y + templateImg.rows/2);
             }
             cv::floodFill(result, maxloc, cv::Scalar(0), 0, cv::Scalar(.1), cv::Scalar(1.));
 
@@ -192,23 +259,4 @@ QList<QPoint> ImageProcessing::findImageListOnImage(const QString &smallImagePat
     LOG << smallImagePath.split("/").last() << " : " << retVal << QString(" %1--%2").arg(threshold).arg(scale);
     return retVal;
 }
-
-cv::Mat ImageProcessing::QImage2Mat(const QImage &img)
-{
-    switch(image.format()) {
-        case QImage::Format_RGB32:
-        {
-            return cv::Mat(img.height(),img.width(),CV_8UC4,(void *)img.constBits(),img.bytesPerLine());
-        }
-        case QImage::Format_RGB888:
-        {
-            return cv::Mat(image.height(),image.width(),CV_8UC3,(void *)image.constBits(),image.bytesPerLine());
-        }
-        default:
-        {
-            return cv::Mat(conv.height(),conv.width(),CV_8UC4,(void *)conv.constBits(),conv.bytesPerLine());
-        }
-    }
-}
-
 #endif

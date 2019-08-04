@@ -31,9 +31,7 @@ void MainController::execVipLike()
 #ifdef ANDROID_KIT
         ShellOperation::findAndClick(ENGLISH_BTN);
         delay(500);
-        ShellOperation::tapScreen(QPoint((EMAIL_FIELD_POS_X * MODEL->deviceInfo().disInfo.width)/STD_SCREEN_WIDTH,
-                                         (EMAIL_FIELD_POS_Y * MODEL->deviceInfo().disInfo.height)/STD_SCREEN_HEIGHT), true);
-
+        ShellOperation::findAndClick(EMAIL_FIELD, true);
         delay(1000);
         ShellOperation::enterText(MODEL->currentControlledUser().uid);
         if(MODEL->deviceType() != "Nox Device"){
@@ -41,8 +39,7 @@ void MainController::execVipLike()
         }
 
         delay(500);
-        ShellOperation::tapScreen(QPoint((PASSWD_FIELD_POS_X * MODEL->deviceInfo().disInfo.width)/STD_SCREEN_WIDTH,
-                                         (PASSWD_FIELD_POS_Y * MODEL->deviceInfo().disInfo.height)/STD_SCREEN_HEIGHT), true);
+        ShellOperation::findAndClick(PASSWORD_FIELD, true);
         delay(1000);
         ShellOperation::enterText(MODEL->currentControlledUser().password);
         if(MODEL->deviceType() != "Nox Device"){
@@ -96,6 +93,8 @@ void MainController::execVipLike()
     case AppEnums::HMI_ADDFRIEND_SUGGESTION_SCREEN:
 #ifdef ANDROID_KIT
         ShellOperation::findAndClick(SKIP_AVARTAR);
+        delay(1000);
+        JAVA_COM->openFBLiteWithUserID(MODEL->currentControlledPkg(),"");
 #endif
         break;
     case AppEnums::HMI_NEW_FEED_SCREEN:
@@ -127,7 +126,7 @@ void MainController::execVipLike()
 #else
                     if(count < NUMBER_CLICK)ShellOperation::callScrollEvent(QPoint(540,1200),QPoint(540,230));
 #endif
-                    delay(200);
+                    delay(1000);
                 }
                 MODEL->nextCurrentAction();
             }else {

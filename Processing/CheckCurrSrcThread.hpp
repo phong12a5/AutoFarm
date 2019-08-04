@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <QMutex>
 #include "AppEnums.hpp"
+#include "ImageProcessing.hpp"
 
 class CheckCurrSrcThread : public QObject
 {
@@ -15,9 +16,12 @@ public:
     ~CheckCurrSrcThread();
 
 private:
-    bool isOnScreen(QString iconPath, QString screenImgPath = "");
-    bool isCurrentScreen(int screenID, QString screenImgPath = "");
+    bool isOnScreen(QString iconPath);
+    bool isCurrentScreen(int screenID);
     int findScreen() const;
+
+private:
+    cv::Mat m_screenImg;
 
 private:
     QTimer* m_updateCurrSrcTimer;

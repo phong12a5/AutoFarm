@@ -43,7 +43,6 @@ void AppMain::initApplication(QQmlApplicationEngine &engine)
     _deviceInfo.android_verion = JAVA_COM->getAndroidVersion();
     _deviceInfo.model = JAVA_COM->getDeviceModel();
     _deviceInfo.isNox = JAVA_COM->getDeviceType();
-    MODEL->setDeviceInfo(_deviceInfo);
     _deviceInfo.disInfo = ShellOperation::getDisplayInfo();
     MODEL->setDeviceInfo(_deviceInfo);
 

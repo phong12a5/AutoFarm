@@ -38,6 +38,8 @@ public:
 
     QString deviceType() const;
 
+    bool isNoxDevice() const;
+
     DEVICE_INFO deviceInfo() const;
     void setDeviceInfo(DEVICE_INFO data);
 

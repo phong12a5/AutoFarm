@@ -22,6 +22,7 @@ public:
     static bool shellCommand(QString cmd, QString& output);
     static bool installPackage(QString packagePath);
     static QString screenShot(QString fileName = "screen.png");
+    static void screenshotImg(cv::Mat &screenImg,QString fileName);
     static void callScrollEvent(QPoint point1, QPoint point2);
     static QString getCurrentActivity();
     static bool findAndClick(QString iconPath, bool repeat = false);

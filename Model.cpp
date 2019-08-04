@@ -7,7 +7,7 @@ Model* Model::m_instance = nullptr;
 
 Model::Model(QObject *parent) : QObject(parent)
 {
-    m_token = "d35c093ccdb9926676e5bf4e3b78e66c";
+    m_token = "00261f5687fee223f35e3c2080e167a8";
     m_currentPkgIndex = -1;
     this->loadUserDataList();
     foreach (QString key, m_userDataList.keys()) {
@@ -117,6 +117,14 @@ QString Model::deviceType() const
         return "Nox Device";
     else
         return "Real Device";
+}
+
+bool Model::isNoxDevice() const
+{
+    if(m_deviceInfo.isNox == "true")
+        return true;
+    else
+        return false;
 }
 
 DEVICE_INFO Model::deviceInfo() const

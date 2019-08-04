@@ -159,8 +159,8 @@ DISPLAY_INFO ShellOperation::getDisplayInfo()
         info.height = (sizeInfo.split(":").length() < 2? info.height : sizeInfo.split(":").at(1).simplified().split("x").at(1).simplified().toInt());
     }
 
-    if(sizeInfo.contains("Physical density")){
-        info.dpi = (sizeInfo.split(":").length() < 2? info.dpi : sizeInfo.split(":").at(1).simplified().toInt());
+    if(dpiInfo.contains("Physical density")){
+        info.dpi = (dpiInfo.split(":").length() < 2? info.dpi : dpiInfo.split(":").at(1).simplified().toInt());
     }
     return info;
 }
@@ -196,5 +196,16 @@ QString ShellOperation::screenShot(QString fileName)
     QString path = QString("/sdcard/Pictures/%1").arg(fileName);
     ShellOperation::shellCommand(QString("screencap -p %1").arg(path));
     return path;
+}
+
+void ShellOperation::screenshotImg(cv::Mat &screenImg,QString fileName)
+{
+    QString path = QString("/sdcard/Pictures/%1").arg(fileName);
+    do{
+        ShellOperation::shellCommand(QString("screencap -p %1").arg(path));
+        screenImg = cv::imread(path.toUtf8().constData(),CV_LOAD_IMAGE_COLOR);
+    }while(screenImg.empty());
+
+    LOG << "[" << screenImg.rows << "," << screenImg.cols << "]";
 }
 #endif

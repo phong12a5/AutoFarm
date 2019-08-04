@@ -22,11 +22,11 @@ private:
 
 public:
     static QPoint findImageOnImage(const QString &smallImagePath, const QString &largeImagePath);
+    static QPoint findImageOnImage(const QString &templatePath, cv::Mat &screenImg);
     static float getThreshhold();
     static float getScale();
 #ifdef ANDROID_KIT
     static QList<QPoint> findImageListOnImage(const QString &smallImagePath, const QString &largeImagePath);
-    static cv::Mat QImage2Mat(QImage const& img);
 #endif
 
 public slots:
