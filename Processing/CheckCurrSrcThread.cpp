@@ -41,7 +41,7 @@ bool CheckCurrSrcThread::isCurrentScreen(int screenID)
         retVal = isOnScreen(SELECT_LANGUAGE_SCREEN);
         break;
     case AppEnums::HMI_LOGIN_SCREEN:
-        retVal = isOnScreen(EMAIL_FIELD) && isOnScreen(PASSWORD_FIELD);
+        retVal = isOnScreen(LOGIN_SCREEN);
         break;
     case AppEnums::HMI_INCORRECT_PASSWORD_SCREEN:
         retVal = isOnScreen(INCORRECT_PASSWORD);

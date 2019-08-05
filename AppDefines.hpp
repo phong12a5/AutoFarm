@@ -39,7 +39,7 @@
 #define SAVE_LOGIN_SCREEN       "/sdcard/DCIM/PDT17/Icons/SaveLoginInfoScreen.png"
 #define LIKE_ICON               "/sdcard/DCIM/PDT17/Icons/LikeIcon_FBLite.png"
 #define LOGIN_BTN               "/sdcard/DCIM/PDT17/Icons/LoginBtn.png"
-#define LOGIN_SCREEN_1          "/sdcard/DCIM/PDT17/Icons/Login_screen.png"
+#define LOGIN_SCREEN            "/sdcard/DCIM/PDT17/Icons/Login_screen.png"
 #define EMAIL_FIELD             "/sdcard/DCIM/PDT17/Icons/MailAndMobileNumberIcon.png"
 #define PASSWORD_FIELD          "/sdcard/DCIM/PDT17/Icons/PasswordIcon.png"
 #define ENGLISH_BTN             "/sdcard/DCIM/PDT17/Icons/EnglishBtn.png"
