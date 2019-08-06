@@ -26,6 +26,7 @@ Window {
     }
 
     Item{
+        id: deviceTypeItem
         height: deviceTypeField.height
         width: deviceTypeField.width + info.width + 10
         anchors.horizontalCenter: parent.horizontalCenter
@@ -48,31 +49,30 @@ Window {
         }
     }
 
-    Flickable{
-        anchors.fill: parent
-        contentWidth: log.width
-        contentHeight: log.height
-
-        Rectangle{
-            clip: true
-            color: "green"
-            opacity: 0.2
-            visible:  APP_MODEL.deviceType == "Nox Device"
-            anchors.fill: parent
+    Item{
+        width: autoStartTitle.width + autoStartCheckBox.indicator.width + 20
+        height: autoStartCheckBox.height
+        anchors.top: deviceTypeItem.bottom
+        anchors.topMargin: 40
+        anchors.horizontalCenter: parent.horizontalCenter
+        Text{
+            id: autoStartTitle
+            font.pixelSize: tokenField.font.pixelSize
+            anchors.verticalCenter: autoStartCheckBox.verticalCenter
+            anchors.left: parent.left
+            text: "Auto starting: "
         }
 
-        Text {
-            id: log
-            width: parent.width
-            height: contentHeight
-            wrapMode: Text.WordWrap
-            anchors.bottom: parent.bottom
-            text: APP_MODEL.logContent
+        CheckBox{
+            id: autoStartCheckBox
+            checkState: APP_MODEL.autoStart? Qt.Checked : Qt.Unchecked
+            indicator.width: tokenField.font.pixelSize
+            indicator.height: tokenField.font.pixelSize
+            anchors.right: parent.right
+            onClicked: APP_MODEL.autoStart = !APP_MODEL.autoStart
         }
+
     }
-
-
-
 
     Rectangle{
         id: startBtn
@@ -111,30 +111,6 @@ Window {
                 APP_MODEL.token = tokenField.text
                 APP_MODEL.start()
             }
-        }
-    }
-
-    Image {
-        id: testImage
-        source: APP_MODEL.testingImageSource == ""? "" : "file:///" + APP_MODEL.testingImageSource
-        anchors.centerIn: parent
-        width: parent.width
-        height: parent.height
-        visible: APP_MODEL.testImageMode
-
-        Rectangle{
-            width: parent.width
-            height: textF.contentHeight
-            anchors.fill: textF
-            opacity: 0.7
-        }
-
-        Text{
-            id: textF
-            text: APP_MODEL.screenName
-            font.pixelSize: 15
-            color: "red"
-            anchors.centerIn: parent
         }
     }
 

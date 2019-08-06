@@ -40,6 +40,7 @@ int main(int argc, char *argv[])
         LOG << "rootObject is NULL";
     }
 
+
     return app.exec();
 }
 

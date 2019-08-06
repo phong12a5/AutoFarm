@@ -201,6 +201,7 @@ USER_DATA WebAPI::cloneUserData()
             LOG << "Another action!";
         }
     }
+    reply->deleteLater();
     return user_data;
 }
 
@@ -329,7 +330,7 @@ void WebAPI::getDoResult()
 
     QJsonObject json;
 
-    json.insert("fbid", QTextCodec::codecForMib(106)->toUnicode(getEncodedStringByImei("100030998794736")));
+    json.insert("fbid", QTextCodec::codecForMib(106)->toUnicode(getEncodedStringByImei(MODEL->currentControlledUser().uid)));
     json.insert("device", QTextCodec::codecForMib(106)->toUnicode(getEncodedDeviceInfo()));
     json.insert("data", QTextCodec::codecForMib(106)->toUnicode(getEncodedJsonDoc(QJsonDocument(actionArray))));
 
@@ -467,15 +468,11 @@ void WebAPI::slotReponseGettingApk(QNetworkReply* reply)
         foreach (QJsonValue data, jdoc.array()) {
             if(data.isObject()){
                 QJsonObject obj = data.toObject();
-                if(!ShellOperation::isPackageExisted(obj["package"].toString())){
+                if(!keys.contains(obj["package"].toString())){
                     LOG << obj["package"].toString();
                     m_neededDownloadPkgList.insert(obj["apk"].toString(),obj["package"].toString());
                     this->downloadApk(QUrl(obj["apk"].toString()));
                 }else{
-                    if(!keys.contains(obj["package"].toString())){
-                        USER_DATA data;
-                        MODEL->getUserDataList()->insert(obj["package"].toString(),data);
-                    }
                     LOG << obj["package"].toString() << " EXISTED";
                 }
             }

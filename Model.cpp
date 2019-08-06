@@ -9,10 +9,22 @@ Model::Model(QObject *parent) : QObject(parent)
 {
     m_token = "00261f5687fee223f35e3c2080e167a8";
     m_currentPkgIndex = -1;
+    m_autoStart = true;
+    m_currentScreen = AppEnums::HMI_UNKNOW_SCREEN;
     this->loadUserDataList();
-    foreach (QString key, m_userDataList.keys()) {
-        LOG << "Key: " << key << " -- " << m_userDataList.value(key).uid;
+    this->loadAppConfig();
+
+    QString _token;
+    ShellOperation::shellCommand(QString("getprop %1").arg(TOKEN_PROP_KEY),_token);
+    _token.simplified();
+
+    LOG << "_token: " << _token;
+
+    if(!_token.isEmpty() && _token.contains("@")){
+        setToken(_token.section("@",1,1));
     }
+
+    this->saveAppConfig();
 }
 
 
@@ -43,57 +55,8 @@ void Model::saveJson(QJsonDocument document, QString fileName)
 
 void Model::start()
 {
-    if(testImageMode()){
-        delay(5000);
-        QDir screenshotDir =  QDir(QDir::currentPath() + "/images/Screenshots");
-        screenshotDir.setNameFilters(QStringList() << "*.png");
-
-        QDir iconDir =  QDir(QDir::currentPath() + "/images/Icons");
-        iconDir.setNameFilters(QStringList() << "*.png");
-
-        foreach (QFileInfo file, screenshotDir.entryInfoList()) {
-            Model::instance()->setTestingImageSource(file.absoluteFilePath());
-            Model::instance()->setScreenName("");
-
-            LOG << Model::instance()->testingImageSource();
-
-            QTimer timer;
-            timer.setInterval(2000);
-            timer.setSingleShot(true);
-
-            QEventLoop event;
-            connect(&timer, SIGNAL(timeout()), &event, SLOT(quit()));
-            timer.start();
-            event.exec();
-
-            foreach (QFileInfo icon, iconDir.entryInfoList()) {
-                QString iconName = icon.absoluteFilePath();
-                LOG << iconName;
-                QPoint result = ImageProcessing::findImageOnImage(iconName, Model::instance()->testingImageSource());
-                if(!result.isNull()){
-                    Model::instance()->setScreenName(Model::instance()->screenName() + "\n" + iconName.split("/").last());
-                }
-
-                QTimer timer2;
-                timer2.setInterval(100);
-                timer2.setSingleShot(true);
-
-                QEventLoop event2;
-                connect(&timer2, SIGNAL(timeout()), &event2, SLOT(quit()));
-
-                if(icon == iconDir.entryInfoList().last()){
-                    Model::instance()->setScreenName(Model::instance()->screenName() + "\n Done");
-                    timer2.setInterval(10000);
-                }
-
-                timer2.start();
-                event2.exec();
-            }
-        }
-        delay(2000);
-    }else{
-        emit sigStartProgram();
-    }
+    this->saveAppConfig();
+    emit sigStartProgram();
 }
 
 QString Model::token() const
@@ -106,8 +69,21 @@ void Model::setToken(QString data)
     LOG << data;
     if(m_token != data){
         m_token = data;
-        this->saveAppConfig();
         emit tokenChanged();
+    }
+}
+
+bool Model::autoStart() const
+{
+    return m_autoStart;
+}
+
+void Model::setAutoStart(bool data)
+{
+    LOG << data;
+    if(m_autoStart != data){
+        m_autoStart = data;
+        emit autoStartChanged();
     }
 }
 
@@ -219,50 +195,12 @@ void Model::setActionList(QList<QJsonObject> data)
     if(m_actionList!= data){
         m_actionList = data;
         m_changedActionList = m_actionList;
-        LOG << "----------------------- New circle ------------------------";
-        emit currentActionChanged();
     }
 }
 
 void Model::clearActionList()
 {
     m_actionList.clear();
-}
-
-QJsonObject Model::currentAction()
-{
-    if(m_changedActionList.isEmpty()){
-        return QJsonObject();
-    }else{
-        return m_changedActionList.first();
-    }
-}
-
-void Model::nextCurrentAction()
-{
-    LOG;
-    if(m_changedActionList.length() <= 1){
-        if(m_changedActionList.length() == 1){
-            m_changedActionList.removeFirst();
-        }
-        emit currentActionListDone();
-        nextCurrentControlledObj();
-    }else{
-        m_changedActionList.removeFirst();
-    }
-    emit currentActionChanged();
-}
-
-QStringList Model::neededInstallpackageList()
-{
-    return m_neededInstallpackageList;
-}
-
-void Model::setNeededInstallpackageList(QStringList data)
-{
-    if(m_neededInstallpackageList != data){
-        m_neededInstallpackageList = data;
-    }
 }
 
 void Model::loadUserDataList()
@@ -273,6 +211,7 @@ void Model::loadUserDataList()
     QFile file(USER_DATA_LIST_PATH);
     if(file.exists()){
 
+        QStringList installedListPkg = ShellOperation::installedFBPkg();
         QJsonDocument userDataListJson = this->loadJson(USER_DATA_LIST_PATH);
         if(!userDataListJson.isNull()){
             foreach (QJsonValue data, userDataListJson.array()) {
@@ -299,25 +238,10 @@ void Model::loadUserDataList()
                     user_data.updated_at       = userDataJson["updated_at"].toString();
                     user_data.user_id          = userDataJson["user_id"].toString();
 
-//                    LOG << "user_data._id           :" << user_data._id           ;
-                    LOG << "user_data.uid           :" << user_data.uid           ;
-//                    LOG << "user_data.password      :" << user_data.password      ;
-//                    LOG << "user_data.cookie        :" << user_data.cookie        ;
-//                    LOG << "user_data.token         :" << user_data.token         ;
-//                    LOG << "user_data.birthday      :" << user_data.birthday      ;
-//                    LOG << "user_data.name          :" << user_data.name          ;
-//                    LOG << "user_data.sex           :" << user_data.sex           ;
-//                    LOG << "user_data.country       :" << user_data.country       ;
-//                    LOG << "user_data.email         :" << user_data.email         ;
-//                    LOG << "user_data.avartar       :" << user_data.avartar       ;
-//                    LOG << "user_data.created_date  :" << user_data.created_date  ;
-//                    LOG << "user_data.farming_status:" << user_data.farming_status;
-//                    LOG << "user_data.alive_status  :" << user_data.alive_status  ;
-//                    LOG << "user_data.created_at    :" << user_data.created_at    ;
-//                    LOG << "user_data.updated_at    :" << user_data.updated_at    ;
-//                    LOG << "user_data.user_id       :" << user_data.user_id       ;
-
-                    m_userDataList.insert(packageName,user_data);
+                    LOG << "user_data.uid           :" << user_data.uid;
+                    if(installedListPkg.contains(packageName)){
+                        m_userDataList.insert(packageName,user_data);
+                    }
                 }
             }
         }
@@ -353,24 +277,6 @@ void Model::saveUserDataList()
         userDataJson["updated_at"]      = user_data.updated_at    ;
         userDataJson["user_id"]         = user_data.user_id       ;
 
-//        LOG << "user_data._id           :" << user_data._id           ;
-//        LOG << "user_data.uid           :" << user_data.uid           ;
-//        LOG << "user_data.password      :" << user_data.password      ;
-//        LOG << "user_data.cookie        :" << user_data.cookie        ;
-//        LOG << "user_data.token         :" << user_data.token         ;
-//        LOG << "user_data.birthday      :" << user_data.birthday      ;
-//        LOG << "user_data.name          :" << user_data.name          ;
-//        LOG << "user_data.sex           :" << user_data.sex           ;
-//        LOG << "user_data.country       :" << user_data.country       ;
-//        LOG << "user_data.email         :" << user_data.email         ;
-//        LOG << "user_data.avartar       :" << user_data.avartar       ;
-//        LOG << "user_data.created_date  :" << user_data.created_date  ;
-//        LOG << "user_data.farming_status:" << user_data.farming_status;
-//        LOG << "user_data.alive_status  :" << user_data.alive_status  ;
-//        LOG << "user_data.created_at    :" << user_data.created_at    ;
-//        LOG << "user_data.updated_at    :" << user_data.updated_at    ;
-//        LOG << "user_data.user_id       :" << user_data.user_id       ;
-
         obj["package_name"] = i.key();
         obj["user_data"] = userDataJson;
         objectArray.append(QJsonValue(obj));
@@ -392,6 +298,7 @@ void Model::loadAppConfig()
             if(!_token.isEmpty()){
                 this->setToken(_token);
             }
+            this->setAutoStart(obj[AUTO_START_KEY].toBool());
         }
     }else{
         LOG << CONFIG_FILE_PATH << " not exist";
@@ -403,39 +310,73 @@ void Model::saveAppConfig()
     LOG;
     QJsonObject obj;
     obj[TOKEN_PROP_KEY] = this->token();
+    obj[AUTO_START_KEY] = this->autoStart();
     this->saveJson(QJsonDocument(obj),CONFIG_FILE_PATH);
 }
 
-QString Model::testingImageSource() const
+int Model::currentScreen() const
 {
-    return m_testingImageSource;
+    return m_currentScreen;
 }
 
-void Model::setTestingImageSource(QString data)
+void Model::setCurrentScreen(const int data)
 {
-    if(m_testingImageSource != data){
-        m_testingImageSource = data;
-        emit testingImageSourceChanged();
+    LOG << data;
+    if(m_currentScreen != data){
+        m_currentScreen = data;
+        emit currentScreenChanged();
     }
 }
 
-QString Model::screenName() const
+QString Model::screenStr(int screenID) const
 {
-    return m_screenName;
-}
-
-void Model::setScreenName(QString data)
-{
-    if(m_screenName != data){
-        m_screenName = data;
-        emit screenNameChanged();
+    QString retVal = "";
+    switch (screenID) {
+    case AppEnums::HMI_UNKNOW_SCREEN:
+        retVal = "HMI_UNKNOW_SCREEN";
+        break;
+    case AppEnums::HMI_SELECT_LANGUAGE_SCREEN:
+        retVal = "HMI_SELECT_LANGUAGE_SCREEN";
+        break;
+    case AppEnums::HMI_LOGIN_SCREEN:
+        retVal = "HMI_LOGIN_SCREEN";
+        break;
+    case AppEnums::HMI_INCORRECT_PASSWORD_SCREEN:
+        retVal = "HMI_INCORRECT_PASSWORD_SCREEN";
+        break;
+    case AppEnums::HMI_MISSING_PASSWORD_SCREEN:
+        retVal = "HMI_MISSING_PASSWORD_SCREEN";
+        break;
+    case AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN:
+        retVal = "HMI_CONFIRM_INDENTIFY_SCREEN";
+        break;
+    case AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN:
+        retVal = "HMI_DEACTIVE_ACCOUNT_SCREEN";
+        break;
+    case AppEnums::HMI_TURNON_FIND_FRIEND_SCREEN:
+        retVal = "HMI_TURNON_FIND_FRIEND_SCREEN";
+        break;
+    case AppEnums::HMI_SAVE_LOGIN_INFO_SCREEN:
+        retVal = "HMI_SAVE_LOGIN_INFO_SCREEN";
+        break;
+    case AppEnums::HMI_CHOOSE_AVATAR_SCREEN:
+        retVal = "HMI_CHOOSE_AVATAR_SCREEN";
+        break;
+    case AppEnums::HMI_ADDFRIEND_SUGGESTION_SCREEN:
+        retVal = "HMI_ADDFRIEND_SUGGESTION_SCREEN";
+        break;
+    case AppEnums::HMI_NEW_FEED_SCREEN:
+        retVal = "HMI_NEW_FEED_SCREEN";
+        break;
+    case AppEnums::HMI_LOGIN_AGAIN_SCREEN:
+        retVal = "HMI_LOGIN_AGAIN_SCREEN";
+        break;
+    default:
+        break;
     }
+    return retVal;
 }
 
-bool Model::testImageMode()
-{
-    return false;
-}
 
 
 

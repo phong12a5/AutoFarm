@@ -6,8 +6,9 @@
 #include <QMap>
 #include <AppEnums.hpp>
 #include <QDir>
+#include <QThread>
 
-#define LOG qDebug() << "[" << __FUNCTION__ << "][" << __LINE__ << "] >>"
+#define LOG qDebug() << "[" << __FUNCTION__ << "][" << __LINE__ << "][" << QThread::currentThreadId() << "] "
 
 #define delay(milescond)        QTest::qSleep(milescond)
 
@@ -60,6 +61,7 @@
 #define FACEBOOK_LITE_ACT       "MainActivity"
 
 #define TOKEN_PROP_KEY          "farm_token"
+#define AUTO_START_KEY          "auto_start"
 
 #define NUMBER_CLICK            5
 

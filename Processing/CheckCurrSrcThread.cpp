@@ -1,7 +1,8 @@
 #include "CheckCurrSrcThread.hpp"
 #include "MainController.hpp"
+#include "Model.hpp"
 
-#define MAIN_CTRL   MainController::instance()
+#define MODEL       Model::instance()
 
 CheckCurrSrcThread::CheckCurrSrcThread(QObject *parent) : QObject(parent)
 {
@@ -74,7 +75,7 @@ bool CheckCurrSrcThread::isCurrentScreen(int screenID)
         retVal = isOnScreen(LOGIN_AGAIN_ICON);
         break;
     }
-    LOG << "Checking " << MAIN_CTRL->screenStr(screenID) << " : " << retVal;
+    LOG << "Checking " << MODEL->screenStr(screenID) << " : " << retVal;
     return retVal;
 }
 
@@ -97,7 +98,8 @@ void CheckCurrSrcThread::doWork(const QString &parameter)
 
 void CheckCurrSrcThread::onUpdateCurrentScreen()
 {
-    int currentScreen = MAIN_CTRL->currentScreen();
+    int currentScreen = MODEL->currentScreen();
+    LOG << "currentScreen: " << MODEL->screenStr(currentScreen);
     QList<int> screenPiorityOrder;
     screenPiorityOrder <<   AppEnums::HMI_NEW_FEED_SCREEN
                        <<   AppEnums::HMI_SELECT_LANGUAGE_SCREEN
@@ -119,36 +121,36 @@ void CheckCurrSrcThread::onUpdateCurrentScreen()
      ShellOperation::screenshotImg(m_screenImg,"screen_checking.png");
 
     foreach (int i , checkedScreenList){
-        if(MAIN_CTRL->currentScreen() != currentScreen){
+        if(MODEL->currentScreen() != currentScreen){
             LOG << "Current is changed from another thread";
             break;
         }
 
         if(i == AppEnums::HMI_LOGIN_SCREEN && currentScreen == AppEnums::HMI_LOGIN_SCREEN){
             if(isCurrentScreen(AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN)){
-                MAIN_CTRL->setCurrentScreen(AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN);
+                MODEL->setCurrentScreen(AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN);
                 delay(2000);
                 break;
             }
             else if(isCurrentScreen(AppEnums::HMI_MISSING_PASSWORD_SCREEN)){
-                MAIN_CTRL->setCurrentScreen(AppEnums::HMI_MISSING_PASSWORD_SCREEN);
+                MODEL->setCurrentScreen(AppEnums::HMI_MISSING_PASSWORD_SCREEN);
                 delay(2000);
                 break;
             }
             else if(isCurrentScreen(AppEnums::HMI_INCORRECT_PASSWORD_SCREEN)){
-                MAIN_CTRL->setCurrentScreen(AppEnums::HMI_INCORRECT_PASSWORD_SCREEN);
+                MODEL->setCurrentScreen(AppEnums::HMI_INCORRECT_PASSWORD_SCREEN);
                 delay(2000);
                 break;
             }
             else if(isCurrentScreen(AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN)){
-                MAIN_CTRL->setCurrentScreen(AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN);
+                MODEL->setCurrentScreen(AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN);
                 delay(2000);
                 break;
             }
         }
 
         if(isCurrentScreen(i)){
-            MAIN_CTRL->setCurrentScreen(i);
+            MODEL->setCurrentScreen(i);
             delay(2000);
             break;
         }

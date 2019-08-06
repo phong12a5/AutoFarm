@@ -32,7 +32,6 @@ void CheckCurrActivityThread::onUpdateCurrentActivity()
     if(currentAct != ""){
         QMutex mutex;
         mutex.lock();
-        MAIN_CONTROLLER->setCurrentActivity(currentAct);
         mutex.unlock();
     }else{
         LOG << "Invalid activity";

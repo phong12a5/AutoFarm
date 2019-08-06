@@ -30,7 +30,8 @@ HEADERS += \
     Processing/CheckCurrSrcThread.hpp \
     Processing/CheckCurrActivityThread.hpp \
     Processing/QAESEncryption.hpp\
-    Communication/WebAPI.hpp
+    Communication/WebAPI.hpp \
+    Controller/FarmActions.h
 
 SOURCES += \
         main.cpp \
@@ -44,7 +45,8 @@ SOURCES += \
     Processing/CheckCurrSrcThread.cpp \
     Processing/CheckCurrActivityThread.cpp \
     Processing/QAESEncryption.cpp\
-    Communication/WebAPI.cpp
+    Communication/WebAPI.cpp \
+    Controller/FarmActions.cpp
 
 RESOURCES += qml.qrc
 

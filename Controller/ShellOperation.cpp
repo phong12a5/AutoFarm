@@ -191,6 +191,16 @@ bool ShellOperation::isPackageExisted(QString packageName)
     }
 }
 
+QStringList ShellOperation::installedFBPkg()
+{
+    QStringList retVal;
+    QString output;
+    if(ShellOperation::shellCommand("pm list packages | grep com.facebook", output)){
+        retVal = output.remove("package:").split("\n");
+    }
+    return retVal;
+}
+
 QString ShellOperation::screenShot(QString fileName)
 {
     QString path = QString("/sdcard/Pictures/%1").arg(fileName);

@@ -13,7 +13,6 @@ void AppMain::initApplication(QQmlApplicationEngine &engine)
 {
     LOG;
 
-
     // Coppy icon to /SDCARD/DCIM folder
     if(!QDir("/sdcard/DCIM/PDT17/Icons").exists()){
         if(QDir("/sdcard/DCIM/").mkdir("PDT17")){
@@ -60,19 +59,6 @@ void AppMain::initApplication(QQmlApplicationEngine &engine)
     LOG << _deviceInfo.disInfo.dpi;
 #endif
 
-    QString _token;
-    ShellOperation::shellCommand(QString("getprop %1").arg(TOKEN_PROP_KEY),_token);
-    _token.simplified();
-
-    LOG << "_token: " << _token;
-
-    if(!_token.isEmpty() && _token.contains("@")){
-        MODEL->setToken(_token.section("@",1,1));
-    }else{
-        MODEL->loadAppConfig();
-    }
-
-
     //Connect  signal - slot
     this->connectSignalSlot();
 }
@@ -98,7 +84,6 @@ void AppMain::coppyFolder(QString src, QString dst)
     }
 
     foreach (QString f, dir.entryList(QDir::Files)) {
-        LOG << "coppying " << src + QDir::separator() + f << " to " << dst + QDir::separator() + f;
         QFile::copy(src + QDir::separator() + f, dst + QDir::separator() + f);
     }
 }

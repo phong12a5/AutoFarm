@@ -38,6 +38,7 @@ public:
     static void removeFile(QString path);
     static void enterKeyBoard();
     static bool isPackageExisted(QString packageName);
+    static QStringList installedFBPkg();
 #endif
 private:
 };

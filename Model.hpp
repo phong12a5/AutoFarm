@@ -21,11 +21,7 @@ class Model : public QObject
     Q_PROPERTY(QString token READ token WRITE setToken NOTIFY tokenChanged)
     Q_PROPERTY(QString deviceType READ deviceType CONSTANT)
     Q_PROPERTY(QString logContent READ logContent WRITE setLogContent NOTIFY logContentChanged)
-
-    /* For test checking image */
-    Q_PROPERTY(QString testingImageSource READ testingImageSource WRITE setTestingImageSource NOTIFY testingImageSourceChanged)
-    Q_PROPERTY(QString screenName READ screenName WRITE setScreenName NOTIFY screenNameChanged)
-    Q_PROPERTY(bool testImageMode READ testImageMode CONSTANT)
+    Q_PROPERTY(bool autoStart READ autoStart WRITE setAutoStart NOTIFY autoStartChanged)
 
 public:
     static Model* instance();
@@ -35,6 +31,9 @@ public:
 public:
     QString token() const;
     void setToken(QString data);
+
+    bool autoStart() const;
+    void setAutoStart(bool data);
 
     QString deviceType() const;
 
@@ -59,24 +58,15 @@ public:
     void setActionList(QList<QJsonObject> data);
     void clearActionList();
 
-    QJsonObject currentAction();
-    void nextCurrentAction();
-
-    QStringList neededInstallpackageList();
-    void setNeededInstallpackageList(QStringList data);
-
     void loadUserDataList();
     void saveUserDataList();
 
     void loadAppConfig();
     void saveAppConfig();
 
-    /* For test checking image */
-    QString testingImageSource() const;
-    void setTestingImageSource(QString data);
-    QString screenName() const;
-    void setScreenName(QString data);
-    bool testImageMode();
+    int currentScreen() const;
+    QString screenStr(int screenID) const;
+    void setCurrentScreen(const int data);
 
 private:
     explicit Model(QObject *parent = nullptr);
@@ -98,20 +88,22 @@ private:
     QList<QJsonObject> m_actionList;
     QList<QJsonObject> m_changedActionList;
     QString m_logContent;
-    QStringList m_neededInstallpackageList;
     QString m_testingImageSource;
     QString m_screenName;
+    bool m_autoStart;
+    int m_currentScreen;
 
 signals:
     void sigStartProgram();
     void tokenChanged();
     void nextCurrentControlledObjChanged();
-    void currentActionChanged();
     void currentActionListDone();
     void finishedListObject();
     void logContentChanged();
     void testingImageSourceChanged();
     void screenNameChanged();
+    void autoStartChanged();
+    void currentScreenChanged();
 
 public slots:
 };

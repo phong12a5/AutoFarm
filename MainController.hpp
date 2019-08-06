@@ -8,6 +8,7 @@
 #include "Controller/ThreadController.hpp"
 #include "AppEnums.hpp"
 #include "Communication/WebAPI.hpp"
+#include "Controller/FarmActions.h"
 
 class MainController : public QObject
 {
@@ -17,7 +18,6 @@ private:
     explicit MainController(QObject *parent = nullptr);
 
 private:
-    void execVipLike();
     void installPackages(QStringList,QStringList);
 
 public:
@@ -26,38 +26,26 @@ public:
     void downloadAndInstallPackages();
 
 public:
-    int currentScreen() const;
-    QString screenStr(int screenID) const;
-    void setCurrentScreen(const int data);
-
-    QString currentActivity() const;
-    void setCurrentActivity(const QString data);
-
     void startCheckCurrentScreen();
-    void startCheckCurrentActivity();
 
 private:
     static MainController* m_instance;
 
     ThreadController multiThreadController;
 
-    int m_currentScreen;
-    QString m_currentActivity;
     QTimer m_changeScreenTimer;
+    QTimer m_test;
 
 signals:
-    void currentScreenChanged();
-    void currentActivityChanged();
 
 public slots:
     void onChangeScreen();
-    void onChangeAcitivity();
     void executeRequiredActions();
-    void doAction();
     void updateResult();
     void onFinishedListObject();
     void onDownloadCompleted(QStringList,QStringList);
     void onchangeScreenTimerTimeout();
+    void onTest();
 };
 
 #endif // MAINCONTROLLER_H
