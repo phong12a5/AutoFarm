@@ -28,10 +28,10 @@ HEADERS += \
     Communication/JavaCommunication.hpp \
     Controller/ThreadController.hpp \
     Processing/CheckCurrSrcThread.hpp \
-    Processing/CheckCurrActivityThread.hpp \
     Processing/QAESEncryption.hpp\
     Communication/WebAPI.hpp \
-    Controller/FarmActions.h
+    Controller/FarmActions.h \
+    Processing/StartNewActivityThread.hpp
 
 SOURCES += \
         main.cpp \
@@ -43,10 +43,10 @@ SOURCES += \
     Communication/JavaCommunication.cpp \
     Controller/ThreadController.cpp \
     Processing/CheckCurrSrcThread.cpp \
-    Processing/CheckCurrActivityThread.cpp \
     Processing/QAESEncryption.cpp\
     Communication/WebAPI.cpp \
-    Controller/FarmActions.cpp
+    Controller/FarmActions.cpp \
+    Processing/StartNewActivityThread.cpp
 
 RESOURCES += qml.qrc
 

@@ -55,6 +55,7 @@
 #define MISSING_PWD_SCREEN      "/sdcard/DCIM/PDT17/Icons/MissingPasswordIcon.png"
 #define SELECT_LANGUAGE_SCREEN  "/sdcard/DCIM/PDT17/Icons/SelectLanguage.png"
 #define LOGIN_AGAIN_ICON        "/sdcard/DCIM/PDT17/Icons/LoginAgain.png"
+#define ACC_NOT_FOUND           "/sdcard/DCIM/PDT17/Icons/AccountNotFound.png"
 
 #define FACEBOOK_LITE_SCREEN    "com.facebook.lite/com.facebook.lite.MainActivity"
 #define FACEBOOK_LITE_PKGNAME   "com.facebook.lite"

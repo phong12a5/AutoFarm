@@ -27,7 +27,7 @@ private:
     QTimer* m_updateCurrSrcTimer;
 
 signals:
-    void resultReady(const QString &result);
+    void screenChanged(int screenID);
 
 public slots:
     void doWork(const QString &parameter);

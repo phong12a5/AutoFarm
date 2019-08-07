@@ -1,8 +1,5 @@
 #include "CheckCurrSrcThread.hpp"
-#include "MainController.hpp"
-#include "Model.hpp"
-
-#define MODEL       Model::instance()
+#include "Controller/ShellOperation.hpp"
 
 CheckCurrSrcThread::CheckCurrSrcThread(QObject *parent) : QObject(parent)
 {
@@ -42,7 +39,7 @@ bool CheckCurrSrcThread::isCurrentScreen(int screenID)
         retVal = isOnScreen(SELECT_LANGUAGE_SCREEN);
         break;
     case AppEnums::HMI_LOGIN_SCREEN:
-        retVal = isOnScreen(LOGIN_SCREEN);
+        retVal = isOnScreen(EMAIL_FIELD) && isOnScreen(PASSWORD_FIELD);
         break;
     case AppEnums::HMI_INCORRECT_PASSWORD_SCREEN:
         retVal = isOnScreen(INCORRECT_PASSWORD);
@@ -74,8 +71,10 @@ bool CheckCurrSrcThread::isCurrentScreen(int screenID)
     case AppEnums::HMI_LOGIN_AGAIN_SCREEN:
         retVal = isOnScreen(LOGIN_AGAIN_ICON);
         break;
+    case AppEnums::HMI_ACCOUNT_NOT_FOUND_SCREEN:
+        retVal = isOnScreen(ACC_NOT_FOUND);
+        break;
     }
-    LOG << "Checking " << MODEL->screenStr(screenID) << " : " << retVal;
     return retVal;
 }
 
@@ -98,8 +97,6 @@ void CheckCurrSrcThread::doWork(const QString &parameter)
 
 void CheckCurrSrcThread::onUpdateCurrentScreen()
 {
-    int currentScreen = MODEL->currentScreen();
-    LOG << "currentScreen: " << MODEL->screenStr(currentScreen);
     QList<int> screenPiorityOrder;
     screenPiorityOrder <<   AppEnums::HMI_NEW_FEED_SCREEN
                        <<   AppEnums::HMI_SELECT_LANGUAGE_SCREEN
@@ -111,48 +108,40 @@ void CheckCurrSrcThread::onUpdateCurrentScreen()
                        <<   AppEnums::HMI_LOGIN_AGAIN_SCREEN;
 
 
-    QList<int> checkedScreenList = screenPiorityOrder;
-    if(screenPiorityOrder.contains(currentScreen)){
-        while (checkedScreenList.indexOf(currentScreen) != 0) {
-            checkedScreenList.append(checkedScreenList.takeFirst());
-        }
-    }
+    ShellOperation::screenshotImg(m_screenImg,"screen_checking.png");
 
-     ShellOperation::screenshotImg(m_screenImg,"screen_checking.png");
-
-    foreach (int i , checkedScreenList){
-        if(MODEL->currentScreen() != currentScreen){
-            LOG << "Current is changed from another thread";
-            break;
-        }
-
-        if(i == AppEnums::HMI_LOGIN_SCREEN && currentScreen == AppEnums::HMI_LOGIN_SCREEN){
+    foreach (int i , screenPiorityOrder){
+        if(i == AppEnums::HMI_LOGIN_SCREEN){
             if(isCurrentScreen(AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN)){
-                MODEL->setCurrentScreen(AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN);
+                emit screenChanged(AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN);
                 delay(2000);
-                break;
+                return;
             }
             else if(isCurrentScreen(AppEnums::HMI_MISSING_PASSWORD_SCREEN)){
-                MODEL->setCurrentScreen(AppEnums::HMI_MISSING_PASSWORD_SCREEN);
+                emit screenChanged(AppEnums::HMI_MISSING_PASSWORD_SCREEN);
                 delay(2000);
-                break;
+                return;
             }
             else if(isCurrentScreen(AppEnums::HMI_INCORRECT_PASSWORD_SCREEN)){
-                MODEL->setCurrentScreen(AppEnums::HMI_INCORRECT_PASSWORD_SCREEN);
+                emit screenChanged(AppEnums::HMI_INCORRECT_PASSWORD_SCREEN);
                 delay(2000);
-                break;
+                return;
             }
             else if(isCurrentScreen(AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN)){
-                MODEL->setCurrentScreen(AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN);
+                emit screenChanged(AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN);
                 delay(2000);
-                break;
+                return;
+            }
+            else if(isCurrentScreen(AppEnums::HMI_ACCOUNT_NOT_FOUND_SCREEN)){
+                emit screenChanged(AppEnums::HMI_ACCOUNT_NOT_FOUND_SCREEN);
+                delay(2000);
+                return;
             }
         }
 
         if(isCurrentScreen(i)){
-            MODEL->setCurrentScreen(i);
-            delay(2000);
-            break;
+            emit screenChanged(i);
+            return;
         }
     }
 }

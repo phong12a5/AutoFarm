@@ -27,6 +27,7 @@ public:
 
 public:
     void startCheckCurrentScreen();
+    void startNewActivity(QString packageName, QString sxtraData);
 
 private:
     static MainController* m_instance;
@@ -34,18 +35,16 @@ private:
     ThreadController multiThreadController;
 
     QTimer m_changeScreenTimer;
-    QTimer m_test;
 
 signals:
 
 public slots:
-    void onChangeScreen();
+    void onChangeScreen(int screenID);
     void executeRequiredActions();
     void updateResult();
     void onFinishedListObject();
     void onDownloadCompleted(QStringList,QStringList);
     void onchangeScreenTimerTimeout();
-    void onTest();
 };
 
 #endif // MAINCONTROLLER_H

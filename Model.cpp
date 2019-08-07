@@ -321,7 +321,6 @@ int Model::currentScreen() const
 
 void Model::setCurrentScreen(const int data)
 {
-    LOG << data;
     if(m_currentScreen != data){
         m_currentScreen = data;
         emit currentScreenChanged();
@@ -370,6 +369,9 @@ QString Model::screenStr(int screenID) const
         break;
     case AppEnums::HMI_LOGIN_AGAIN_SCREEN:
         retVal = "HMI_LOGIN_AGAIN_SCREEN";
+        break;
+    case AppEnums::HMI_ACCOUNT_NOT_FOUND_SCREEN:
+        retVal = "HMI_ACCOUNT_NOT_FOUND_SCREEN";
         break;
     default:
         break;

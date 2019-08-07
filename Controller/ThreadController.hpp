@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QThread>
 #include "Processing/CheckCurrSrcThread.hpp"
-#include "Processing/CheckCurrActivityThread.hpp"
+#include "Processing/StartNewActivityThread.hpp"
 
 class ThreadController : public QObject
 {
@@ -15,20 +15,21 @@ public:
 
 private:
     QThread m_checkScreenThread;
-    QThread m_checkActivityThread;
-    CheckCurrSrcThread checkScreenWorker;
-    CheckCurrActivityThread checkActivityWorker;
+    QThread m_startNewActivityThread;
+
+    CheckCurrSrcThread      checkScreenWorker;
+    StartNewActivityThread  startNewActivityWorker;
 
     QThread m_readFile;
 
 
 public:
     void startCheckCurrentScreen();
-    void startCheckCurrentActivity();
+    void startNewActivity(QString packageName, QString sxtraData);
 
 signals:
     void sigStartCheckCurrentScreen(const QString &);
-    void sigStartCheckCurrentActivity(const QString &);
+    void sigStartNewActivity(QString packageName, QString sxtraData);
 
 public slots:
 };

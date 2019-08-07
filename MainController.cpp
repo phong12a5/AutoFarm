@@ -13,12 +13,6 @@ MainController::MainController(QObject *parent) : QObject(parent)
 {
     m_changeScreenTimer.setSingleShot(true);
     m_changeScreenTimer.setInterval(120000);
-    m_test.setInterval(100);
-    m_test.setSingleShot(false);
-    connect(&m_test, SIGNAL(timeout()), this, SLOT(onTest()));
-    m_test.start();
-    startCheckCurrentScreen();
-
 }
 
 
@@ -35,7 +29,7 @@ void MainController::initController()
     LOG;
     // Do nothing;
     connect(&m_changeScreenTimer, SIGNAL(timeout()), this, SLOT(onchangeScreenTimerTimeout()));
-    connect(MODEL,SIGNAL(currentScreenChanged()),this,SLOT(onChangeScreen()));
+//    connect(MODEL,SIGNAL(currentScreenChanged()),this,SLOT(onChangeScreen()));
     connect(MODEL,SIGNAL(nextCurrentControlledObjChanged()),this,SLOT(executeRequiredActions()));
     connect(MODEL,SIGNAL(currentActionListDone()),this,SLOT(updateResult()));
     connect(MODEL,SIGNAL(finishedListObject()),this,SLOT(onFinishedListObject()));
@@ -68,6 +62,11 @@ void MainController::startCheckCurrentScreen()
     multiThreadController.startCheckCurrentScreen();
 }
 
+void MainController::startNewActivity(QString packageName, QString sxtraData)
+{
+    multiThreadController.startNewActivity(packageName,sxtraData);
+}
+
 void MainController::executeRequiredActions()
 {
 #ifdef ANDROID_KIT
@@ -77,10 +76,9 @@ void MainController::executeRequiredActions()
         LOG << "User info has storaged already";
     }
 
-    JAVA_COM->openFBLiteWithUserID(MODEL->currentControlledPkg(),MODEL->currentControlledUser().uid);
-
-//    MODEL->setCurrentScreen(AppEnums::HMI_UNKNOW_SCREEN);
-//    startCheckCurrentScreen();
+    startNewActivity(MODEL->currentControlledPkg(),"");
+    MODEL->setCurrentScreen(AppEnums::HMI_UNKNOW_SCREEN);
+    startCheckCurrentScreen();
 #endif
 }
 
@@ -110,6 +108,7 @@ void MainController::onDownloadCompleted(QStringList downloadedFile,QStringList 
 void MainController::onchangeScreenTimerTimeout()
 {
     LOG << MODEL->screenStr(MODEL->currentScreen());
+#ifdef ANDROID_KIT
     if(MODEL->currentScreen() == AppEnums::HMI_LOGIN_SCREEN){
         LOG << "Click Login again!";
         if(ShellOperation::findAndClick(LOGIN_BTN)){
@@ -118,26 +117,28 @@ void MainController::onchangeScreenTimerTimeout()
     }
 
     if(MODEL->currentScreen() != AppEnums::HMI_NEW_FEED_SCREEN){
-#ifdef ANDROID_KIT
         ShellOperation::clearPackageData(MODEL->currentControlledPkg());
-#endif
         MODEL->nextCurrentControlledObj();
     }
+#endif
 }
 
-void MainController::onTest()
+void MainController::onChangeScreen(int screenID)
 {
-    LOG << "onTest";
-}
 
-void MainController::onChangeScreen()
-{
+    if(screenID == MODEL->currentScreen())
+        return;
+
+    MODEL->setCurrentScreen(screenID);
     LOG << "currentScreen: " << MODEL->screenStr(MODEL->currentScreen());
 
 #ifdef ANDROID_KIT
-//    m_changeScreenTimer.stop();
+    m_changeScreenTimer.stop();
 
     switch(MODEL->currentScreen()){
+    case AppEnums::HMI_UNKNOW_SCREEN:
+        ShellOperation::findAndClick(ENGLISH_BTN);
+        break;
     case AppEnums::HMI_SELECT_LANGUAGE_SCREEN:
         ShellOperation::findAndClick(ENGLISH_BTN);
         break;
@@ -152,7 +153,7 @@ void MainController::onChangeScreen()
             ShellOperation::enterKeyBoard();
         }
 
-        delay(500);
+        delay(1000);
         ShellOperation::findAndClick(PASSWORD_FIELD, true);
         delay(1000);
         ShellOperation::enterText(MODEL->currentControlledUser().password);
@@ -165,6 +166,7 @@ void MainController::onChangeScreen()
     }
         break;
     case AppEnums::HMI_MISSING_PASSWORD_SCREEN:
+    case AppEnums::HMI_ACCOUNT_NOT_FOUND_SCREEN:
         MODEL->updateCurrentControlleredUser(WEB_API->cloneUserData());
         ShellOperation::clearPackageData(MODEL->currentControlledPkg());
         MODEL->nextCurrentControlledObj();
@@ -172,11 +174,6 @@ void MainController::onChangeScreen()
 
     case AppEnums::HMI_INCORRECT_PASSWORD_SCREEN:
     case AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN:
-        WEB_API->updateCheckPoint();
-        MODEL->updateCurrentControlleredUser(WEB_API->cloneUserData());
-        ShellOperation::clearPackageData(MODEL->currentControlledPkg());
-        MODEL->nextCurrentControlledObj();
-        break;
     case AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN:
         WEB_API->updateCheckPoint();
         MODEL->updateCurrentControlleredUser(WEB_API->cloneUserData());
@@ -199,7 +196,8 @@ void MainController::onChangeScreen()
         break;
     case AppEnums::HMI_NEW_FEED_SCREEN:
         MODEL->clearActionList();
-        FARM_ACTIONS->doActions();
+//        FARM_ACTIONS->doActions();
+        MODEL->nextCurrentControlledObj();
         break;
     case AppEnums::HMI_LOGIN_AGAIN_SCREEN:
         break;
@@ -207,7 +205,7 @@ void MainController::onChangeScreen()
         break;
     }
 
-//    m_changeScreenTimer.start();
+    m_changeScreenTimer.start();
 #endif
 }
 

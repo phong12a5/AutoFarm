@@ -9,10 +9,10 @@ ThreadController::ThreadController(QObject *parent) : QObject(parent)
 ThreadController::~ThreadController()
 {
     m_checkScreenThread.quit();
-    m_checkActivityThread.quit();
+    m_startNewActivityThread.quit();
 
     m_checkScreenThread.wait();
-    m_checkActivityThread.wait();
+    m_startNewActivityThread.wait();
 }
 
 void ThreadController::startCheckCurrentScreen()
@@ -25,21 +25,19 @@ void ThreadController::startCheckCurrentScreen()
     checkScreenWorker.moveToThread(&m_checkScreenThread);
     connect(&m_checkScreenThread, &QThread::finished, &checkScreenWorker, &QObject::deleteLater);
     connect(this, &ThreadController::sigStartCheckCurrentScreen, &checkScreenWorker, &CheckCurrSrcThread::doWork);
+    connect(&checkScreenWorker, &CheckCurrSrcThread::screenChanged,MainController::instance(), &MainController::onChangeScreen);
     m_checkScreenThread.start();
     emit sigStartCheckCurrentScreen("Phong DT");
 }
 
-void ThreadController::startCheckCurrentActivity()
+void ThreadController::startNewActivity(QString packageName, QString sxtraData)
 {
-    LOG << "[ThreadController]";
-    if(m_checkActivityThread.isRunning()){
-        LOG << "m_checkActivityThread is running already";
-        return;
+    if(!m_startNewActivityThread.isRunning()){
+        startNewActivityWorker.moveToThread(&m_startNewActivityThread);
+        connect(&m_startNewActivityThread, &QThread::finished, &startNewActivityWorker, &QObject::deleteLater);
+        connect(this, &ThreadController::sigStartNewActivity, &startNewActivityWorker, &StartNewActivityThread::doWork);
+        m_startNewActivityThread.start();
     }
-    checkActivityWorker.moveToThread(&m_checkActivityThread);
-    connect(&m_checkActivityThread, &QThread::finished, &checkActivityWorker, &QObject::deleteLater);
-    connect(this, &ThreadController::sigStartCheckCurrentActivity, &checkActivityWorker, &CheckCurrActivityThread::doWork);
-    m_checkActivityThread.start();
-    emit sigStartCheckCurrentActivity(QString("Phong DT"));
+    emit sigStartNewActivity(packageName,sxtraData);
 }
 
