@@ -1,34 +1,27 @@
 #include "MainController.hpp"
-#include "Communication/WebAPI.hpp"
 #include "Model.hpp"
 
-#define WEB_API         WebAPI::instance()
 #define MODEL           Model::instance()
-#define JAVA_COM        JavaCommunication::instance()
-#define FARM_ACTIONS    FarmActions::instance()
-
-MainController* MainController::m_instance = nullptr;
+#define AUTOFARMERJNI   AutoFarmerJNI::instance()
 
 MainController::MainController(QObject *parent) : QObject(parent)
 {
+    m_farmAction = new FarmActions(this);
     m_changeScreenTimer.setSingleShot(true);
     m_changeScreenTimer.setInterval(120000);
 }
 
-
-MainController *MainController::instance()
+MainController::~MainController()
 {
-    if(m_instance == nullptr){
-        m_instance = new MainController();
-    }
-    return m_instance;
+    m_checkScreenThread.quit();
+    m_checkScreenThread.wait();
 }
 
 void MainController::initController()
 {
-    LOG;
+    LOG_DEBUG;
     connect(&m_changeScreenTimer, SIGNAL(timeout()), this, SLOT(onchangeScreenTimerTimeout()));
-//    connect(MODEL,SIGNAL(currentScreenChanged()),this,SLOT(onChangeScreen()));
+    connect(MODEL,SIGNAL(currentScreenChanged()),this,SLOT(onChangeScreen()));
     connect(MODEL,SIGNAL(nextCurrentControlledObjChanged()),this,SLOT(executeRequiredActions()));
     connect(MODEL,SIGNAL(currentActionListDone()),this,SLOT(updateResult()));
     connect(MODEL,SIGNAL(finishedListObject()),this,SLOT(onFinishedListObject()));
@@ -37,7 +30,7 @@ void MainController::initController()
 
 QJsonDocument MainController::loadJson(QString fileName)
 {
-    LOG << "[Model]";
+    LOG_DEBUG << "[Model]";
     QFile jsonFile(fileName);
     jsonFile.open(QFile::ReadOnly);
     return QJsonDocument().fromJson(jsonFile.readAll());
@@ -45,8 +38,8 @@ QJsonDocument MainController::loadJson(QString fileName)
 
 void MainController::saveJson(QJsonDocument document, QString fileName)
 {
-    LOG <<"document: " << document;
-    LOG <<"fileName: " << fileName;
+    LOG_DEBUG <<"document: " << document;
+    LOG_DEBUG <<"fileName: " << fileName;
     QFile jsonFile(fileName);
     jsonFile.open(QFile::WriteOnly);
     jsonFile.write(document.toJson());
@@ -54,11 +47,11 @@ void MainController::saveJson(QJsonDocument document, QString fileName)
 
 void MainController::downloadAndInstallPackages()
 {
-    QJsonObject retVal = m_farmerAPIs.getApk();
+    QJsonObject retVal = m_famerAPIs.w_getApk();
 
     QJsonDocument jdoc = QJsonDocument(retVal);
 
-    LOG << jdoc;
+    LOG_DEBUG << jdoc;
 
     QMap<QString, USER_DATA>  userDataList = MODEL->userDataList();
     QList<QString> keys = userDataList.keys();
@@ -67,14 +60,14 @@ void MainController::downloadAndInstallPackages()
         if(data.isObject()){
             QJsonObject obj = data.toObject();
             if(!keys.contains(obj["package"].toString())){
-                QJsonObject apkPathObj = m_farmerAPIs.downloadApk(QUrl(obj["apk"].toString()));
-                if(apkPathObj["ResponseData"] != ""){
-                    m_farmerAPIs.installPackage(apkPathObj["ResponseData"]);
+                QString apkPath = m_famerAPIs.w_downloadApk(obj["apk"].toString());
+                if(apkPath != ""){
+                    m_famerAPIs.w_installPackage(apkPath);
                     USER_DATA data;
                     userDataList.insert(obj["package"].toString(),data);
                 }
             }else{
-                LOG << obj["package"].toString() << " EXISTED";
+                LOG_DEBUG << obj["package"].toString() << " EXISTED";
             }
         }
     }
@@ -83,7 +76,17 @@ void MainController::downloadAndInstallPackages()
 
 void MainController::startCheckCurrentScreen()
 {
-    multiThreadController.startCheckCurrentScreen();
+    if(m_checkScreenThread.isRunning()){
+        LOG_DEBUG << "m_checkScreenThread is running already";
+        return;
+    }
+    checkScreenWorker.setAutoFarmerAPIs(m_famerAPIs);
+    checkScreenWorker.moveToThread(&m_checkScreenThread);
+    connect(&m_checkScreenThread, &QThread::finished, &checkScreenWorker, &QObject::deleteLater);
+    connect(this, &MainController::sigStartCheckCurrentScreen, &checkScreenWorker, &CheckCurrSrcWorker::doWork);
+    connect(&checkScreenWorker, &CheckCurrSrcWorker::screenChanged,this, &MainController::onChangeScreen);
+    m_checkScreenThread.start();
+    emit sigStartCheckCurrentScreen();
 }
 
 void MainController::loadUserDataList()
@@ -121,8 +124,8 @@ void MainController::loadUserDataList()
                     user_data.updated_at       = userDataJson["updated_at"].toString();
                     user_data.user_id          = userDataJson["user_id"].toString();
 
-                    LOG << "user_data.uid           :" << user_data.uid;
-                    if(m_farmerAPIs.isExistPackage(packageName)){
+                    LOG_DEBUG << "user_data.uid           :" << user_data.uid;
+                    if(m_famerAPIs.w_isExistPackage(packageName)){
                         userDataList.insert(packageName,user_data);
                     }
                 }
@@ -131,13 +134,13 @@ void MainController::loadUserDataList()
             MODEL->setUserDataList(userDataList);
         }
     }else{
-        LOG << CURRENT_DIR + "userDataList.json" << " not exist";
+        LOG_DEBUG << CURRENT_DIR + "userDataList.json" << " not exist";
     }
 }
 
 void MainController::saveUserDataList()
 {
-    LOG;
+    LOG_DEBUG;
     QMap<QString, USER_DATA>::const_iterator i = MODEL->userDataList().constBegin();
     QJsonArray objectArray;
     while (i != MODEL->userDataList().constEnd()) {
@@ -172,65 +175,63 @@ void MainController::saveUserDataList()
 
 void MainController::onStartProgram()
 {
-    QJsonObject retVal = m_farmerAPIs.initEnv(MODEL->token(),APPNAME_ID_FACEBOOK);
-    if(retVal["Status"].toBool()){
-
+    if(!m_famerAPIs.w_initEnv(MODEL->token(),APPNAME_ID_FACEBOOK)){
+        m_farmAction->setFarmerAPIs(m_famerAPIs);
         this->loadUserDataList();
         this->downloadAndInstallPackages();
         this->saveUserDataList();
+        m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
         MODEL->nextCurrentControlledObj();
     }else{
-        LOG << "Init API false";
+        LOG_DEBUG << "Init API false";
     }
 }
 
 void MainController::executeRequiredActions()
 {
     if(MODEL->currentControlledUser().uid == ""){
-        MODEL->updateCurrentControlleredUser(WEB_API->cloneUserData());
+        MODEL->updateCurrentControlleredUser(m_famerAPIs.w_getClone());
+        this->saveUserDataList();
     }else{
-        LOG << "User info has storaged already";
+        LOG_DEBUG << "User info has storaged already";
     }
 
-    JavaCommunication::instance()->openFBLiteWithUserID(packageName,sxtraData);
+    AUTOFARMERJNI->openFBLiteWithUserID(MODEL->currentControlledPkg(),MODEL->currentControlledUser().uid);
     MODEL->setCurrentScreen(AppEnums::HMI_UNKNOW_SCREEN);
     startCheckCurrentScreen();
 }
 
 void MainController::updateResult()
 {
-    WEB_API->getDoResult();
-#ifdef ANDROID_KIT
-    ShellOperation::killSpecificApp(MODEL->currentControlledPkg());
-#endif
+    foreach (QJsonObject action, MODEL->actionList()) {
+        m_famerAPIs.w_doResult(MODEL->currentControlledUser().uid, action);
+    }
+    m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
 }
 
 void MainController::onFinishedListObject()
 {
-    LOG << "The last user: " << MODEL->currentControlledUser().uid;
+    LOG_DEBUG << "The last user: " << MODEL->currentControlledUser().uid;
     if(MODEL->deviceInfo().isNox == "true"){
-#ifdef ANDROID_KIT
-        ShellOperation::shellCommand(QString("touch %1%2").arg(ENDSCRIPT_PATH).arg(ENDSCRIPT_FILENAME));
-#endif
+//        m_farmerAPIsshellCommand(QString("touch %1%2").arg(DCIM_FOLDER).arg(ENDSCRIPT_FILENAME));
     }
 }
 
 void MainController::onchangeScreenTimerTimeout()
 {
-    LOG << MODEL->screenStr(MODEL->currentScreen());
-#ifdef ANDROID_KIT
+    LOG_DEBUG << MODEL->screenStr(MODEL->currentScreen());
     if(MODEL->currentScreen() == AppEnums::HMI_LOGIN_SCREEN){
-        LOG << "Click Login again!";
-        if(ShellOperation::findAndClick(LOGIN_BTN)){
+        LOG_DEBUG << "Click Login again!";
+        if(m_famerAPIs.findAndClick(LOGIN_BTN)){
             return;
         }
     }
 
     if(MODEL->currentScreen() != AppEnums::HMI_NEW_FEED_SCREEN){
-        ShellOperation::clearPackageData(MODEL->currentControlledPkg());
+        m_famerAPIs.w_wipePackage(QStringList() << MODEL->currentControlledPkg());
+        m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
         MODEL->nextCurrentControlledObj();
     }
-#endif
 }
 
 void MainController::onChangeScreen(int screenID)
@@ -240,74 +241,78 @@ void MainController::onChangeScreen(int screenID)
         return;
 
     MODEL->setCurrentScreen(screenID);
-    LOG << "currentScreen: " << MODEL->screenStr(MODEL->currentScreen());
+    LOG_DEBUG << "currentScreen: " << MODEL->screenStr(MODEL->currentScreen());
 
-#ifdef ANDROID_KIT
     m_changeScreenTimer.stop();
 
     switch(MODEL->currentScreen()){
     case AppEnums::HMI_UNKNOW_SCREEN:
-        ShellOperation::findAndClick(ENGLISH_BTN);
+        m_famerAPIs.findAndClick(ENGLISH_BTN);
         break;
     case AppEnums::HMI_SELECT_LANGUAGE_SCREEN:
-        ShellOperation::findAndClick(ENGLISH_BTN);
+        m_famerAPIs.findAndClick(ENGLISH_BTN);
         break;
     case AppEnums::HMI_LOGIN_SCREEN:
     {
-        ShellOperation::findAndClick(ENGLISH_BTN);
+        m_famerAPIs.findAndClick(ENGLISH_BTN);
         delay(500);
-        ShellOperation::findAndClick(EMAIL_FIELD, true);
+        m_famerAPIs.findAndClick(EMAIL_FIELD);
         delay(1000);
-        ShellOperation::enterText(MODEL->currentControlledUser().uid);
+        m_famerAPIs.w_inputText(MODEL->currentControlledUser().uid);
         if(!MODEL->isNoxDevice()){
-            ShellOperation::enterKeyBoard();
+            m_famerAPIs.enterKeyBoard();
         }
 
         delay(1000);
-        ShellOperation::findAndClick(PASSWORD_FIELD, true);
+        m_famerAPIs.findAndClick(PASSWORD_FIELD);
         delay(1000);
-        ShellOperation::enterText(MODEL->currentControlledUser().password);
+        m_famerAPIs.w_inputText(MODEL->currentControlledUser().password);
         if(!MODEL->isNoxDevice()){
-            ShellOperation::enterKeyBoard();
+            m_famerAPIs.enterKeyBoard();
         }
 
         delay(1000);
-        ShellOperation::findAndClick(LOGIN_BTN);
+        m_famerAPIs.findAndClick(LOGIN_BTN);
     }
         break;
     case AppEnums::HMI_MISSING_PASSWORD_SCREEN:
     case AppEnums::HMI_ACCOUNT_NOT_FOUND_SCREEN:
-        MODEL->updateCurrentControlleredUser(WEB_API->cloneUserData());
-        ShellOperation::clearPackageData(MODEL->currentControlledPkg());
+        MODEL->updateCurrentControlleredUser(m_famerAPIs.w_getClone());
+        this->saveUserDataList();
+        m_famerAPIs.w_wipePackage(QStringList() << MODEL->currentControlledPkg());
+        m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
         MODEL->nextCurrentControlledObj();
         break;
 
     case AppEnums::HMI_INCORRECT_PASSWORD_SCREEN:
     case AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN:
     case AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN:
-        WEB_API->updateCheckPoint();
-        MODEL->updateCurrentControlleredUser(WEB_API->cloneUserData());
-        ShellOperation::clearPackageData(MODEL->currentControlledPkg());
+//        WEB_API->updateCheckPoint();
+        MODEL->updateCurrentControlleredUser(m_famerAPIs.w_getClone());
+        this->saveUserDataList();
+        m_famerAPIs.w_wipePackage(QStringList() << MODEL->currentControlledPkg());
+        m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
         MODEL->nextCurrentControlledObj();
         break;
     case AppEnums::HMI_TURNON_FIND_FRIEND_SCREEN:
-        ShellOperation::findAndClick(SKIP_FIND_FRIEND_BTN);
+        m_famerAPIs.findAndClick(SKIP_FIND_FRIEND_BTN);
         break;
     case AppEnums::HMI_SAVE_LOGIN_INFO_SCREEN:
-        ShellOperation::findAndClick(OK_BUTTON);
+        m_famerAPIs.findAndClick(OK_BUTTON);
         break;
     case AppEnums::HMI_CHOOSE_AVATAR_SCREEN:
-        ShellOperation::findAndClick(SKIP_AVARTAR);
+        m_famerAPIs.findAndClick(SKIP_AVARTAR);
         break;
     case AppEnums::HMI_ADDFRIEND_SUGGESTION_SCREEN:
-        ShellOperation::findAndClick(SKIP_AVARTAR);
+        m_famerAPIs.findAndClick(SKIP_AVARTAR);
         delay(1000);
-        JAVA_COM->openFBLiteWithUserID(MODEL->currentControlledPkg(),"");
+        AUTOFARMERJNI->openFBLiteWithUserID(MODEL->currentControlledPkg(),"");
         break;
     case AppEnums::HMI_NEW_FEED_SCREEN:
         MODEL->clearActionList();
-//        FARM_ACTIONS->doActions();
+        m_farmAction->doActions();
         MODEL->nextCurrentControlledObj();
+        m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
         break;
     case AppEnums::HMI_LOGIN_AGAIN_SCREEN:
         break;
@@ -316,6 +321,5 @@ void MainController::onChangeScreen(int screenID)
     }
 
     m_changeScreenTimer.start();
-#endif
 }
 

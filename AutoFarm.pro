@@ -18,33 +18,30 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 HEADERS += \
-    Model.hpp \
-    Controller/ShellOperation.hpp \
-    Processing/ImageProcessing.hpp \
     AppMain.hpp \
     AppEnums.hpp \
-    MainController.hpp \
-    Communication/JavaCommunication.hpp \
-    Controller/ThreadController.hpp \
-    Processing/CheckCurrSrcThread.hpp \
-    Processing/QAESEncryption.hpp\
-    Communication/WebAPI.hpp \
-    Controller/FarmActions.h
+    AppDefines.hpp \
+    Model/Model.hpp \
+    Controller/MainController.hpp \
+    Controller/FarmActions.hpp \
+    APIs/AutoFarmerJNI.hpp \
+    APIs/AutoFarmerAPIsWraper.hpp \
+    MultiThreads/CheckCurrSrcWorker.hpp
 
 SOURCES += \
         main.cpp \
-    Model.cpp \
-    Controller/ShellOperation.cpp \
-    Processing/ImageProcessing.cpp \
     AppMain.cpp \
-    MainController.cpp \
-    Communication/JavaCommunication.cpp \
-    Controller/ThreadController.cpp \
-    Processing/CheckCurrSrcThread.cpp \
-    Processing/QAESEncryption.cpp\
-    Communication/WebAPI.cpp \
+    Model/Model.cpp \
+    Controller/MainController.cpp \
     Controller/FarmActions.cpp \
-    Processing/StartNewActivityThread.cpp
+    APIs/AutoFarmerJNI.cpp \
+    APIs/AutoFarmerAPIsWraper.cpp \
+    MultiThreads/CheckCurrSrcWorker.cpp
+
+INCLUDEPATH += $$PWD/Model \
+               $$PWD/Controller\
+                $$PWD/APIs \
+                $$PWD/MultiThreads
 
 RESOURCES += qml.qrc
 
@@ -59,6 +56,8 @@ QML_DESIGNER_IMPORT_PATH =
 
 android {
     QT += androidextras
+
+    DEFINES += APIS_DEBUG_MODE
 
     INCLUDEPATH += $$PWD/AutoFarmer.API/Android/include
     INCLUDEPATH += "$$_PRO_FILE_PWD_/../OpenCV-android-sdk/sdk/native/jni/include"

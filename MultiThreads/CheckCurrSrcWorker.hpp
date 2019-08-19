@@ -7,30 +7,29 @@
 #include <QMutex>
 #include "AppEnums.hpp"
 #include "ImageProcessing.hpp"
+#include "AutoFarmerAPIsWraper.hpp"
 
-class CheckCurrSrcThread : public QObject
+class CheckCurrSrcWorker : public QObject
 {
     Q_OBJECT
 public:
-    explicit CheckCurrSrcThread(QObject *parent = nullptr);
-    ~CheckCurrSrcThread();
+    explicit CheckCurrSrcWorker(QObject *parent = nullptr);
+    ~CheckCurrSrcWorker();
+    void setAutoFarmerAPIs(AutoFarmerAPIsWraper autoFamerAPIs);
 
 private:
     bool isOnScreen(QString iconPath);
     bool isCurrentScreen(int screenID);
-    int findScreen() const;
 
 private:
     cv::Mat m_screenImg;
-
-private:
     QTimer* m_updateCurrSrcTimer;
-
+    AutoFarmerAPIsWraper m_autoFamerAPIs;
 signals:
     void screenChanged(int screenID);
 
 public slots:
-    void doWork(const QString &parameter);
+    void doWork();
     void onUpdateCurrentScreen();
 };
 

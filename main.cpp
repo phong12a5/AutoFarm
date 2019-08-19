@@ -2,16 +2,14 @@
 #include <QQmlApplicationEngine>
 #include <AppDefines.hpp>
 #include "Model.hpp"
-#include "Controller/ShellOperation.hpp"
-#include "Processing/ImageProcessing.hpp"
 #include "AppMain.hpp"
 
 int main(int argc, char *argv[])
 {
-    LOG << "STARTING .... ";
-    LOG << "Thread ID: " << QThread::currentThreadId();
+    LOG_DEBUG << "STARTING .... ";
+    LOG_DEBUG << "Thread ID: " << QThread::currentThreadId();
 
-    LOG <<  "supportsSsl: " << QSslSocket::supportsSsl();
+    LOG_DEBUG <<  "supportsSsl: " << QSslSocket::supportsSsl();
 
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
@@ -21,7 +19,7 @@ int main(int argc, char *argv[])
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty()){
-        LOG << "rootObject is NULL";
+        LOG_DEBUG << "rootObject is NULL";
     }
 
 

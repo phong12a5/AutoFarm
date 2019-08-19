@@ -5,25 +5,25 @@
 #include "AppDefines.hpp"
 #include "AppEnums.hpp"
 #include "Model.hpp"
-#include "Communication/JavaCommunication.hpp"
-#include "Communication/WebAPI.hpp"
+#include "APIs/AutoFarmerJNI.hpp"
+#include "AutoFarmerAPIsWraper.hpp"
 
 #include <QMutex>
 
 class FarmActions : public QObject
 {
     Q_OBJECT
-private:
-    explicit FarmActions(QObject *parent = nullptr);
 
-    void doVipLike(QJsonObject action);
 public:
-    static FarmActions *instance();
-
+    explicit FarmActions(QObject *parent = nullptr);
     void doActions();
+    void setFarmerAPIs(AutoFarmerAPIsWraper _farmerAPIs);
 
 private:
-    static FarmActions *m_instance;
+    void doVipLike(QJsonObject action);
+
+private:
+    AutoFarmerAPIsWraper m_famerAPIs;
 
 signals:
 

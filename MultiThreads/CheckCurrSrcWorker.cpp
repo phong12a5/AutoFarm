@@ -1,37 +1,31 @@
-#include "CheckCurrSrcThread.hpp"
-#include "Controller/ShellOperation.hpp"
+#include "CheckCurrSrcWorker.hpp"
 
-CheckCurrSrcThread::CheckCurrSrcThread(QObject *parent) : QObject(parent)
+CheckCurrSrcWorker::CheckCurrSrcWorker(QObject *parent) : QObject(parent)
 {
     // Do nothing
 }
 
-CheckCurrSrcThread::~CheckCurrSrcThread()
+CheckCurrSrcWorker::~CheckCurrSrcWorker()
 {
-    LOG;
+    LOG_DEBUG;
     m_updateCurrSrcTimer->stop();
     delete m_updateCurrSrcTimer;
 }
 
-bool CheckCurrSrcThread::isOnScreen(QString iconPath)
+bool CheckCurrSrcWorker::isOnScreen(QString iconPath)
 {
     bool retVal = false;
-#ifdef ANDROID_KIT
-    QPoint point = ImageProcessing::findImageOnImage(iconPath,m_screenImg);
+    QPoint point = m_autoFamerAPIs.w_findImageFromImage(iconPath,CHECKING_SCREEN_IMG);
     if(!point.isNull()){
         retVal = true;
     }else{
         retVal = false;
     }
-#else
-    Q_UNUSED(iconPath);
-    return true;
-#endif
-    LOG << iconPath.split("/").last() << " : " << retVal;
+    LOG_DEBUG << iconPath.split("/").last() << " : " << retVal;
     return retVal;
 }
 
-bool CheckCurrSrcThread::isCurrentScreen(int screenID)
+bool CheckCurrSrcWorker::isCurrentScreen(int screenID)
 {
     bool retVal = false;
     switch (screenID) {
@@ -78,16 +72,13 @@ bool CheckCurrSrcThread::isCurrentScreen(int screenID)
     return retVal;
 }
 
-int CheckCurrSrcThread::findScreen() const
+void CheckCurrSrcWorker::setAutoFarmerAPIs(AutoFarmerAPIsWraper autoFamerAPIs)
 {
-    LOG;
-    int retVal = 0;
-    return retVal;
+    m_autoFamerAPIs = autoFamerAPIs;
 }
 
-void CheckCurrSrcThread::doWork(const QString &parameter)
+void CheckCurrSrcWorker::doWork()
 {
-    Q_UNUSED(parameter);
     m_updateCurrSrcTimer = new QTimer(this);
     m_updateCurrSrcTimer->setInterval(2000);
     m_updateCurrSrcTimer->setSingleShot(false);
@@ -95,7 +86,7 @@ void CheckCurrSrcThread::doWork(const QString &parameter)
     m_updateCurrSrcTimer->start();
 }
 
-void CheckCurrSrcThread::onUpdateCurrentScreen()
+void CheckCurrSrcWorker::onUpdateCurrentScreen()
 {
     QList<int> screenPiorityOrder;
     screenPiorityOrder <<   AppEnums::HMI_NEW_FEED_SCREEN
@@ -108,7 +99,7 @@ void CheckCurrSrcThread::onUpdateCurrentScreen()
                        <<   AppEnums::HMI_LOGIN_AGAIN_SCREEN;
 
 
-    ShellOperation::screenshotImg(m_screenImg,"screen_checking.png");
+    m_autoFamerAPIs.w_screenCapture(CHECKING_SCREEN_IMG);
 
     foreach (int i , screenPiorityOrder){
         if(i == AppEnums::HMI_LOGIN_SCREEN){

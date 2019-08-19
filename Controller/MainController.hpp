@@ -5,18 +5,20 @@
 #include <QJsonObject>
 
 #include "AppDefines.hpp"
-#include "Controller/ThreadController.hpp"
 #include "AppEnums.hpp"
-#include "Controller/FarmActions.h"
-#include "AutoFarmerAPI.hpp"
+#include "FarmActions.hpp"
+#include "AutoFarmerAPIsWraper.hpp"
 #include "AutoFarmerDefine.hpp"
+#include "CheckCurrSrcWorker.hpp"
 
 class MainController : public QObject
 {
     Q_OBJECT
 
-private:
+public:
     explicit MainController(QObject *parent = nullptr);
+    ~MainController();
+    void initController();
 
 private:
     void loadUserDataList();
@@ -24,21 +26,18 @@ private:
     QJsonDocument loadJson(QString fileName);
     void saveJson(QJsonDocument document, QString fileName);
     void downloadAndInstallPackages();
-
-public:
-    static MainController* instance();
-    void initController();
-
-public:
     void startCheckCurrentScreen();
 
+
 private:
-    static MainController* m_instance;
-    ThreadController multiThreadController;
     QTimer m_changeScreenTimer;
-    AutoFarmerAPI m_farmerAPIs;
+    AutoFarmerAPIsWraper m_famerAPIs;
+    FarmActions* m_farmAction;
+    QThread                 m_checkScreenThread;
+    CheckCurrSrcWorker      checkScreenWorker;
 
 signals:
+    void sigStartCheckCurrentScreen();
 
 public slots:
     void onStartProgram();

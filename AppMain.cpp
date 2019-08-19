@@ -1,17 +1,13 @@
 #include "AppMain.hpp"
 
-#define MODEL           Model::instance()
-#define MAIN_CONTROLLER MainController::instance()
-#define JAVA_COM        JavaCommunication::instance()
-
 AppMain::AppMain(QObject *parent) : QObject(parent)
 {
-    LOG;
+    m_mainController = new MainController(this);
 }
 
 void AppMain::initApplication(QQmlApplicationEngine &engine)
 {
-    LOG;
+    LOG_DEBUG;
 
     // Coppy icon to /SDCARD/DCIM folder
     if(!QDir("/sdcard/DCIM/PDT17/Icons").exists()){
@@ -22,13 +18,13 @@ void AppMain::initApplication(QQmlApplicationEngine &engine)
     this->coppyFolder("assets:/images/Icons","/sdcard/DCIM/PDT17/Icons");
 
     // Init Model
-    MODEL->initModel();
+    Model::instance()->initModel();
 
     // Init Main controller
-    MAIN_CONTROLLER->initController();
+    m_mainController->initController();
 
     //Set context property
-    engine.rootContext()->setContextProperty("APP_MODEL",MODEL);
+    engine.rootContext()->setContextProperty("APP_MODEL", Model::instance());
 
     //Register Enum class
     qmlRegisterType<AppEnums>("AppEnums", 1, 0, "AppEnums");
@@ -39,7 +35,7 @@ void AppMain::coppyFolder(QString src, QString dst)
 {
     QDir dir(src);
     if (! dir.exists()){
-        LOG << "src folder not exist";
+        LOG_DEBUG << "src folder not exist";
         return;
     }
 

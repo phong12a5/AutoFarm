@@ -15,6 +15,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <AutoFarmerDefine.hpp>
+#include <AutoFarmerLogger.hpp>
 
 class Model : public QObject
 {
@@ -57,9 +58,6 @@ public:
     QList<QJsonObject> actionList();
     void setActionList(QList<QJsonObject> data);
     void clearActionList();
-
-    void loadUserDataList();
-    void saveUserDataList();
 
     void loadAppConfig();
     void saveAppConfig();

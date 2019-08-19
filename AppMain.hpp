@@ -18,11 +18,9 @@ public:
 
 private:
     void coppyFolder(QString src, QString dst);
+
 private:
-
-signals:
-
-public slots:
+    MainController* m_mainController;
 };
 
 #endif // APPMAIN_H

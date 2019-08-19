@@ -1,7 +1,5 @@
 #include "Model.hpp"
 #include <QWidgetList>
-#include "Processing/ImageProcessing.hpp"
-#include "Controller/ShellOperation.hpp"
 
 Model* Model::m_instance = nullptr;
 
@@ -16,7 +14,7 @@ Model::Model(QObject *parent) : QObject(parent)
 //    ShellOperation::shellCommand(QString("getprop %1").arg(TOKEN_PROP_KEY),_token);
 //    _token.simplified();
 
-//    LOG << "_token: " << _token;
+//    LOG_DEBUG << "_token: " << _token;
 
 //    if(!_token.isEmpty() && _token.contains("@")){
 //        setToken(_token.section("@",1,1));
@@ -40,7 +38,7 @@ void Model::initModel()
 
 QJsonDocument Model::loadJson(QString fileName)
 {
-    LOG << "[Model]";
+    LOG_DEBUG << "[Model]";
     QFile jsonFile(fileName);
     jsonFile.open(QFile::ReadOnly);
     return QJsonDocument().fromJson(jsonFile.readAll());
@@ -48,8 +46,8 @@ QJsonDocument Model::loadJson(QString fileName)
 
 void Model::saveJson(QJsonDocument document, QString fileName)
 {
-    LOG <<"document: " << document;
-    LOG <<"fileName: " << fileName;
+    LOG_DEBUG <<"document: " << document;
+    LOG_DEBUG <<"fileName: " << fileName;
     QFile jsonFile(fileName);
     jsonFile.open(QFile::WriteOnly);
     jsonFile.write(document.toJson());
@@ -125,33 +123,31 @@ void Model::setAppConfig(APP_CONFIG data)
     m_appConfig = data;
 }
 
-QMap<QString, USER_DATA>* Model::userDataList()
+QMap<QString, USER_DATA> Model::userDataList()
 {
     return m_userDataList;
 }
 
 void Model::setUserDataList(QMap<QString, USER_DATA> data)
 {
-    if(m_userDataList != data){
-        m_userDataList = data;
-    }
+    m_userDataList = data;
 }
 
 
 QString Model::currentControlledPkg()
 {
-    LOG << m_currentPkgIndex;
-    if(m_currentPkgIndex < m_userDataList.count()){
+    LOG_DEBUG << m_currentPkgIndex;
+    if(m_currentPkgIndex < m_userDataList.count() && m_currentPkgIndex >= 0){
         return m_userDataList.keys().at(m_currentPkgIndex);
     }else{
-        LOG << "m_currentPkgIndex is invalid";
+        LOG_DEBUG << "m_currentPkgIndex is invalid";
         return "";
     }
 }
 
 USER_DATA Model::currentControlledUser()
 {
-    LOG << m_userDataList.value(currentControlledPkg()).uid;
+    LOG_DEBUG << m_userDataList.value(currentControlledPkg()).uid;
     return m_userDataList.value(currentControlledPkg());
 }
 
@@ -159,16 +155,11 @@ void Model::updateCurrentControlleredUser(USER_DATA data)
 {
     if(m_userDataList[currentControlledPkg()] != data){
         m_userDataList[currentControlledPkg()] = data;
-        saveUserDataList();
     }
 }
 
 void Model::nextCurrentControlledObj()
 {
-
-    if(m_currentPkgIndex >= 0 && m_currentPkgIndex < m_userDataList.count())
-        ShellOperation::stopApp(this->currentControlledPkg());
-
     if(m_currentPkgIndex < 0 || m_currentPkgIndex >= m_userDataList.count() - 1){
         if(m_currentPkgIndex >= m_userDataList.count() - 1){
             emit finishedListObject();
@@ -180,7 +171,7 @@ void Model::nextCurrentControlledObj()
     }else{
         m_currentPkgIndex ++;
     }
-    LOG << "m_currentPkgIndex: " << m_currentPkgIndex;
+    LOG_DEBUG << "m_currentPkgIndex: " << m_currentPkgIndex;
     emit nextCurrentControlledObjChanged();
 }
 
@@ -202,88 +193,6 @@ void Model::clearActionList()
     m_actionList.clear();
 }
 
-void Model::loadUserDataList()
-{
-    LOG;
-    m_userDataList.clear();
-
-    QFile file(USER_DATA_LIST_PATH);
-    if(file.exists()){
-
-        QStringList installedListPkg = ShellOperation::installedFBPkg();
-        QJsonDocument userDataListJson = this->loadJson(USER_DATA_LIST_PATH);
-        if(!userDataListJson.isNull()){
-            foreach (QJsonValue data, userDataListJson.array()) {
-                if(data.isObject()){
-                    QJsonObject obj = data.toObject();
-                    QString packageName = obj["package_name"].toString();
-                    QJsonObject userDataJson = obj["user_data"].toObject();
-                    USER_DATA user_data;
-                    user_data._id              = userDataJson["_id"].toString();
-                    user_data.uid              = userDataJson["uid"].toString();
-                    user_data.password         = userDataJson["password"].toString();
-                    user_data.cookie           = userDataJson["cookie"].toString();
-                    user_data.token            = userDataJson["token"].toString();
-                    user_data.birthday         = userDataJson["birthday"].toString();
-                    user_data.name             = userDataJson["name"].toString();
-                    user_data.sex              = userDataJson["sex"].toString();
-                    user_data.country          = userDataJson["country"].toString();
-                    user_data.email            = userDataJson["email"].toString();
-                    user_data.avartar          = userDataJson["avartar"].toString();
-                    user_data.created_date     = userDataJson["created_date"].toString();
-                    user_data.farming_status   = userDataJson["farming_status"].toString();
-                    user_data.alive_status     = userDataJson["alive_status"].toString();
-                    user_data.created_at       = userDataJson["created_at"].toString();
-                    user_data.updated_at       = userDataJson["updated_at"].toString();
-                    user_data.user_id          = userDataJson["user_id"].toString();
-
-                    LOG << "user_data.uid           :" << user_data.uid;
-                    if(installedListPkg.contains(packageName)){
-                        m_userDataList.insert(packageName,user_data);
-                    }
-                }
-            }
-        }
-    }else{
-        LOG << CURRENT_DIR + "userDataList.json" << " not exist";
-    }
-}
-
-void Model::saveUserDataList()
-{
-    LOG;
-    QMap<QString, USER_DATA>::const_iterator i = m_userDataList.constBegin();
-    QJsonArray objectArray;
-    while (i != m_userDataList.constEnd()) {
-        QJsonObject obj;
-        USER_DATA user_data = static_cast<USER_DATA>(i.value());
-        QJsonObject userDataJson;
-        userDataJson["_id"]             = user_data._id           ;
-        userDataJson["uid"]             = user_data.uid           ;
-        userDataJson["password"]        = user_data.password      ;
-        userDataJson["cookie"]          = user_data.cookie        ;
-        userDataJson["token"]           = user_data.token         ;
-        userDataJson["birthday"]        = user_data.birthday      ;
-        userDataJson["name"]            = user_data.name          ;
-        userDataJson["sex"]             = user_data.sex           ;
-        userDataJson["country"]         = user_data.country       ;
-        userDataJson["email"]           = user_data.email         ;
-        userDataJson["avartar"]         = user_data.avartar       ;
-        userDataJson["created_date"]    = user_data.created_date  ;
-        userDataJson["farming_status"]  = user_data.farming_status;
-        userDataJson["alive_status"]    = user_data.alive_status  ;
-        userDataJson["created_at"]      = user_data.created_at    ;
-        userDataJson["updated_at"]      = user_data.updated_at    ;
-        userDataJson["user_id"]         = user_data.user_id       ;
-
-        obj["package_name"] = i.key();
-        obj["user_data"] = userDataJson;
-        objectArray.append(QJsonValue(obj));
-        ++i;
-    }
-    this->saveJson(QJsonDocument(objectArray),USER_DATA_LIST_PATH);
-}
-
 void Model::loadAppConfig()
 {
     QFile file(CONFIG_FILE_PATH);
@@ -292,7 +201,7 @@ void Model::loadAppConfig()
         QJsonDocument appConfig = this->loadJson(CONFIG_FILE_PATH);
         if(!appConfig.isNull()){
             QJsonObject obj = appConfig.object();
-            LOG << "AppConfig: " << obj;
+            LOG_DEBUG << "AppConfig: " << obj;
             QString _token = obj[TOKEN_PROP_KEY].toString();
             if(!_token.isEmpty()){
                 this->setToken(_token);
@@ -300,13 +209,13 @@ void Model::loadAppConfig()
             this->setAutoStart(obj[AUTO_START_KEY].toBool());
         }
     }else{
-        LOG << CONFIG_FILE_PATH << " not exist";
+        LOG_DEBUG << CONFIG_FILE_PATH << " not exist";
     }
 }
 
 void Model::saveAppConfig()
 {
-    LOG;
+    LOG_DEBUG;
     QJsonObject obj;
     obj[TOKEN_PROP_KEY] = this->token();
     obj[AUTO_START_KEY] = this->autoStart();
