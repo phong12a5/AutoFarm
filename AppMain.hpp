@@ -17,14 +17,12 @@ public:
     void initApplication(QQmlApplicationEngine &engine);
 
 private:
-    void connectSignalSlot() const;
     void coppyFolder(QString src, QString dst);
 private:
 
 signals:
 
 public slots:
-    void onStartProgram();
 };
 
 #endif // APPMAIN_H

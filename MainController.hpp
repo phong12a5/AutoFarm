@@ -2,13 +2,14 @@
 #define MAINCONTROLLER_H
 
 #include <QObject>
+#include <QJsonObject>
+
 #include "AppDefines.hpp"
-#include "Communication/JavaCommunication.hpp"
-#include "Processing/ImageProcessing.hpp"
 #include "Controller/ThreadController.hpp"
 #include "AppEnums.hpp"
-#include "Communication/WebAPI.hpp"
 #include "Controller/FarmActions.h"
+#include "AutoFarmerAPI.hpp"
+#include "AutoFarmerDefine.hpp"
 
 class MainController : public QObject
 {
@@ -18,32 +19,33 @@ private:
     explicit MainController(QObject *parent = nullptr);
 
 private:
-    void installPackages(QStringList,QStringList);
+    void loadUserDataList();
+    void saveUserDataList();
+    QJsonDocument loadJson(QString fileName);
+    void saveJson(QJsonDocument document, QString fileName);
+    void downloadAndInstallPackages();
 
 public:
     static MainController* instance();
     void initController();
-    void downloadAndInstallPackages();
 
 public:
     void startCheckCurrentScreen();
-    void startNewActivity(QString packageName, QString sxtraData);
 
 private:
     static MainController* m_instance;
-
     ThreadController multiThreadController;
-
     QTimer m_changeScreenTimer;
+    AutoFarmerAPI m_farmerAPIs;
 
 signals:
 
 public slots:
+    void onStartProgram();
     void onChangeScreen(int screenID);
     void executeRequiredActions();
     void updateResult();
     void onFinishedListObject();
-    void onDownloadCompleted(QStringList,QStringList);
     void onchangeScreenTimerTimeout();
 };
 

@@ -11,20 +11,17 @@ Model::Model(QObject *parent) : QObject(parent)
     m_currentPkgIndex = -1;
     m_autoStart = true;
     m_currentScreen = AppEnums::HMI_UNKNOW_SCREEN;
-    this->loadUserDataList();
-    this->loadAppConfig();
 
-    QString _token;
-    ShellOperation::shellCommand(QString("getprop %1").arg(TOKEN_PROP_KEY),_token);
-    _token.simplified();
+//    QString _token;
+//    ShellOperation::shellCommand(QString("getprop %1").arg(TOKEN_PROP_KEY),_token);
+//    _token.simplified();
 
-    LOG << "_token: " << _token;
+//    LOG << "_token: " << _token;
 
-    if(!_token.isEmpty() && _token.contains("@")){
-        setToken(_token.section("@",1,1));
-    }
+//    if(!_token.isEmpty() && _token.contains("@")){
+//        setToken(_token.section("@",1,1));
+//    }
 
-    this->saveAppConfig();
 }
 
 
@@ -34,6 +31,11 @@ Model *Model::instance()
         m_instance = new Model();
     }
     return m_instance;
+}
+
+void Model::initModel()
+{
+    this->loadAppConfig();
 }
 
 QJsonDocument Model::loadJson(QString fileName)
@@ -66,9 +68,9 @@ QString Model::token() const
 
 void Model::setToken(QString data)
 {
-    LOG << data;
     if(m_token != data){
         m_token = data;
+        this->saveAppConfig();
         emit tokenChanged();
     }
 }
@@ -80,9 +82,9 @@ bool Model::autoStart() const
 
 void Model::setAutoStart(bool data)
 {
-    LOG << data;
     if(m_autoStart != data){
         m_autoStart = data;
+        this->saveAppConfig();
         emit autoStartChanged();
     }
 }
@@ -113,17 +115,6 @@ void Model::setDeviceInfo(DEVICE_INFO data)
     m_deviceInfo = data;
 }
 
-QString Model::logContent()
-{
-    return m_logContent;
-}
-
-void Model::setLogContent(QString data)
-{
-    m_logContent += (data + "\n") ;
-    emit logContentChanged();
-}
-
 APP_CONFIG Model::appConfig() const
 {
     return m_appConfig;
@@ -134,10 +125,18 @@ void Model::setAppConfig(APP_CONFIG data)
     m_appConfig = data;
 }
 
-QMap<QString, USER_DATA>* Model::getUserDataList()
+QMap<QString, USER_DATA>* Model::userDataList()
 {
-    return &m_userDataList;
+    return m_userDataList;
 }
+
+void Model::setUserDataList(QMap<QString, USER_DATA> data)
+{
+    if(m_userDataList != data){
+        m_userDataList = data;
+    }
+}
+
 
 QString Model::currentControlledPkg()
 {
@@ -378,7 +377,3 @@ QString Model::screenStr(int screenID) const
     }
     return retVal;
 }
-
-
-
-

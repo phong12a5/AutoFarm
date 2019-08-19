@@ -30,14 +30,3 @@ void ThreadController::startCheckCurrentScreen()
     emit sigStartCheckCurrentScreen("Phong DT");
 }
 
-void ThreadController::startNewActivity(QString packageName, QString sxtraData)
-{
-    if(!m_startNewActivityThread.isRunning()){
-        startNewActivityWorker.moveToThread(&m_startNewActivityThread);
-        connect(&m_startNewActivityThread, &QThread::finished, &startNewActivityWorker, &QObject::deleteLater);
-        connect(this, &ThreadController::sigStartNewActivity, &startNewActivityWorker, &StartNewActivityThread::doWork);
-        m_startNewActivityThread.start();
-    }
-    emit sigStartNewActivity(packageName,sxtraData);
-}
-

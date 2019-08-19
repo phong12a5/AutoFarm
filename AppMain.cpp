@@ -19,8 +19,10 @@ void AppMain::initApplication(QQmlApplicationEngine &engine)
             QDir("/sdcard/DCIM/PDT17").mkdir("Icons");
         }
     }
-
     this->coppyFolder("assets:/images/Icons","/sdcard/DCIM/PDT17/Icons");
+
+    // Init Model
+    MODEL->initModel();
 
     // Init Main controller
     MAIN_CONTROLLER->initController();
@@ -31,42 +33,6 @@ void AppMain::initApplication(QQmlApplicationEngine &engine)
     //Register Enum class
     qmlRegisterType<AppEnums>("AppEnums", 1, 0, "AppEnums");
 
-#ifdef ANDROID_KIT
-    DEVICE_INFO _deviceInfo;
-    _deviceInfo.googleSF = JAVA_COM->getGoogleSF();
-    _deviceInfo.androidID = JAVA_COM->getAndroidID();
-    _deviceInfo.iMEI = JAVA_COM->getDeviceIMEI();
-    _deviceInfo.iMSI = JAVA_COM->getDeiceIMSI();
-    _deviceInfo.sIMCardSerial = JAVA_COM->getSimCardSerialNo();
-    _deviceInfo.wifiMacAddress = JAVA_COM->getWifiMacAdd();
-    _deviceInfo.android_verion = JAVA_COM->getAndroidVersion();
-    _deviceInfo.model = JAVA_COM->getDeviceModel();
-    _deviceInfo.isNox = JAVA_COM->getDeviceType();
-    _deviceInfo.disInfo = ShellOperation::getDisplayInfo();
-    MODEL->setDeviceInfo(_deviceInfo);
-
-    LOG << _deviceInfo.googleSF;
-    LOG << _deviceInfo.androidID;
-    LOG << _deviceInfo.iMEI;
-    LOG << _deviceInfo.iMSI;
-    LOG << _deviceInfo.sIMCardSerial;
-    LOG << _deviceInfo.wifiMacAddress;
-    LOG << _deviceInfo.android_verion;
-    LOG << _deviceInfo.model;
-    LOG << _deviceInfo.isNox;
-    LOG << _deviceInfo.disInfo.width;
-    LOG << _deviceInfo.disInfo.height;
-    LOG << _deviceInfo.disInfo.dpi;
-#endif
-
-    //Connect  signal - slot
-    this->connectSignalSlot();
-}
-
-void AppMain::connectSignalSlot() const
-{
-    LOG;
-    connect(MODEL,SIGNAL(sigStartProgram()),this,SLOT(onStartProgram()));
 }
 
 void AppMain::coppyFolder(QString src, QString dst)
@@ -88,8 +54,3 @@ void AppMain::coppyFolder(QString src, QString dst)
     }
 }
 
-void AppMain::onStartProgram()
-{
-    LOG;
-    MAIN_CONTROLLER->downloadAndInstallPackages();
-}

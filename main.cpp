@@ -16,22 +16,6 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
-#ifdef SU_USER
-    while(QProcess::execute("su -c ls") != 0){
-        delay(10000);
-        LOG << "Request Superuser again!";
-    }
-#endif
-    LOG << "Superuser is granted!";
-
-    while (!JavaCommunication::instance()->requestPermission()) {
-        delay(1000);
-    };
-
-#ifdef ANDROID_KIT
-    ShellOperation::shellCommand(QString("touch %1").arg(INITSCRIPT_FILENAME));
-#endif
-
     AppMain appMain;
     appMain.initApplication(engine);
 

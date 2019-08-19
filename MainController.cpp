@@ -27,34 +27,58 @@ MainController *MainController::instance()
 void MainController::initController()
 {
     LOG;
-    // Do nothing;
     connect(&m_changeScreenTimer, SIGNAL(timeout()), this, SLOT(onchangeScreenTimerTimeout()));
 //    connect(MODEL,SIGNAL(currentScreenChanged()),this,SLOT(onChangeScreen()));
     connect(MODEL,SIGNAL(nextCurrentControlledObjChanged()),this,SLOT(executeRequiredActions()));
     connect(MODEL,SIGNAL(currentActionListDone()),this,SLOT(updateResult()));
     connect(MODEL,SIGNAL(finishedListObject()),this,SLOT(onFinishedListObject()));
-    connect(WEB_API, SIGNAL(downloadCompleted(QStringList,QStringList)), this, SLOT(onDownloadCompleted(QStringList,QStringList)));
+    connect(MODEL,SIGNAL(sigStartProgram()),this,SLOT(onStartProgram()));
 }
 
-void MainController::installPackages(QStringList downloadedFile,QStringList downloadedPackage)
+QJsonDocument MainController::loadJson(QString fileName)
 {
-    for(int i = 0 ; i < downloadedFile.length(); i ++){
-        if(!MODEL->getUserDataList()->contains(downloadedPackage.at(i))){
-            if(ShellOperation::installPackage(downloadedFile.at(i))){
-                USER_DATA data;
-                MODEL->getUserDataList()->insert(downloadedPackage.at(i),data);
-            }
-        }else {
-            LOG << downloadedPackage.at(i) << " package  was installed already";
-        }
-    }
-    MODEL->saveUserDataList();
-    MODEL->nextCurrentControlledObj();
+    LOG << "[Model]";
+    QFile jsonFile(fileName);
+    jsonFile.open(QFile::ReadOnly);
+    return QJsonDocument().fromJson(jsonFile.readAll());
+}
+
+void MainController::saveJson(QJsonDocument document, QString fileName)
+{
+    LOG <<"document: " << document;
+    LOG <<"fileName: " << fileName;
+    QFile jsonFile(fileName);
+    jsonFile.open(QFile::WriteOnly);
+    jsonFile.write(document.toJson());
 }
 
 void MainController::downloadAndInstallPackages()
 {
-    WEB_API->downloadlAllPackages();
+    QJsonObject retVal = m_farmerAPIs.getApk();
+
+    QJsonDocument jdoc = QJsonDocument(retVal);
+
+    LOG << jdoc;
+
+    QMap<QString, USER_DATA>  userDataList = MODEL->userDataList();
+    QList<QString> keys = userDataList.keys();
+
+    foreach (QJsonValue data, jdoc.array()) {
+        if(data.isObject()){
+            QJsonObject obj = data.toObject();
+            if(!keys.contains(obj["package"].toString())){
+                QJsonObject apkPathObj = m_farmerAPIs.downloadApk(QUrl(obj["apk"].toString()));
+                if(apkPathObj["ResponseData"] != ""){
+                    m_farmerAPIs.installPackage(apkPathObj["ResponseData"]);
+                    USER_DATA data;
+                    userDataList.insert(obj["package"].toString(),data);
+                }
+            }else{
+                LOG << obj["package"].toString() << " EXISTED";
+            }
+        }
+    }
+
 }
 
 void MainController::startCheckCurrentScreen()
@@ -62,24 +86,115 @@ void MainController::startCheckCurrentScreen()
     multiThreadController.startCheckCurrentScreen();
 }
 
-void MainController::startNewActivity(QString packageName, QString sxtraData)
+void MainController::loadUserDataList()
 {
-    multiThreadController.startNewActivity(packageName,sxtraData);
+    QFile file(USER_DATA_LIST_PATH);
+    if(file.exists()){
+
+        QJsonDocument userDataListJson = this->loadJson(USER_DATA_LIST_PATH);
+        if(!userDataListJson.isNull()){
+
+            QMap<QString, USER_DATA> userDataList;
+            userDataList.clear();
+
+            foreach (QJsonValue data, userDataListJson.array()) {
+                if(data.isObject()){
+                    QJsonObject obj = data.toObject();
+                    QString packageName = obj["package_name"].toString();
+                    QJsonObject userDataJson = obj["user_data"].toObject();
+                    USER_DATA user_data;
+                    user_data._id              = userDataJson["_id"].toString();
+                    user_data.uid              = userDataJson["uid"].toString();
+                    user_data.password         = userDataJson["password"].toString();
+                    user_data.cookie           = userDataJson["cookie"].toString();
+                    user_data.token            = userDataJson["token"].toString();
+                    user_data.birthday         = userDataJson["birthday"].toString();
+                    user_data.name             = userDataJson["name"].toString();
+                    user_data.sex              = userDataJson["sex"].toString();
+                    user_data.country          = userDataJson["country"].toString();
+                    user_data.email            = userDataJson["email"].toString();
+                    user_data.avartar          = userDataJson["avartar"].toString();
+                    user_data.created_date     = userDataJson["created_date"].toString();
+                    user_data.farming_status   = userDataJson["farming_status"].toString();
+                    user_data.alive_status     = userDataJson["alive_status"].toString();
+                    user_data.created_at       = userDataJson["created_at"].toString();
+                    user_data.updated_at       = userDataJson["updated_at"].toString();
+                    user_data.user_id          = userDataJson["user_id"].toString();
+
+                    LOG << "user_data.uid           :" << user_data.uid;
+                    if(m_farmerAPIs.isExistPackage(packageName)){
+                        userDataList.insert(packageName,user_data);
+                    }
+                }
+            }
+
+            MODEL->setUserDataList(userDataList);
+        }
+    }else{
+        LOG << CURRENT_DIR + "userDataList.json" << " not exist";
+    }
+}
+
+void MainController::saveUserDataList()
+{
+    LOG;
+    QMap<QString, USER_DATA>::const_iterator i = MODEL->userDataList().constBegin();
+    QJsonArray objectArray;
+    while (i != MODEL->userDataList().constEnd()) {
+        QJsonObject obj;
+        USER_DATA user_data = static_cast<USER_DATA>(i.value());
+        QJsonObject userDataJson;
+        userDataJson["_id"]             = user_data._id           ;
+        userDataJson["uid"]             = user_data.uid           ;
+        userDataJson["password"]        = user_data.password      ;
+        userDataJson["cookie"]          = user_data.cookie        ;
+        userDataJson["token"]           = user_data.token         ;
+        userDataJson["birthday"]        = user_data.birthday      ;
+        userDataJson["name"]            = user_data.name          ;
+        userDataJson["sex"]             = user_data.sex           ;
+        userDataJson["country"]         = user_data.country       ;
+        userDataJson["email"]           = user_data.email         ;
+        userDataJson["avartar"]         = user_data.avartar       ;
+        userDataJson["created_date"]    = user_data.created_date  ;
+        userDataJson["farming_status"]  = user_data.farming_status;
+        userDataJson["alive_status"]    = user_data.alive_status  ;
+        userDataJson["created_at"]      = user_data.created_at    ;
+        userDataJson["updated_at"]      = user_data.updated_at    ;
+        userDataJson["user_id"]         = user_data.user_id       ;
+
+        obj["package_name"] = i.key();
+        obj["user_data"] = userDataJson;
+        objectArray.append(QJsonValue(obj));
+        ++i;
+    }
+    this->saveJson(QJsonDocument(objectArray),USER_DATA_LIST_PATH);
+}
+
+void MainController::onStartProgram()
+{
+    QJsonObject retVal = m_farmerAPIs.initEnv(MODEL->token(),APPNAME_ID_FACEBOOK);
+    if(retVal["Status"].toBool()){
+
+        this->loadUserDataList();
+        this->downloadAndInstallPackages();
+        this->saveUserDataList();
+        MODEL->nextCurrentControlledObj();
+    }else{
+        LOG << "Init API false";
+    }
 }
 
 void MainController::executeRequiredActions()
 {
-#ifdef ANDROID_KIT
     if(MODEL->currentControlledUser().uid == ""){
         MODEL->updateCurrentControlleredUser(WEB_API->cloneUserData());
     }else{
         LOG << "User info has storaged already";
     }
 
-    startNewActivity(MODEL->currentControlledPkg(),"");
+    JavaCommunication::instance()->openFBLiteWithUserID(packageName,sxtraData);
     MODEL->setCurrentScreen(AppEnums::HMI_UNKNOW_SCREEN);
     startCheckCurrentScreen();
-#endif
 }
 
 void MainController::updateResult()
@@ -98,11 +213,6 @@ void MainController::onFinishedListObject()
         ShellOperation::shellCommand(QString("touch %1%2").arg(ENDSCRIPT_PATH).arg(ENDSCRIPT_FILENAME));
 #endif
     }
-}
-
-void MainController::onDownloadCompleted(QStringList downloadedFile,QStringList downloadedPackage)
-{
-    this->installPackages(downloadedFile,downloadedPackage);
 }
 
 void MainController::onchangeScreenTimerTimeout()

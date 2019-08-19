@@ -14,17 +14,18 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <AutoFarmerDefine.hpp>
 
 class Model : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString token READ token WRITE setToken NOTIFY tokenChanged)
     Q_PROPERTY(QString deviceType READ deviceType CONSTANT)
-    Q_PROPERTY(QString logContent READ logContent WRITE setLogContent NOTIFY logContentChanged)
     Q_PROPERTY(bool autoStart READ autoStart WRITE setAutoStart NOTIFY autoStartChanged)
 
 public:
     static Model* instance();
+    void initModel();
 
     Q_INVOKABLE void start();
 
@@ -42,13 +43,12 @@ public:
     DEVICE_INFO deviceInfo() const;
     void setDeviceInfo(DEVICE_INFO data);
 
-    QString logContent();
-    void setLogContent(QString data);
-
     APP_CONFIG appConfig() const;
     void setAppConfig(APP_CONFIG data);
 
-    QMap<QString, USER_DATA>* getUserDataList();
+    QMap<QString, USER_DATA> userDataList();
+    void setUserDataList(QMap<QString, USER_DATA> data);
+
     QString currentControlledPkg();
     USER_DATA currentControlledUser();
     void updateCurrentControlleredUser(USER_DATA data);
@@ -75,8 +75,6 @@ private:
     void saveJson(QJsonDocument document, QString fileName);
 
 private:
-
-private:
     static Model* m_instance;
 
     QString m_token;
@@ -87,9 +85,6 @@ private:
     int m_currentPkgIndex;
     QList<QJsonObject> m_actionList;
     QList<QJsonObject> m_changedActionList;
-    QString m_logContent;
-    QString m_testingImageSource;
-    QString m_screenName;
     bool m_autoStart;
     int m_currentScreen;
 
@@ -99,13 +94,9 @@ signals:
     void nextCurrentControlledObjChanged();
     void currentActionListDone();
     void finishedListObject();
-    void logContentChanged();
-    void testingImageSourceChanged();
     void screenNameChanged();
     void autoStartChanged();
     void currentScreenChanged();
-
-public slots:
 };
 
 #endif // MODEL_H

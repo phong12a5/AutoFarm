@@ -20,7 +20,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 HEADERS += \
     Model.hpp \
     Controller/ShellOperation.hpp \
-    AppDefines.hpp \
     Processing/ImageProcessing.hpp \
     AppMain.hpp \
     AppEnums.hpp \
@@ -30,8 +29,7 @@ HEADERS += \
     Processing/CheckCurrSrcThread.hpp \
     Processing/QAESEncryption.hpp\
     Communication/WebAPI.hpp \
-    Controller/FarmActions.h \
-    Processing/StartNewActivityThread.hpp
+    Controller/FarmActions.h
 
 SOURCES += \
         main.cpp \
@@ -57,25 +55,17 @@ QML_IMPORT_PATH =
 QML_DESIGNER_IMPORT_PATH =
 
 # Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
-
-INSTALLS += target
 
 
 android {
     QT += androidextras
 
-    DEFINES += ANDROID_KIT
-    DEFINES += INPUT_STRING
-#    DEFINES += CLICK_MULTI_POINT
-    DEFINES += SU_USER
-
+    INCLUDEPATH += $$PWD/AutoFarmer.API/Android/include
     INCLUDEPATH += "$$_PRO_FILE_PWD_/../OpenCV-android-sdk/sdk/native/jni/include"
+
     LIBS += \
-        -L"$$_PRO_FILE_PWD_/../OpenCV-android-sdk/sdk/native/3rdparty/libs/armeabi-v7a"\
-        -L"$$_PRO_FILE_PWD_/../OpenCV-android-sdk/sdk/native/libs/armeabi-v7a"\
+        -L"$$PWD/AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH"\
+        -lAutoFarmerAPI\
         -llibtiff\
         -llibjpeg\
         -llibjasper\
@@ -102,33 +92,17 @@ android {
         -lopencv_ts\
         -lopencv_videostab
 
+
+
+    ANDROID_EXTRA_LIBS += \
+        $$PWD/AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH/libcrypto.so \
+        $$PWD/AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH/libssl.so\
+        $$PWD/AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH/libopencv_java.so
+
     ANDROID_PACKAGE_SOURCE_DIR=$$_PRO_FILE_PWD_/android-sources
 
     DISTFILES += android-sources/AndroidManifest.xml \
                 android-sources/assets/images/
-}
-
-contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
-
-    ANDROID_EXTRA_LIBS += \
-        $$PWD/android_openssl-1.0.x/arm/libcrypto.so \
-        $$PWD/android_openssl-1.0.x/arm/libssl.so
-
-    ANDROID_EXTRA_LIBS += \
-        $$PWD/../OpenCV-android-sdk/sdk/native/libs/armeabi-v7a/libopencv_java.so
-}
-
-win32 {
-    INCLUDEPATH += "$$_PRO_FILE_PWD_/../OpenCV-Library/install/include"
-
-    LIBS += \
-    -L"$$_PRO_FILE_PWD_/../OpenCV-Library/install/x86/mingw/lib"\
-    -lopencv_core410        \
-    -lopencv_highgui410     \
-    -lopencv_imgcodecs410   \
-    -lopencv_imgproc410     \
-    -lopencv_features2d410  \
-    -lopencv_calib3d410
 }
 
 
