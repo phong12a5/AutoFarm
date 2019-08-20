@@ -41,11 +41,12 @@ signals:
 
 public slots:
     void onStartProgram();
-    void onChangeScreen(int screenID);
+    void onChangeScreen();
     void executeRequiredActions();
     void updateResult();
     void onFinishedListObject();
     void onchangeScreenTimerTimeout();
+    void onUpdateCurrentScreen(int screenID);
 };
 
 #endif // MAINCONTROLLER_H

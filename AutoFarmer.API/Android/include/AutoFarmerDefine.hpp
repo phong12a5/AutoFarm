@@ -56,13 +56,14 @@ typedef struct app_config_struct {
     QString encryption;
 
     app_config_struct(){
-        timeout = 0;
-        reset_3g = 0;
-        debug_mode = "0";
+        timeout = 30;
+        reset_3g = 10;
+        debug_mode = "test";
         user_type = 0;
-        encryption = "0";
+        encryption = "00110001";
     }
 } APP_CONFIG;
+
 
 
 #endif // AUTOFARMERDEFINE_H

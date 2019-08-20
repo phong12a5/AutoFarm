@@ -8,7 +8,7 @@ Model::Model(QObject *parent) : QObject(parent)
     m_token = "00261f5687fee223f35e3c2080e167a8";
     m_currentPkgIndex = -1;
     m_autoStart = true;
-    m_currentScreen = AppEnums::HMI_UNKNOW_SCREEN;
+    m_currentScreen = -1;
 
 //    QString _token;
 //    ShellOperation::shellCommand(QString("getprop %1").arg(TOKEN_PROP_KEY),_token);
@@ -147,8 +147,14 @@ QString Model::currentControlledPkg()
 
 USER_DATA Model::currentControlledUser()
 {
-    LOG_DEBUG << m_userDataList.value(currentControlledPkg()).uid;
-    return m_userDataList.value(currentControlledPkg());
+    if(currentControlledPkg() != ""){
+        LOG_DEBUG << m_userDataList.value(currentControlledPkg()).uid;
+        return m_userDataList.value(currentControlledPkg());
+    }else{
+        USER_DATA data;
+        LOG_DEBUG << "currentControlledPkg is NULL";
+        return data;
+    }
 }
 
 void Model::updateCurrentControlleredUser(USER_DATA data)

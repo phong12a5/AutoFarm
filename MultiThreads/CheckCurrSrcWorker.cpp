@@ -104,34 +104,34 @@ void CheckCurrSrcWorker::onUpdateCurrentScreen()
     foreach (int i , screenPiorityOrder){
         if(i == AppEnums::HMI_LOGIN_SCREEN){
             if(isCurrentScreen(AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN)){
-                emit screenChanged(AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN);
+                emit updateCurrentScreen(AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN);
                 delay(2000);
                 return;
             }
             else if(isCurrentScreen(AppEnums::HMI_MISSING_PASSWORD_SCREEN)){
-                emit screenChanged(AppEnums::HMI_MISSING_PASSWORD_SCREEN);
+                emit updateCurrentScreen(AppEnums::HMI_MISSING_PASSWORD_SCREEN);
                 delay(2000);
                 return;
             }
             else if(isCurrentScreen(AppEnums::HMI_INCORRECT_PASSWORD_SCREEN)){
-                emit screenChanged(AppEnums::HMI_INCORRECT_PASSWORD_SCREEN);
+                emit updateCurrentScreen(AppEnums::HMI_INCORRECT_PASSWORD_SCREEN);
                 delay(2000);
                 return;
             }
             else if(isCurrentScreen(AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN)){
-                emit screenChanged(AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN);
+                emit updateCurrentScreen(AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN);
                 delay(2000);
                 return;
             }
             else if(isCurrentScreen(AppEnums::HMI_ACCOUNT_NOT_FOUND_SCREEN)){
-                emit screenChanged(AppEnums::HMI_ACCOUNT_NOT_FOUND_SCREEN);
+                emit updateCurrentScreen(AppEnums::HMI_ACCOUNT_NOT_FOUND_SCREEN);
                 delay(2000);
                 return;
             }
         }
 
         if(isCurrentScreen(i)){
-            emit screenChanged(i);
+            emit updateCurrentScreen(i);
             return;
         }
     }

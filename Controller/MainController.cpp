@@ -69,6 +69,7 @@ void MainController::downloadAndInstallPackages()
             }
         }
     }
+    MODEL->setUserDataList(userDataList);
 
 }
 
@@ -82,7 +83,7 @@ void MainController::startCheckCurrentScreen()
     checkScreenWorker.moveToThread(&m_checkScreenThread);
     connect(&m_checkScreenThread, &QThread::finished, &checkScreenWorker, &QObject::deleteLater);
     connect(this, &MainController::sigStartCheckCurrentScreen, &checkScreenWorker, &CheckCurrSrcWorker::doWork);
-    connect(&checkScreenWorker, &CheckCurrSrcWorker::screenChanged,this, &MainController::onChangeScreen);
+    connect(&checkScreenWorker, &CheckCurrSrcWorker::updateCurrentScreen,this, &MainController::onUpdateCurrentScreen);
     m_checkScreenThread.start();
     emit sigStartCheckCurrentScreen();
 }
@@ -232,14 +233,15 @@ void MainController::onchangeScreenTimerTimeout()
     }
 }
 
-void MainController::onChangeScreen(int screenID)
+void MainController::onUpdateCurrentScreen(int screenID)
 {
-
-    if(screenID == MODEL->currentScreen())
-        return;
-
+    LOG_DEBUG << MODEL->screenStr(screenID);
     MODEL->setCurrentScreen(screenID);
-    LOG_DEBUG << "currentScreen: " << MODEL->screenStr(MODEL->currentScreen());
+}
+
+void MainController::onChangeScreen()
+{
+    LOG_DEBUG  << MODEL->screenStr(MODEL->currentScreen());
 
     m_changeScreenTimer.stop();
 

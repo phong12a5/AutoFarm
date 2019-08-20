@@ -26,7 +26,7 @@ private:
     QTimer* m_updateCurrSrcTimer;
     AutoFarmerAPIsWraper m_autoFamerAPIs;
 signals:
-    void screenChanged(int screenID);
+    void updateCurrentScreen(int screenID);
 
 public slots:
     void doWork();
