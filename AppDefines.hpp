@@ -12,7 +12,6 @@
 #define USER_DATA_LIST_PATH     CURRENT_DIR+"userDataList.json"
 #define CONFIG_FILE_PATH        CURRENT_DIR+"config.json"
 
-#define API_SERVER              "https://api.autofarmer.xyz/api/"
 #define DCIM_FOLDER             "/sdcard/DCIM/"
 #define CHECKING_SCREEN_IMG     "/sdcard/DCIM/screen_checking.png"
 #define SCREEN_IMG              "/sdcard/DCIM/screen.png"

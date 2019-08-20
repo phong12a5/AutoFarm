@@ -47,9 +47,7 @@ void MainController::saveJson(QJsonDocument document, QString fileName)
 
 void MainController::downloadAndInstallPackages()
 {
-    QJsonObject retVal = m_famerAPIs.w_getApk();
-
-    QJsonDocument jdoc = QJsonDocument(retVal);
+    QJsonDocument jdoc = m_famerAPIs.w_getApk();
 
     LOG_DEBUG << jdoc;
 
@@ -175,7 +173,7 @@ void MainController::saveUserDataList()
 
 void MainController::onStartProgram()
 {
-    if(!m_famerAPIs.w_initEnv(MODEL->token(),APPNAME_ID_FACEBOOK)){
+    if(m_famerAPIs.w_initEnv(MODEL->token(),APPNAME_ID_FACEBOOK)){
         m_farmAction->setFarmerAPIs(m_famerAPIs);
         this->loadUserDataList();
         this->downloadAndInstallPackages();

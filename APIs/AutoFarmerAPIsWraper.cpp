@@ -46,7 +46,7 @@ APP_CONFIG AutoFarmerAPIsWraper::w_getConfig()
     return config;
 }
 
-QJsonObject AutoFarmerAPIsWraper::w_getApk()
+QJsonDocument AutoFarmerAPIsWraper::w_getApk()
 {
     QJsonObject retVal = this->getApk();
     if(retVal["Status"].toBool() == false){
@@ -56,7 +56,7 @@ QJsonObject AutoFarmerAPIsWraper::w_getApk()
         LOG_DEBUG << retVal;
 #endif
     }
-    return retVal["ResponseData"].toObject();
+    return QJsonDocument::fromJson(retVal["ResponseData"].toString().toUtf8());
 }
 
 QString AutoFarmerAPIsWraper::w_downloadApk(QString url)

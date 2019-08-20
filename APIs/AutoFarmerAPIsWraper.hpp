@@ -15,7 +15,7 @@ public:
 
     bool                w_initEnv(const QString token, const APPNAME_ID appnameId);
     APP_CONFIG          w_getConfig();
-    QJsonObject         w_getApk();
+    QJsonDocument       w_getApk();
     QString             w_downloadApk(QString url);
     USER_DATA           w_getClone();
     QJsonObject         w_getCloneInfo();
