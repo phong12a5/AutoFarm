@@ -176,6 +176,8 @@ void MainController::onStartProgram()
 {
     if(m_famerAPIs.w_initEnv(MODEL->token(),APPNAME_ID_FACEBOOK)){
         m_farmAction->setFarmerAPIs(m_famerAPIs);
+        m_famerAPIs.screenCapture("/sdcard/DCIM/phong.png");
+
         this->loadUserDataList();
         this->downloadAndInstallPackages();
         this->saveUserDataList();

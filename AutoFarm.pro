@@ -60,7 +60,6 @@ android {
     DEFINES += APIS_DEBUG_MODE
 
     INCLUDEPATH += $$PWD/AutoFarmer.API/Android/include
-    INCLUDEPATH += "$$_PRO_FILE_PWD_/../OpenCV-android-sdk/sdk/native/jni/include"
 
     LIBS += \
         -L"$$PWD/AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH"\

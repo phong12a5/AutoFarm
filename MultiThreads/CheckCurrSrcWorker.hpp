@@ -22,7 +22,6 @@ private:
     bool isCurrentScreen(int screenID);
 
 private:
-    cv::Mat m_screenImg;
     QTimer* m_updateCurrSrcTimer;
     AutoFarmerAPIsWraper m_autoFamerAPIs;
 signals:
