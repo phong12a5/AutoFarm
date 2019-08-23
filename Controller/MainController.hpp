@@ -9,7 +9,7 @@
 #include "FarmActions.hpp"
 #include "AutoFarmerAPIsWraper.hpp"
 #include "AutoFarmerDefine.hpp"
-#include "CheckCurrSrcWorker.hpp"
+#include "ScreenAnalysis.h"
 
 class MainController : public QObject
 {
@@ -26,18 +26,23 @@ private:
     QJsonDocument loadJson(QString fileName);
     void saveJson(QJsonDocument document, QString fileName);
     void downloadAndInstallPackages();
+#if 0
     void startCheckCurrentScreen();
-
+#endif
 
 private:
     QTimer m_changeScreenTimer;
     AutoFarmerAPIsWraper m_famerAPIs;
     FarmActions* m_farmAction;
+    ScreenAnalysis* m_screenAnalysis;
+#if 0
     QThread                 m_checkScreenThread;
     CheckCurrSrcWorker      checkScreenWorker;
-
+#endif
 signals:
+#if 0
     void sigStartCheckCurrentScreen();
+#endif
 
 public slots:
     void onStartProgram();

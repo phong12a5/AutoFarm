@@ -33,7 +33,7 @@ public:
     bool                w_openPackage(QString packageName, QString activity);
     bool                w_closePackage(QString packageName);
     bool                w_wipePackage(QStringList packageNames);
-    QJsonObject         w_getTextFromImage(QString imagePath);
+    QList<TEXT_COMPOENT>w_getTextFromImage(QString imagePath);
     QPoint              w_findImageFromImage(QString templatePath, QString imagePath);
     bool                findAndClick(QString iconPath);
     bool                enterKeyBoard();

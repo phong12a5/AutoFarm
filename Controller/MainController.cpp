@@ -6,7 +6,9 @@
 
 MainController::MainController(QObject *parent) : QObject(parent)
 {
-    m_farmAction = new FarmActions(this);
+    m_farmAction = nullptr;
+    m_screenAnalysis = nullptr;
+
     m_changeScreenTimer.setSingleShot(true);
     m_changeScreenTimer.setInterval(120000);
 }
@@ -73,6 +75,7 @@ void MainController::downloadAndInstallPackages()
 
 }
 
+#if 0
 void MainController::startCheckCurrentScreen()
 {
     if(m_checkScreenThread.isRunning()){
@@ -87,6 +90,7 @@ void MainController::startCheckCurrentScreen()
     m_checkScreenThread.start();
     emit sigStartCheckCurrentScreen();
 }
+#endif
 
 void MainController::loadUserDataList()
 {
@@ -176,12 +180,14 @@ void MainController::onStartProgram()
 {
     if(m_famerAPIs.w_initEnv(MODEL->token(),APPNAME_ID_FACEBOOK)){
         m_farmAction->setFarmerAPIs(m_famerAPIs);
-        m_famerAPIs.screenCapture("/sdcard/DCIM/phong.png");
-
         this->loadUserDataList();
         this->downloadAndInstallPackages();
         this->saveUserDataList();
         m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
+
+        m_farmAction = new FarmActions(this,&m_famerAPIs);
+        m_screenAnalysis = new ScreenAnalysis(this,m_famerAPIs);
+
         MODEL->nextCurrentControlledObj();
     }else{
         LOG_DEBUG << "Init API false";
@@ -199,7 +205,7 @@ void MainController::executeRequiredActions()
 
     AUTOFARMERJNI->openFBLiteWithUserID(MODEL->currentControlledPkg(),MODEL->currentControlledUser().uid);
     MODEL->setCurrentScreen(AppEnums::HMI_UNKNOW_SCREEN);
-    startCheckCurrentScreen();
+//    startCheckCurrentScreen();
 }
 
 void MainController::updateResult()

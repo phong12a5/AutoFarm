@@ -26,7 +26,8 @@ HEADERS += \
     Controller/FarmActions.hpp \
     APIs/AutoFarmerJNI.hpp \
     APIs/AutoFarmerAPIsWraper.hpp \
-    MultiThreads/CheckCurrSrcWorker.hpp
+#    MultiThreads/CheckCurrSrcWorker.hpp
+    Controller/ScreenAnalysis.h
 
 SOURCES += \
         main.cpp \
@@ -36,7 +37,8 @@ SOURCES += \
     Controller/FarmActions.cpp \
     APIs/AutoFarmerJNI.cpp \
     APIs/AutoFarmerAPIsWraper.cpp \
-    MultiThreads/CheckCurrSrcWorker.cpp
+#    MultiThreads/CheckCurrSrcWorker.cpp
+    Controller/ScreenAnalysis.cpp
 
 INCLUDEPATH += $$PWD/Model \
                $$PWD/Controller\

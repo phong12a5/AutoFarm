@@ -298,9 +298,30 @@ bool AutoFarmerAPIsWraper::w_wipePackage(QStringList packageNames)
 }
 
 /* This method has not wrapped yet */
-QJsonObject AutoFarmerAPIsWraper::w_getTextFromImage(QString imagePath)
+QList<TEXT_COMPOENT> AutoFarmerAPIsWraper::w_getTextFromImage(QString imagePath)
 {
-    return this->getTextFromImage(imagePath);
+    QList<TEXT_COMPOENT> textCmpList;
+    textCmpList.clear();
+    QJsonObject retVal = this->getTextFromImage(imagePath);
+    if(retVal["Status"].toBool() == false){
+        LOG_DEBUG << retVal;
+        return textCmpList;
+    }else{
+#ifdef APIS_DEBUG_MODE
+        LOG_DEBUG << retVal;
+#endif
+        foreach (QJsonValue obj, retVal["ResponseData"]) {
+            TEXT_COMPOENT component;
+            component.x = obj["x"];
+            component.y = obj["y"];
+            component.width = obj["width"];
+            component.height = obj["height"];
+            component.confidence = obj["confidence"];
+            component.text = obj["text"];
+            textCmpList.append(component);
+        };
+        return textCmpList;
+    }
 }
 
 QPoint AutoFarmerAPIsWraper::w_findImageFromImage(QString templatePath, QString imagePath)

@@ -3,7 +3,9 @@
 #define MODEL Model::instance()
 #define AUTOFARMERJNI AutoFarmerJNI::instance()
 
-FarmActions::FarmActions(QObject *parent) : QObject(parent)
+FarmActions::FarmActions(QObject *parent,AutoFarmerAPIsWraper* famerAPIs) :
+    QObject(parent),
+    m_famerAPIs(famerAPIs)
 {
 
 }
@@ -11,7 +13,7 @@ FarmActions::FarmActions(QObject *parent) : QObject(parent)
 void FarmActions::doActions()
 {
     LOG_DEBUG;
-    MODEL->setActionList(m_famerAPIs.w_doAction(MODEL->currentControlledUser().uid));
+    MODEL->setActionList(m_famerAPIs->w_doAction(MODEL->currentControlledUser().uid));
     foreach (QJsonObject action, MODEL->actionList()) {
         if(action["action"].toString() == "viplike"){
             this->doVipLike(action);

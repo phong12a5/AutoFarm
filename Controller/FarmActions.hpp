@@ -15,7 +15,7 @@ class FarmActions : public QObject
     Q_OBJECT
 
 public:
-    explicit FarmActions(QObject *parent = nullptr);
+    explicit FarmActions(QObject *parent, AutoFarmerAPIsWraper* famerAPIs);
     void doActions();
     void setFarmerAPIs(AutoFarmerAPIsWraper _farmerAPIs);
 
@@ -23,7 +23,7 @@ private:
     void doVipLike(QJsonObject action);
 
 private:
-    AutoFarmerAPIsWraper m_famerAPIs;
+    AutoFarmerAPIsWraper* m_famerAPIs;
 
 signals:
 
