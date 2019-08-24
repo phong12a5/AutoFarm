@@ -23,11 +23,6 @@ void FarmActions::doActions()
     MODEL->nextCurrentControlledObj();
 }
 
-void FarmActions::setFarmerAPIs(AutoFarmerAPIsWraper _farmerAPIs)
-{
-    m_famerAPIs = _farmerAPIs;
-}
-
 void FarmActions::doVipLike(QJsonObject action)
 {
     LOG_DEBUG << action["fbid"].toString();
@@ -38,7 +33,7 @@ void FarmActions::doVipLike(QJsonObject action)
         int failureCount = 0;
         while(count < NUMBER_CLICK){
 
-            if(m_famerAPIs.findAndClick(LIKE_ICON)){
+            if(m_famerAPIs->findAndClick(LIKE_ICON)){
                 count ++;
                 failureCount = 0;
             }else
@@ -49,7 +44,7 @@ void FarmActions::doVipLike(QJsonObject action)
                 break;
             }
 
-            if(count < NUMBER_CLICK) m_famerAPIs.w_swipe(QPoint(540,1200),QPoint(540,230),1000);
+            if(count < NUMBER_CLICK) m_famerAPIs->w_swipe(QPoint(540,1200),QPoint(540,230),1000);
             delay(1000);
         }
     }else {

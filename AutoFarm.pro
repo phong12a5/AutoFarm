@@ -90,14 +90,21 @@ android {
         -lopencv_stitching\
         -lopencv_superres\
         -lopencv_ts\
-        -lopencv_videostab
+        -lopencv_videostab\
+        -ljpgt\
+        -llept\
+        -ltess
 
 
 
     ANDROID_EXTRA_LIBS += \
         $$PWD/AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH/libcrypto.so \
         $$PWD/AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH/libssl.so\
-        $$PWD/AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH/libopencv_java.so
+        $$PWD/AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH/libopencv_java.so \
+        $$PWD/AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH/libjpgt.so \
+        $$PWD/AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH/liblept.so \
+        $$PWD/AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH/libtess.so \
+        $$PWD/AutoFarmer.API/Android/libs/$$ANDROID_TARGET_ARCH/libpngt.so
 
     ANDROID_PACKAGE_SOURCE_DIR=$$_PRO_FILE_PWD_/android-sources
 

@@ -17,7 +17,6 @@ class FarmActions : public QObject
 public:
     explicit FarmActions(QObject *parent, AutoFarmerAPIsWraper* famerAPIs);
     void doActions();
-    void setFarmerAPIs(AutoFarmerAPIsWraper _farmerAPIs);
 
 private:
     void doVipLike(QJsonObject action);

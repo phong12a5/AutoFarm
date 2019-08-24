@@ -64,7 +64,7 @@ typedef struct app_config_struct {
     }
 } APP_CONFIG;
 
-typedef struct text_coponent {
+typedef struct text_component {
     int x;
     int y;
     int width;

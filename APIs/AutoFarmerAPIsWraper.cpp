@@ -310,14 +310,15 @@ QList<TEXT_COMPOENT> AutoFarmerAPIsWraper::w_getTextFromImage(QString imagePath)
 #ifdef APIS_DEBUG_MODE
         LOG_DEBUG << retVal;
 #endif
-        foreach (QJsonValue obj, retVal["ResponseData"]) {
+        foreach (QJsonValue jsonValue, retVal["ResponseData"].toArray()) {
             TEXT_COMPOENT component;
-            component.x = obj["x"];
-            component.y = obj["y"];
-            component.width = obj["width"];
-            component.height = obj["height"];
-            component.confidence = obj["confidence"];
-            component.text = obj["text"];
+            QJsonObject obj = jsonValue.toObject();
+            component.x = obj["x"].toInt();
+            component.y = obj["y"].toInt();
+            component.width = obj["width"].toInt();
+            component.height = obj["height"].toInt();
+            component.confidence = obj["confidence"].toInt();
+            component.text = obj["text"].toString().toLower();
             textCmpList.append(component);
         };
         return textCmpList;

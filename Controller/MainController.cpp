@@ -15,8 +15,10 @@ MainController::MainController(QObject *parent) : QObject(parent)
 
 MainController::~MainController()
 {
+#if 0
     m_checkScreenThread.quit();
     m_checkScreenThread.wait();
+#endif
 }
 
 void MainController::initController()
@@ -179,14 +181,13 @@ void MainController::saveUserDataList()
 void MainController::onStartProgram()
 {
     if(m_famerAPIs.w_initEnv(MODEL->token(),APPNAME_ID_FACEBOOK)){
-        m_farmAction->setFarmerAPIs(m_famerAPIs);
         this->loadUserDataList();
         this->downloadAndInstallPackages();
         this->saveUserDataList();
         m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
 
         m_farmAction = new FarmActions(this,&m_famerAPIs);
-        m_screenAnalysis = new ScreenAnalysis(this,m_famerAPIs);
+        m_screenAnalysis = new ScreenAnalysis(this,&m_famerAPIs);
 
         MODEL->nextCurrentControlledObj();
     }else{
