@@ -161,6 +161,7 @@ bool AutoFarmerAPIsWraper::w_doResult(QString fbId, QJsonObject data)
 
 bool AutoFarmerAPIsWraper::w_doClick(int x, int y)
 {
+    LOG_DEBUG << "[" << x << "," << y << "]";
     QJsonObject retVal = this->doClick(x,y);
     if(retVal["Status"].toBool() == false){
         LOG_DEBUG << retVal;

@@ -103,7 +103,7 @@ Window {
 
     Timer{
         id: autoStartTimer
-        interval: 60000
+        interval: 1000
         repeat: false
         onTriggered: {
             if(startBtn.enabled){

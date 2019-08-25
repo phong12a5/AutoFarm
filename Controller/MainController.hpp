@@ -9,7 +9,6 @@
 #include "FarmActions.hpp"
 #include "AutoFarmerAPIsWraper.hpp"
 #include "AutoFarmerDefine.hpp"
-#include "ScreenAnalysis.h"
 
 class MainController : public QObject
 {
@@ -34,7 +33,7 @@ private:
     QTimer m_changeScreenTimer;
     AutoFarmerAPIsWraper m_famerAPIs;
     FarmActions* m_farmAction;
-    ScreenAnalysis* m_screenAnalysis;
+    QTimer m_checkScreenTimer;
 #if 0
     QThread                 m_checkScreenThread;
     CheckCurrSrcWorker      checkScreenWorker;
@@ -52,6 +51,7 @@ public slots:
     void onFinishedListObject();
     void onchangeScreenTimerTimeout();
     void onUpdateCurrentScreen(int screenID);
+    void onCheckScreen();
 };
 
 #endif // MAINCONTROLLER_H

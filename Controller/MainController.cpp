@@ -7,10 +7,12 @@
 MainController::MainController(QObject *parent) : QObject(parent)
 {
     m_farmAction = nullptr;
-    m_screenAnalysis = nullptr;
 
     m_changeScreenTimer.setSingleShot(true);
     m_changeScreenTimer.setInterval(120000);
+
+    m_checkScreenTimer.setInterval(5000);
+    m_checkScreenTimer.setSingleShot(true);
 }
 
 MainController::~MainController()
@@ -30,6 +32,7 @@ void MainController::initController()
     connect(MODEL,SIGNAL(currentActionListDone()),this,SLOT(updateResult()));
     connect(MODEL,SIGNAL(finishedListObject()),this,SLOT(onFinishedListObject()));
     connect(MODEL,SIGNAL(sigStartProgram()),this,SLOT(onStartProgram()));
+    connect(&m_checkScreenTimer, SIGNAL(timeout()), this, SLOT(onCheckScreen()));
 }
 
 QJsonDocument MainController::loadJson(QString fileName)
@@ -58,14 +61,19 @@ void MainController::downloadAndInstallPackages()
     QMap<QString, USER_DATA>  userDataList = MODEL->userDataList();
     QList<QString> keys = userDataList.keys();
 
+    LOG_DEBUG << "keys: " << keys;
     foreach (QJsonValue data, jdoc.array()) {
         if(data.isObject()){
             QJsonObject obj = data.toObject();
             if(!keys.contains(obj["package"].toString())){
-                QString apkPath = m_famerAPIs.w_downloadApk(obj["apk"].toString());
-                if(apkPath != ""){
-                    m_famerAPIs.w_installPackage(apkPath);
-                    USER_DATA data;
+                USER_DATA data;
+                if(!m_famerAPIs.w_isExistPackage(obj["package"].toString())){
+                    QString apkPath = m_famerAPIs.w_downloadApk(obj["apk"].toString());
+                    if(apkPath != ""){
+                        m_famerAPIs.w_installPackage(apkPath);
+                        userDataList.insert(obj["package"].toString(),data);
+                    }
+                }else{
                     userDataList.insert(obj["package"].toString(),data);
                 }
             }else{
@@ -187,7 +195,7 @@ void MainController::onStartProgram()
         m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
 
         m_farmAction = new FarmActions(this,&m_famerAPIs);
-        m_screenAnalysis = new ScreenAnalysis(this,&m_famerAPIs);
+        m_checkScreenTimer.start();
 
         MODEL->nextCurrentControlledObj();
     }else{
@@ -248,87 +256,229 @@ void MainController::onUpdateCurrentScreen(int screenID)
     MODEL->setCurrentScreen(screenID);
 }
 
+void MainController::onCheckScreen()
+{
+    QString screenImgPath = m_famerAPIs.w_screenCapture(CHECKING_SCREEN_IMG);
+    if(screenImgPath != ""){
+        QList<TEXT_COMPOENT> textCompList = m_famerAPIs.w_getTextFromImage(screenImgPath);
+        QString fullContent;
+        foreach (TEXT_COMPOENT textComp, textCompList) {
+            fullContent += (textComp.text + " ");
+        }
+        LOG_DEBUG << "fullContent: " << fullContent;
+
+        if(fullContent.contains("incorrect password")){
+            LOG_DEBUG << "Incorrect password screen";
+            //            m_famerAPIs.w_updateCheckPoint();
+            MODEL->updateCurrentControlleredUser(m_famerAPIs.w_getClone());
+            this->saveUserDataList();
+            m_famerAPIs.w_wipePackage(QStringList() << MODEL->currentControlledPkg());
+            m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
+            MODEL->nextCurrentControlledObj();
+            /* -------------------------------------------- */
+        }else if(fullContent.contains("confirm") && fullContent.contains("identify")){
+            LOG_DEBUG << "Checkpoint screen";
+            //            m_famerAPIs.w_updateCheckPoint();
+            MODEL->updateCurrentControlleredUser(m_famerAPIs.w_getClone());
+            this->saveUserDataList();
+            m_famerAPIs.w_wipePackage(QStringList() << MODEL->currentControlledPkg());
+            m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
+            MODEL->nextCurrentControlledObj();
+            /* -------------------------------------------- */
+        }else if(fullContent.contains("missing email or password")){
+            LOG_DEBUG << "Missing email or password screen";
+            MODEL->updateCurrentControlleredUser(m_famerAPIs.w_getClone());
+            this->saveUserDataList();
+            m_famerAPIs.w_wipePackage(QStringList() << MODEL->currentControlledPkg());
+            m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
+            MODEL->nextCurrentControlledObj();
+            /* -------------------------------------------- */
+        }else if(fullContent.contains("download your information")){
+            LOG_DEBUG << "Checkpoint screen";
+            //            m_famerAPIs.w_updateCheckPoint();
+            MODEL->updateCurrentControlleredUser(m_famerAPIs.w_getClone());
+            this->saveUserDataList();
+            m_famerAPIs.w_wipePackage(QStringList() << MODEL->currentControlledPkg());
+            m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
+            MODEL->nextCurrentControlledObj();
+            /* -------------------------------------------- */
+        }else if(fullContent.contains("find an account")){
+            LOG_DEBUG << "Couldn't find account";
+            MODEL->updateCurrentControlleredUser(m_famerAPIs.w_getClone());
+            this->saveUserDataList();
+            m_famerAPIs.w_wipePackage(QStringList() << MODEL->currentControlledPkg());
+            m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
+            MODEL->nextCurrentControlledObj();
+            /* -------------------------------------------- */
+        }else if(fullContent.contains("save login info")){
+            LOG_DEBUG << "Save login screen";
+            foreach (TEXT_COMPOENT textComp, textCompList) {
+                if(textComp.text.contains("ok")){
+                    m_famerAPIs.w_doClick(textComp.x + textComp.width/2, textComp.y + textComp.height/2);
+                    break;
+                }
+            }
+            /* -------------------------------------------- */
+        }else if(fullContent.contains("choose from gallery")){
+            LOG_DEBUG << "Upoad avatar screen";
+            foreach (TEXT_COMPOENT textComp, textCompList) {
+                if(textComp.text.contains("skip")){
+                    m_famerAPIs.w_doClick(textComp.x + textComp.width/2, textComp.y + textComp.height/2);
+                    break;
+                }
+            }            /* -------------------------------------------- */
+        }else if(fullContent.contains("facebook is better with friends")){
+            LOG_DEBUG << "Turn on find friends screen";
+            foreach (TEXT_COMPOENT textComp, textCompList) {
+                if(textComp.text.contains("ok")){
+                    m_famerAPIs.w_doClick(textComp.x + textComp.width/2, textComp.y + textComp.height/2);
+                    break;
+                }
+            }            /* -------------------------------------------- */
+        }else if(fullContent.contains("people you may know")){
+            LOG_DEBUG << "suggest add friend screen";
+            foreach (TEXT_COMPOENT textComp, textCompList) {
+                if(textComp.text.contains("skip")){
+                    m_famerAPIs.w_doClick(textComp.x + textComp.width/2, textComp.y + textComp.height/2);
+                    break;
+                }
+            }
+            delay(1000);
+            AUTOFARMERJNI->openFBLiteWithUserID(MODEL->currentControlledPkg(),"");
+            /* -------------------------------------------- */
+        }else if(fullContent.contains("mobile number or email") && fullContent.contains("password")){
+            LOG_DEBUG << "Login screen";
+            foreach (TEXT_COMPOENT textComp, textCompList) {
+                if(textComp.text.contains("mobile number or email")){
+                    m_famerAPIs.w_doClick(textComp.x + textComp.width, textComp.y + textComp.height * 3);
+                    break;
+                }
+            }
+            delay(1000);
+            m_famerAPIs.w_inputText(MODEL->currentControlledUser().uid);
+
+//            if(!MODEL->isNoxDevice()){
+                m_famerAPIs.enterKeyBoard();
+//            }
+
+            delay(1000);
+            foreach (TEXT_COMPOENT textComp, textCompList) {
+                if(textComp.text.contains("password")){
+                    m_famerAPIs.w_doClick(textComp.x + textComp.width, textComp.y + textComp.height * 3);
+                    break;
+                }
+            }
+            delay(1000);
+            m_famerAPIs.w_inputText(MODEL->currentControlledUser().password);
+
+//            if(!MODEL->isNoxDevice()){
+                m_famerAPIs.enterKeyBoard();
+//            }
+
+            delay(1000);
+            m_famerAPIs.findAndClick(LOGIN_BTN);
+            /* -------------------------------------------- */
+        }else if((fullContent.contains("english") && fullContent.contains("more languages")) ||
+                 (fullContent.contains("english") && fullContent.contains("deutsch")) ||
+                 fullContent.contains("english (us)") ||
+                 fullContent.contains("english (uk)")){
+            LOG_DEBUG << "Need to change language";
+            foreach (TEXT_COMPOENT textComp, textCompList) {
+                if(textComp.text.contains("english")){
+                    m_famerAPIs.w_doClick(textComp.x + textComp.width/2, textComp.y + textComp.height/2);
+                    break;
+                }
+            }
+            /* -------------------------------------------- */
+        }else{
+            LOG_DEBUG << "unknow screen";
+            m_famerAPIs.enterKeyBoard();
+        }
+    }
+
+    m_checkScreenTimer.start();
+}
+
 void MainController::onChangeScreen()
 {
-    LOG_DEBUG  << MODEL->screenStr(MODEL->currentScreen());
+//    LOG_DEBUG  << MODEL->screenStr(MODEL->currentScreen());
 
-    m_changeScreenTimer.stop();
+//    m_changeScreenTimer.stop();
 
-    switch(MODEL->currentScreen()){
-    case AppEnums::HMI_UNKNOW_SCREEN:
-        m_famerAPIs.findAndClick(ENGLISH_BTN);
-        break;
-    case AppEnums::HMI_SELECT_LANGUAGE_SCREEN:
-        m_famerAPIs.findAndClick(ENGLISH_BTN);
-        break;
-    case AppEnums::HMI_LOGIN_SCREEN:
-    {
-        m_famerAPIs.findAndClick(ENGLISH_BTN);
-        delay(500);
-        m_famerAPIs.findAndClick(EMAIL_FIELD);
-        delay(1000);
-        m_famerAPIs.w_inputText(MODEL->currentControlledUser().uid);
-        if(!MODEL->isNoxDevice()){
-            m_famerAPIs.enterKeyBoard();
-        }
+//    switch(MODEL->currentScreen()){
+//    case AppEnums::HMI_UNKNOW_SCREEN:
+//        break;
+//    case AppEnums::HMI_SELECT_LANGUAGE_SCREEN:
+//        m_famerAPIs.findAndClick(ENGLISH_BTN);
+//        break;
+//    case AppEnums::HMI_LOGIN_SCREEN:
+//    {
+//        m_famerAPIs.findAndClick(ENGLISH_BTN);
+//        delay(500);
+//        m_famerAPIs.findAndClick(EMAIL_FIELD);
+//        delay(1000);
+//        m_famerAPIs.w_inputText(MODEL->currentControlledUser().uid);
+//        if(!MODEL->isNoxDevice()){
+//            m_famerAPIs.enterKeyBoard();
+//        }
 
-        delay(1000);
-        m_famerAPIs.findAndClick(PASSWORD_FIELD);
-        delay(1000);
-        m_famerAPIs.w_inputText(MODEL->currentControlledUser().password);
-        if(!MODEL->isNoxDevice()){
-            m_famerAPIs.enterKeyBoard();
-        }
+//        delay(1000);
+//        m_famerAPIs.findAndClick(PASSWORD_FIELD);
+//        delay(1000);
+//        m_famerAPIs.w_inputText(MODEL->currentControlledUser().password);
+//        if(!MODEL->isNoxDevice()){
+//            m_famerAPIs.enterKeyBoard();
+//        }
 
-        delay(1000);
-        m_famerAPIs.findAndClick(LOGIN_BTN);
-    }
-        break;
-    case AppEnums::HMI_MISSING_PASSWORD_SCREEN:
-    case AppEnums::HMI_ACCOUNT_NOT_FOUND_SCREEN:
-        MODEL->updateCurrentControlleredUser(m_famerAPIs.w_getClone());
-        this->saveUserDataList();
-        m_famerAPIs.w_wipePackage(QStringList() << MODEL->currentControlledPkg());
-        m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
-        MODEL->nextCurrentControlledObj();
-        break;
+//        delay(1000);
+//        m_famerAPIs.findAndClick(LOGIN_BTN);
+//    }
+//        break;
+//    case AppEnums::HMI_MISSING_PASSWORD_SCREEN:
+//    case AppEnums::HMI_ACCOUNT_NOT_FOUND_SCREEN:
+//        MODEL->updateCurrentControlleredUser(m_famerAPIs.w_getClone());
+//        this->saveUserDataList();
+//        m_famerAPIs.w_wipePackage(QStringList() << MODEL->currentControlledPkg());
+//        m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
+//        MODEL->nextCurrentControlledObj();
+//        break;
 
-    case AppEnums::HMI_INCORRECT_PASSWORD_SCREEN:
-    case AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN:
-    case AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN:
-//        WEB_API->updateCheckPoint();
-        MODEL->updateCurrentControlleredUser(m_famerAPIs.w_getClone());
-        this->saveUserDataList();
-        m_famerAPIs.w_wipePackage(QStringList() << MODEL->currentControlledPkg());
-        m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
-        MODEL->nextCurrentControlledObj();
-        break;
-    case AppEnums::HMI_TURNON_FIND_FRIEND_SCREEN:
-        m_famerAPIs.findAndClick(SKIP_FIND_FRIEND_BTN);
-        break;
-    case AppEnums::HMI_SAVE_LOGIN_INFO_SCREEN:
-        m_famerAPIs.findAndClick(OK_BUTTON);
-        break;
-    case AppEnums::HMI_CHOOSE_AVATAR_SCREEN:
-        m_famerAPIs.findAndClick(SKIP_AVARTAR);
-        break;
-    case AppEnums::HMI_ADDFRIEND_SUGGESTION_SCREEN:
-        m_famerAPIs.findAndClick(SKIP_AVARTAR);
-        delay(1000);
-        AUTOFARMERJNI->openFBLiteWithUserID(MODEL->currentControlledPkg(),"");
-        break;
-    case AppEnums::HMI_NEW_FEED_SCREEN:
-        MODEL->clearActionList();
-        m_farmAction->doActions();
-        MODEL->nextCurrentControlledObj();
-        m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
-        break;
-    case AppEnums::HMI_LOGIN_AGAIN_SCREEN:
-        break;
-    default:
-        break;
-    }
+//    case AppEnums::HMI_INCORRECT_PASSWORD_SCREEN:
+//    case AppEnums::HMI_CONFIRM_INDENTIFY_SCREEN:
+//    case AppEnums::HMI_DEACTIVE_ACCOUNT_SCREEN:
+////        WEB_API->updateCheckPoint();
+//        MODEL->updateCurrentControlleredUser(m_famerAPIs.w_getClone());
+//        this->saveUserDataList();
+//        m_famerAPIs.w_wipePackage(QStringList() << MODEL->currentControlledPkg());
+//        m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
+//        MODEL->nextCurrentControlledObj();
+//        break;
+//    case AppEnums::HMI_TURNON_FIND_FRIEND_SCREEN:
+//        m_famerAPIs.findAndClick(SKIP_FIND_FRIEND_BTN);
+//        break;
+//    case AppEnums::HMI_SAVE_LOGIN_INFO_SCREEN:
+//        m_famerAPIs.findAndClick(OK_BUTTON);
+//        break;
+//    case AppEnums::HMI_CHOOSE_AVATAR_SCREEN:
+//        m_famerAPIs.findAndClick(SKIP_AVARTAR);
+//        break;
+//    case AppEnums::HMI_ADDFRIEND_SUGGESTION_SCREEN:
+//        m_famerAPIs.findAndClick(SKIP_AVARTAR);
+//        delay(1000);
+//        AUTOFARMERJNI->openFBLiteWithUserID(MODEL->currentControlledPkg(),"");
+//        break;
+//    case AppEnums::HMI_NEW_FEED_SCREEN:
+//        MODEL->clearActionList();
+//        m_farmAction->doActions();
+//        MODEL->nextCurrentControlledObj();
+//        m_famerAPIs.w_closePackage(MODEL->currentControlledPkg());
+//        break;
+//    case AppEnums::HMI_LOGIN_AGAIN_SCREEN:
+//        break;
+//    default:
+//        break;
+//    }
 
-    m_changeScreenTimer.start();
+//    m_changeScreenTimer.start();
 }
 
